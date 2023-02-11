@@ -2,7 +2,8 @@ package main
 
 import (
 	"api-auto-assistant/configs"
-	"api-auto-assistant/handlers"
+	task_route "api-auto-assistant/routes/task"
+	user_route "api-auto-assistant/routes/user"
 	"fmt"
 	"net/http"
 
@@ -14,13 +15,9 @@ func main() {
 	if err != nil {
 		panic((err))
 	}
-	r := chi.NewRouter()
-	r.Post("/", handlers.Create)
-	r.Put("/{id}", handlers.Update)
-	r.Delete("/{id}", handlers.Delete)
-	r.Get("/", handlers.List)
-	r.Get("/{id}", handlers.Get)
-
-	http.ListenAndServe(fmt.Sprintf(":%s", configs.GetServerPort()), r)
+	route := chi.NewRouter()
+	task_route.TaskRoute(route)
+	user_route.UserRoute(route)
+	http.ListenAndServe(fmt.Sprintf(":%s", configs.GetServerPort()), route)
 
 }
