@@ -21,12 +21,12 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp = map[string]any{
 			"Error":   true,
-			"Message": fmt.Sprintf("OH nooo. i cant insert this %v", err),
+			"Message": fmt.Sprintf("Task creation failed %v", err),
 		}
 	} else {
 		resp = map[string]any{
 			"Error":   false,
-			"Message": fmt.Sprintf("i am message like a dynamic of c# but i am wrotten in golang %d", id),
+			"Message": fmt.Sprintf("Task create %d", id),
 		}
 	}
 	w.Header().Add("Content-Type", "application/json")

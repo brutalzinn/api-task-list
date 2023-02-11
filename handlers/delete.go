@@ -10,32 +10,25 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func Update(w http.ResponseWriter, r *http.Request) {
+func Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
-	if err != nil {
-		log.Printf("wron url format %v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-	var task models.Task
-	err = json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
 		log.Printf("error on decode json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	rows, err := models.Update(int64(id), task)
+	rows, err := models.Delete(int64(id))
 	if err != nil {
-		log.Printf("error on update register %v", err)
+		log.Printf("error on delete register %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	if rows > 1 {
-		log.Printf("updates on  %d", rows)
+		log.Printf("delete on  %d", rows)
 	}
 	resp := map[string]any{
 		"Error":   false,
-		"Message": "Tasks updated",
+		"Message": "Task deleted",
 	}
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)

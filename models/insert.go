@@ -8,7 +8,7 @@ func Insert(task Task) (id int64, err error) {
 		return
 	}
 	defer conn.Close()
-	sql := "INSERT INTO Tasks (title, description) VALUES ($1, $2) RETURNING id"
+	sql := "INSERT INTO tasks (title, description) VALUES ($1, $2) RETURNING id"
 	err = conn.QueryRow(sql, task.Title, task.Description).Scan(&id)
 	return
 }

@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS tasks (
+    id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	title TEXT,
+    description TEXT
+);

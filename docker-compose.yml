@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+    database_service:
+        image: postgres
+        restart: always
+        hostname: postgree_hostname
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_DB=test
+        ports:
+            - "5432:5432"
+        volumes:
+            - ./init.sql:/docker-entrypoint-initdb.d/init.sql

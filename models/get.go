@@ -8,7 +8,7 @@ func Get(id int64) (task Task, err error) {
 		return
 	}
 	defer conn.Close()
-	row := conn.QueryRow("SELECT * FROM Tasks WHERE id=$1", id)
+	row := conn.QueryRow("SELECT * FROM tasks WHERE id=$1", id)
 	err = row.Scan(&task.ID, &task.Title, &task.Description)
 	return
 }

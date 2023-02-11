@@ -8,7 +8,7 @@ func GetAll() (tasks []Task, err error) {
 		return
 	}
 	defer conn.Close()
-	rows, err := conn.Query("SELECT * FROM Tasks")
+	rows, err := conn.Query("SELECT * FROM tasks")
 	if err != nil {
 		return
 	}

@@ -27,9 +27,9 @@ func init() {
 	viper.SetDefault("database.port", "5432")
 }
 
-func load() error {
+func Load() error {
 	viper.SetConfigName("config")
-	viper.SetConfigType("config")
+	viper.SetConfigType("toml")
 	viper.AddConfigPath(".")
 	err := viper.ReadInConfig()
 	if err != nil {
@@ -46,7 +46,7 @@ func load() error {
 		Port:     viper.GetString("database.port"),
 		User:     viper.GetString("database.user"),
 		Pass:     viper.GetString("database.pass"),
-		Database: viper.GetString("database.name"),
+		Database: viper.GetString("database.database"),
 	}
 	return nil
 }
