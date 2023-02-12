@@ -1,16 +1,17 @@
 package jwt_util
 
 import (
+	"api-auto-assistant/configs"
 	entities "api-auto-assistant/models"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 )
 
-var secretKey = []byte("my_secret_key")
-
 func GenerateJWT(id int64) (string, error) {
-	expirationTime := time.Now().Add(5 * time.Minute)
+	var secretKey = configs.GetAuthSecret()
+	var expiration = configs.GetAuthExpiration()
+	expirationTime := time.Now().Add(time.Duration(expiration) * time.Second)
 	// Create the JWT claims, which includes the username and expiry time
 	claims := entities.Claims{
 		ID: id,
@@ -23,6 +24,7 @@ func GenerateJWT(id int64) (string, error) {
 	return tokenString, err
 }
 func VerifyJWT(token string) (*jwt.Token, error) {
+	var secretKey = configs.GetAuthSecret()
 	claims := entities.Claims{}
 	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
 		return secretKey, nil

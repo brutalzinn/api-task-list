@@ -1,6 +1,10 @@
 [api]
 port = "9000"
 
+[authentication]
+secret = "secretket"
+expiration = 900
+
 [database]
 host = "localhost"
 user = "postgres"

@@ -5,12 +5,19 @@ import "github.com/spf13/viper"
 var cfg *config
 
 type config struct {
-	API APIConfig
-	DB  DBConfig
+	API            APIConfig
+	DB             DBConfig
+	Authentication AuthConfig
 }
 
 type APIConfig struct {
-	Port string
+	Port      string
+	JwtSecret string
+}
+
+type AuthConfig struct {
+	Secret     string
+	Expiration int64
 }
 
 type DBConfig struct {
@@ -41,6 +48,10 @@ func Load() error {
 	cfg.API = APIConfig{
 		Port: viper.GetString("api.port"),
 	}
+	cfg.Authentication = AuthConfig{
+		Secret:     viper.GetString("authentication.secret"),
+		Expiration: viper.GetInt64("authentication.expiration"),
+	}
 	cfg.DB = DBConfig{
 		Host:     viper.GetString("database.host"),
 		Port:     viper.GetString("database.port"),
@@ -57,4 +68,11 @@ func GetDB() DBConfig {
 
 func GetServerPort() string {
 	return cfg.API.Port
+}
+
+func GetAuthSecret() []byte {
+	return []byte(cfg.Authentication.Secret)
+}
+func GetAuthExpiration() int64 {
+	return cfg.Authentication.Expiration
 }
