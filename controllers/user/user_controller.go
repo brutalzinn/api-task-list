@@ -2,7 +2,9 @@ package user_controller
 
 import (
 	entities "api-auto-assistant/models"
-	user_service "api-auto-assistant/services/user"
+	user_service "api-auto-assistant/services/database/user"
+	crypt_utils "api-auto-assistant/services/utils/crypt"
+	jwt_util "api-auto-assistant/services/utils/jwt"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -14,7 +16,7 @@ import (
 
 func Get(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
-	tasks, err := user_service.Get(int64(id))
+	users, err := user_service.Get(int64(id))
 	if err != nil {
 		log.Printf("error on decode json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -22,7 +24,7 @@ func Get(w http.ResponseWriter, r *http.Request) {
 	}
 	resp := map[string]any{
 		"Error":   false,
-		"Message": tasks,
+		"Message": users,
 	}
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
@@ -52,14 +54,14 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 	resp := map[string]any{
 		"Error":   false,
-		"Message": "Tasks updated",
+		"Message": "users updated",
 	}
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
 }
 
 func List(w http.ResponseWriter, r *http.Request) {
-	tasks, err := user_service.GetAll()
+	users, err := user_service.GetAll()
 	if err != nil {
 		log.Printf("error on decode json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -67,7 +69,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 	}
 	resp := map[string]any{
 		"Error":   false,
-		"Message": tasks,
+		"Message": users,
 	}
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
@@ -103,6 +105,8 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
+	hash, _ := crypt_utils.HashPassword(user.Password)
+	user.Password = hash
 	id, err := user_service.Insert(user)
 	var resp map[string]any
 	if err != nil {
@@ -116,6 +120,32 @@ func Create(w http.ResponseWriter, r *http.Request) {
 			"Message": fmt.Sprintf("User create %d", id),
 		}
 	}
+	w.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+}
+func Login(w http.ResponseWriter, r *http.Request) {
+	var auth entities.AuthRequest
+	err := json.NewDecoder(r.Body).Decode(&auth)
+	if err != nil {
+		log.Printf("error on decode json %v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	user, err := user_service.FindByEmail(auth.Email)
+	validPassword := crypt_utils.CheckPasswordHash(auth.Password, user.Password)
+	if validPassword == false {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+	jwtToken, err := jwt_util.GenerateJWT(user.ID)
+	resp := entities.AuthResponse{
+		AccessToken: jwtToken,
+	}
+	// resp := map[string]any{
+	// 	"Auth":    validPassword,
+	// 	"Error":   false,
+	// 	"Message": user,
+	// }
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
 }

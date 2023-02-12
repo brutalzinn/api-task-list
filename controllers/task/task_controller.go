@@ -2,7 +2,7 @@ package task_controller
 
 import (
 	entities "api-auto-assistant/models"
-	task_service "api-auto-assistant/services/task"
+	task_service "api-auto-assistant/services/database/task"
 	"encoding/json"
 	"fmt"
 	"log"

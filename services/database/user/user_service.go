@@ -76,3 +76,15 @@ func Update(id int64, user entities.User) (int64, error) {
 	}
 	return res.RowsAffected()
 }
+func FindByEmail(email string) (user entities.User, err error) {
+	conn, err := db.OpenConnection()
+	if err != nil {
+		return
+	}
+	defer conn.Close()
+	row := conn.QueryRow("SELECT * FROM users WHERE email=$1", email)
+	err = row.Scan(&user.ID, &user.Email, &user.Password,
+		&user.Username, &user.FirebaseToken, &user.Create_at,
+		&user.Update_at)
+	return
+}
