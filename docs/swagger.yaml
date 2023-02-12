@@ -1,0 +1,113 @@
+basePath: /api/v1
+definitions:
+  entities.Task:
+    properties:
+      create_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+      update_at:
+        type: string
+    type: object
+host: localhost:9000
+info:
+  contact: {}
+  description: Swagger example
+  title: API-AUTO-ASSISTANT
+  version: "1.0"
+paths:
+  /tasks:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a task for current user
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Task'
+      summary: Delete a task
+      tags:
+      - tasks
+    get:
+      consumes:
+      - application/json
+      description: List tasks for current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Task'
+      summary: List tasks
+      tags:
+      - tasks
+    post:
+      consumes:
+      - application/json
+      description: Create a task for current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Task'
+      summary: Create a task
+      tags:
+      - tasks
+    put:
+      consumes:
+      - application/json
+      description: Update a task for current user
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Task'
+      summary: Update a task
+      tags:
+      - tasks
+  /tasks/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get task by id for current user
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Task'
+      summary: Get task by id
+      tags:
+      - tasks
+swagger: "2.0"

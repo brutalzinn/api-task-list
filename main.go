@@ -8,8 +8,18 @@ import (
 	"fmt"
 	"net/http"
 
+	_ "api-auto-assistant/docs"
+
 	"github.com/go-chi/chi/v5"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
+
+// @title           API-AUTO-ASSISTANT
+// @version         1.0
+// @description     Swagger example
+
+// @host      localhost:9000
+// @BasePath  /api/v1
 
 func main() {
 	err := configs.Load()
@@ -17,8 +27,11 @@ func main() {
 		panic((err))
 	}
 	route := chi.NewRouter()
+	route.Mount("/swagger", httpSwagger.WrapHandler)
+
 	task_route.TaskRoute(route)
 	login_route.LoginRoute(route)
 	user_route.UserRoute(route)
+
 	http.ListenAndServe(fmt.Sprintf(":%s", configs.GetServerPort()), route)
 }

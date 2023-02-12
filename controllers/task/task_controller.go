@@ -12,6 +12,14 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// @Summary      Get task by id
+// @Description  Get task by id for current user
+// @Tags         tasks
+// @Accept       json
+// @Produce      json
+// @Param id path int true "ID"
+// @Success      200  {object} entities.Task
+// @Router       /tasks/{id} [get]
 func Get(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	tasks, err := task_service.Get(int64(id))
@@ -27,6 +35,15 @@ func Get(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
 }
+
+// @Summary      Update a task
+// @Description  Update a task for current user
+// @Tags         tasks
+// @Accept       json
+// @Produce      json
+// @Param id path int true "ID"
+// @Success      200  {object} entities.Task
+// @Router       /tasks/{id} [put]
 func Update(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -58,6 +75,13 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
+// @Summary      List tasks
+// @Description  List tasks for current user
+// @Tags         tasks
+// @Accept       json
+// @Produce      json
+// @Success      200  {object} entities.Task
+// @Router       /tasks [get]
 func List(w http.ResponseWriter, r *http.Request) {
 	tasks, err := task_service.GetAll()
 	if err != nil {
@@ -72,6 +96,15 @@ func List(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
 }
+
+// @Summary      Delete a task
+// @Description  Delete a task for current user
+// @Tags         tasks
+// @Accept       json
+// @Produce      json
+// @Param id path int true "ID"
+// @Success      200  {object} entities.Task
+// @Router       /tasks/{id} [delete]
 func Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -95,6 +128,14 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
 }
+
+// @Summary      Create a task
+// @Description  Create a task for current user
+// @Tags         tasks
+// @Accept       json
+// @Produce      json
+// @Success      200  {object} entities.Task
+// @Router       /tasks [post]
 func Create(w http.ResponseWriter, r *http.Request) {
 	var task entities.Task
 	err := json.NewDecoder(r.Body).Decode(&task)
