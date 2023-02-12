@@ -1,7 +1,5 @@
 # API-AUTO-ASSISTANT
 
-# [Golang startup video](https://www.youtube.com/watch?v=MD7b-iQMC24)
-
 # My first GO API with hypermedia links
 
 - [x] Authentication
@@ -9,3 +7,5 @@
 - [x] Users route
 - [x] Table users
 - [x] Table tasks
+- [] Swagger
+- [] Firebase integration
