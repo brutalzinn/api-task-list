@@ -7,5 +7,5 @@
 - [x] Users route
 - [x] Table users
 - [x] Table tasks
-- [] Swagger
-- [] Firebase integration
+- [ ] Swagger
+- [ ] Firebase integration
