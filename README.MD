@@ -5,6 +5,7 @@
 - [x] Authentication
 - [x] Tasks route
 - [x] Users route
+- [x] Authentication route
 - [x] Table users
 - [x] Table tasks
 - [ ] Swagger
