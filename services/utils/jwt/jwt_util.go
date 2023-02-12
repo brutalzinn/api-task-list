@@ -3,6 +3,9 @@ package jwt_util
 import (
 	"api-auto-assistant/configs"
 	entities "api-auto-assistant/models"
+	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -23,11 +26,21 @@ func GenerateJWT(id int64) (string, error) {
 	tokenString, err := token.SignedString(secretKey)
 	return tokenString, err
 }
-func VerifyJWT(token string) (*jwt.Token, error) {
+func VerifyJWT(tokenJWT string) (*jwt.Token, error) {
 	var secretKey = configs.GetAuthSecret()
-	claims := entities.Claims{}
+	safeSplit := strings.Split(tokenJWT, " ")
+	fmt.Printf("token split count %d", len(safeSplit))
+	if len(safeSplit) != 2 {
+		return nil, errors.New("No valid token provided")
+	}
+	token := safeSplit[1]
+	claims := jwt.MapClaims{}
 	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
 		return secretKey, nil
 	})
+	if err != nil {
+		return nil, errors.New("No valid token provided")
+	}
+	fmt.Printf("claims %d", tkn.Claims)
 	return tkn, err
 }
