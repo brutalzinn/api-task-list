@@ -6,6 +6,7 @@
 - [x] Tasks route
 - [x] Users route
 - [x] Authentication route
+- [x] Api key route ( revoke and generate )
 - [x] Table users
 - [x] Table tasks
 - [x] Table api keys
