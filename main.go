@@ -2,6 +2,7 @@ package main
 
 import (
 	"api-auto-assistant/configs"
+	apikey_route "api-auto-assistant/routes/apikey"
 	login_route "api-auto-assistant/routes/login"
 	task_route "api-auto-assistant/routes/task"
 	user_route "api-auto-assistant/routes/user"
@@ -32,6 +33,7 @@ func main() {
 	task_route.TaskRoute(route)
 	login_route.LoginRoute(route)
 	user_route.UserRoute(route)
+	apikey_route.ApiKeyRoute(route)
 
 	http.ListenAndServe(fmt.Sprintf(":%s", configs.GetServerPort()), route)
 }

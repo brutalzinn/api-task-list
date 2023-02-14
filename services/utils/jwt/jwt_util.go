@@ -4,7 +4,6 @@ import (
 	"api-auto-assistant/configs"
 	entities "api-auto-assistant/models"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -13,8 +12,8 @@ import (
 
 func GenerateJWT(id int64) (string, error) {
 	var secretKey = configs.GetAuthSecret()
-	var expiration = configs.GetAuthExpiration()
-	expirationTime := time.Now().Add(time.Duration(expiration) * time.Second)
+	var authConfig = configs.GetAuthConfig()
+	expirationTime := time.Now().Add(time.Duration(authConfig.Expiration) * time.Second)
 	// Create the JWT claims, which includes the username and expiry time
 	claims := entities.Claims{
 		ID: id,
@@ -26,21 +25,19 @@ func GenerateJWT(id int64) (string, error) {
 	tokenString, err := token.SignedString(secretKey)
 	return tokenString, err
 }
-func VerifyJWT(tokenJWT string) (*jwt.Token, error) {
+func VerifyJWT(tokenJWT string) (*entities.Claims, error) {
 	var secretKey = configs.GetAuthSecret()
 	safeSplit := strings.Split(tokenJWT, " ")
-	fmt.Printf("token split count %d", len(safeSplit))
 	if len(safeSplit) != 2 {
 		return nil, errors.New("No valid token provided")
 	}
 	token := safeSplit[1]
-	claims := jwt.MapClaims{}
-	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+	claims := entities.Claims{}
+	_, err := jwt.ParseWithClaims(token, &claims, func(token *jwt.Token) (interface{}, error) {
 		return secretKey, nil
 	})
 	if err != nil {
 		return nil, errors.New("No valid token provided")
 	}
-	fmt.Printf("claims %d", tkn.Claims)
-	return tkn, err
+	return &claims, err
 }

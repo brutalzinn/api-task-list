@@ -3,6 +3,7 @@ port = "9000"
 
 [authentication]
 secret = "secretket"
+aeskey = "abc&1*~#^2^#s0^=)^^7%b34"
 expiration = 900
 
 [database]

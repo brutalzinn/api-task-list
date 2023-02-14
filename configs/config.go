@@ -18,6 +18,7 @@ type APIConfig struct {
 type AuthConfig struct {
 	Secret     string
 	Expiration int64
+	AesKey     string
 }
 
 type DBConfig struct {
@@ -51,6 +52,7 @@ func Load() error {
 	cfg.Authentication = AuthConfig{
 		Secret:     viper.GetString("authentication.secret"),
 		Expiration: viper.GetInt64("authentication.expiration"),
+		AesKey:     viper.GetString("authentication.aeskey"),
 	}
 	cfg.DB = DBConfig{
 		Host:     viper.GetString("database.host"),
@@ -73,6 +75,6 @@ func GetServerPort() string {
 func GetAuthSecret() []byte {
 	return []byte(cfg.Authentication.Secret)
 }
-func GetAuthExpiration() int64 {
-	return cfg.Authentication.Expiration
+func GetAuthConfig() AuthConfig {
+	return cfg.Authentication
 }

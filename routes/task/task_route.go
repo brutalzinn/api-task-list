@@ -9,7 +9,8 @@ import (
 
 func TaskRoute(route *chi.Mux) {
 	route.Group(func(r chi.Router) {
-		r.Use(middlewares.AuthMiddleware)
+		r.Use(middlewares.JWTMiddleware)
+		r.Use(middlewares.ApiKeyMiddleware)
 		r.Post("/task", task_controller.Create)
 		r.Put("/task/{id}", task_controller.Update)
 		r.Delete("/task/{id}", task_controller.Delete)
