@@ -8,5 +8,6 @@
 - [x] Authentication route
 - [x] Table users
 - [x] Table tasks
+- [x] Table api keys
 - [ ] Swagger
 - [ ] Firebase integration
