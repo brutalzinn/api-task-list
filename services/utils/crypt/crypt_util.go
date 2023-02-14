@@ -25,12 +25,12 @@ var bytes = []byte{35, 46, 57, 24, 85, 35, 24, 74, 87, 35, 88, 98, 66, 32, 14, 0
 func Encode(b []byte) string {
 	return base64.StdEncoding.EncodeToString(b)
 }
-func Decode(s string) []byte {
+func Decode(s string) ([]byte, error) {
 	data, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return data
+	return data, nil
 }
 
 // Encrypt method is to encrypt or hide any classified text
@@ -54,7 +54,10 @@ func Decrypt(text string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	cipherText := Decode(text)
+	cipherText, err := Decode(text)
+	if err != nil {
+		return "", err
+	}
 	cfb := cipher.NewCFBDecrypter(block, bytes)
 	plainText := make([]byte, len(cipherText))
 	cfb.XORKeyStream(plainText, cipherText)
