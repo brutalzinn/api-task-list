@@ -1,14 +1,15 @@
 package apikey_controller
 
 import (
-	entities "api-auto-assistant/models"
-	apikey_service "api-auto-assistant/services/database/apikey"
-	crypt_util "api-auto-assistant/services/utils/crypt"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strings"
+
+	entities "github.com/brutalzinn/api-task-list/models"
+	apikey_service "github.com/brutalzinn/api-task-list/services/database/apikey"
+	crypt_util "github.com/brutalzinn/api-task-list/services/utils/crypt"
 
 	"github.com/google/uuid"
 )

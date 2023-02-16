@@ -1,10 +1,11 @@
 package crypt_util
 
 import (
-	"api-auto-assistant/configs"
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/base64"
+
+	"github.com/brutalzinn/api-task-list/configs"
 
 	"golang.org/x/crypto/bcrypt"
 )

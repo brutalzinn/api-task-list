@@ -1,11 +1,12 @@
 package jwt_util
 
 import (
-	"api-auto-assistant/configs"
-	entities "api-auto-assistant/models"
 	"errors"
 	"strings"
 	"time"
+
+	"github.com/brutalzinn/api-task-list/configs"
+	entities "github.com/brutalzinn/api-task-list/models"
 
 	"github.com/golang-jwt/jwt/v4"
 )

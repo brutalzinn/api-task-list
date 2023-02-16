@@ -1,7 +1,7 @@
 package user_route
 
 import (
-	user_controller "api-auto-assistant/controllers/user"
+	user_controller "github.com/brutalzinn/api-task-list/controllers/user"
 
 	"github.com/go-chi/chi/v5"
 )

@@ -1,15 +1,16 @@
 package user_controller
 
 import (
-	entities "api-auto-assistant/models"
-	user_service "api-auto-assistant/services/database/user"
-	crypt_utils "api-auto-assistant/services/utils/crypt"
-	jwt_util "api-auto-assistant/services/utils/jwt"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
+
+	entities "github.com/brutalzinn/api-task-list/models"
+	user_service "github.com/brutalzinn/api-task-list/services/database/user"
+	crypt_utils "github.com/brutalzinn/api-task-list/services/utils/crypt"
+	jwt_util "github.com/brutalzinn/api-task-list/services/utils/jwt"
 
 	"github.com/go-chi/chi/v5"
 )

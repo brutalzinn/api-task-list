@@ -1,13 +1,14 @@
 package task_controller
 
 import (
-	entities "api-auto-assistant/models"
-	task_service "api-auto-assistant/services/database/task"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
+
+	entities "github.com/brutalzinn/api-task-list/models"
+	task_service "github.com/brutalzinn/api-task-list/services/database/task"
 
 	"github.com/go-chi/chi/v5"
 )

@@ -1,13 +1,14 @@
 package middlewares
 
 import (
-	apikey_service "api-auto-assistant/services/database/apikey"
-	crypt_util "api-auto-assistant/services/utils/crypt"
 	"context"
 	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
+
+	apikey_service "github.com/brutalzinn/api-task-list/services/database/apikey"
+	crypt_util "github.com/brutalzinn/api-task-list/services/utils/crypt"
 )
 
 func ApiKeyMiddleware(next http.Handler) http.Handler {

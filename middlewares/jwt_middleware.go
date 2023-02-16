@@ -1,10 +1,11 @@
 package middlewares
 
 import (
-	jwt_util "api-auto-assistant/services/utils/jwt"
 	"context"
 	"fmt"
 	"net/http"
+
+	jwt_util "github.com/brutalzinn/api-task-list/services/utils/jwt"
 )
 
 func JWTMiddleware(next http.Handler) http.Handler {

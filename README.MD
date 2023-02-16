@@ -1,4 +1,4 @@
-# API-AUTO-ASSISTANT
+# github.com/brutalzinn/api-task-list
 
 # My first GO API with hypermedia links
 

@@ -37,6 +37,59 @@ const docTemplate = `{
                     }
                 }
             },
+            "post": {
+                "description": "Create a task for current user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Create a task",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Task"
+                        }
+                    }
+                }
+            }
+        },
+        "/tasks/{id}": {
+            "get": {
+                "description": "Get task by id for current user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Get task by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Task"
+                        }
+                    }
+                }
+            },
             "put": {
                 "description": "Update a task for current user",
                 "consumes": [
@@ -67,27 +120,6 @@ const docTemplate = `{
                     }
                 }
             },
-            "post": {
-                "description": "Create a task for current user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tasks"
-                ],
-                "summary": "Create a task",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Task"
-                        }
-                    }
-                }
-            },
             "delete": {
                 "description": "Delete a task for current user",
                 "consumes": [
@@ -100,38 +132,6 @@ const docTemplate = `{
                     "tasks"
                 ],
                 "summary": "Delete a task",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Task"
-                        }
-                    }
-                }
-            }
-        },
-        "/tasks/{id}": {
-            "get": {
-                "description": "Get task by id for current user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tasks"
-                ],
-                "summary": "Get task by id",
                 "parameters": [
                     {
                         "type": "integer",
@@ -182,7 +182,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:9000",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "API-AUTO-ASSISTANT",
+	Title:            "github.com/brutalzinn/api-task-list",
 	Description:      "Swagger example",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

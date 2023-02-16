@@ -1,8 +1,8 @@
 package task_route
 
 import (
-	task_controller "api-auto-assistant/controllers/task"
-	"api-auto-assistant/middlewares"
+	task_controller "github.com/brutalzinn/api-task-list/controllers/task"
+	"github.com/brutalzinn/api-task-list/middlewares"
 
 	"github.com/go-chi/chi/v5"
 )

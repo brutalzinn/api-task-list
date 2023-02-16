@@ -1,9 +1,10 @@
 package apikey_service
 
 import (
-	"api-auto-assistant/db"
-	entities "api-auto-assistant/models"
 	"time"
+
+	"github.com/brutalzinn/api-task-list/db"
+	entities "github.com/brutalzinn/api-task-list/models"
 )
 
 func Delete(userId int64) (int64, error) {

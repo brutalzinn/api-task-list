@@ -1,9 +1,10 @@
 package db
 
 import (
-	"api-auto-assistant/configs"
 	"database/sql"
 	"fmt"
+
+	"github.com/brutalzinn/api-task-list/configs"
 
 	_ "github.com/lib/pq"
 )

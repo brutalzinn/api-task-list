@@ -17,30 +17,10 @@ host: localhost:9000
 info:
   contact: {}
   description: Swagger example
-  title: API-AUTO-ASSISTANT
+  title: github.com/brutalzinn/api-task-list
   version: "1.0"
 paths:
   /tasks:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a task for current user
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/entities.Task'
-      summary: Delete a task
-      tags:
-      - tasks
     get:
       consumes:
       - application/json
@@ -69,10 +49,11 @@ paths:
       summary: Create a task
       tags:
       - tasks
-    put:
+  /tasks/{id}:
+    delete:
       consumes:
       - application/json
-      description: Update a task for current user
+      description: Delete a task for current user
       parameters:
       - description: ID
         in: path
@@ -86,10 +67,9 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/entities.Task'
-      summary: Update a task
+      summary: Delete a task
       tags:
       - tasks
-  /tasks/{id}:
     get:
       consumes:
       - application/json
@@ -108,6 +88,26 @@ paths:
           schema:
             $ref: '#/definitions/entities.Task'
       summary: Get task by id
+      tags:
+      - tasks
+    put:
+      consumes:
+      - application/json
+      description: Update a task for current user
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Task'
+      summary: Update a task
       tags:
       - tasks
 swagger: "2.0"

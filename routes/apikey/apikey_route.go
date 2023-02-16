@@ -1,8 +1,8 @@
 package apikey_route
 
 import (
-	apikey_controller "api-auto-assistant/controllers/apikey"
-	"api-auto-assistant/middlewares"
+	apikey_controller "github.com/brutalzinn/api-task-list/controllers/apikey"
+	"github.com/brutalzinn/api-task-list/middlewares"
 
 	"github.com/go-chi/chi/v5"
 )

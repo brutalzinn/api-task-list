@@ -1,22 +1,23 @@
 package main
 
 import (
-	"api-auto-assistant/configs"
-	apikey_route "api-auto-assistant/routes/apikey"
-	login_route "api-auto-assistant/routes/login"
-	task_route "api-auto-assistant/routes/task"
-	user_route "api-auto-assistant/routes/user"
 	"fmt"
 	"net/http"
 
-	_ "api-auto-assistant/docs"
+	"github.com/brutalzinn/api-task-list/configs"
+	apikey_route "github.com/brutalzinn/api-task-list/routes/apikey"
+	login_route "github.com/brutalzinn/api-task-list/routes/login"
+	task_route "github.com/brutalzinn/api-task-list/routes/task"
+	user_route "github.com/brutalzinn/api-task-list/routes/user"
+
+	_ "github.com/brutalzinn/api-task-list/docs"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
-// @title           API-AUTO-ASSISTANT
+// @title           github.com/brutalzinn/api-task-list
 // @version         1.0
 // @description     Swagger example
 
@@ -30,14 +31,11 @@ func main() {
 	}
 	route := chi.NewRouter()
 	route.Use(cors.Handler(cors.Options{
-		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
 		AllowedOrigins: []string{"https://*", "http://*"},
-		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: false,
-		MaxAge:           300, // Maximum value not ignored by any of major browsers
+		MaxAge:           300,
 	}))
 	route.Mount("/swagger", httpSwagger.WrapHandler)
 
@@ -45,6 +43,6 @@ func main() {
 	login_route.LoginRoute(route)
 	user_route.UserRoute(route)
 	apikey_route.ApiKeyRoute(route)
-	print("Api started")
+	fmt.Printf("Api started %s", configs.GetServerPort())
 	http.ListenAndServe(fmt.Sprintf(":%s", configs.GetServerPort()), route)
 }
