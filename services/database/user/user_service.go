@@ -82,9 +82,7 @@ func FindByEmail(email string) (user entities.User, err error) {
 		return
 	}
 	defer conn.Close()
-	row := conn.QueryRow("SELECT * FROM users WHERE email=$1", email)
-	err = row.Scan(&user.ID, &user.Email, &user.Password,
-		&user.Username, &user.FirebaseToken, &user.Create_at,
-		&user.Update_at)
+	row := conn.QueryRow("SELECT id, password FROM users WHERE email=$1", email)
+	err = row.Scan(&user.ID, &user.Password)
 	return
 }
