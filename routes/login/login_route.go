@@ -6,6 +6,6 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func LoginRoute(route *chi.Mux) {
+func Register(route *chi.Mux) {
 	route.Post("/login", user_controller.Login)
 }

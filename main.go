@@ -7,6 +7,7 @@ import (
 	"github.com/brutalzinn/api-task-list/configs"
 	apikey_route "github.com/brutalzinn/api-task-list/routes/apikey"
 	login_route "github.com/brutalzinn/api-task-list/routes/login"
+	repo_route "github.com/brutalzinn/api-task-list/routes/repo"
 	task_route "github.com/brutalzinn/api-task-list/routes/task"
 	user_route "github.com/brutalzinn/api-task-list/routes/user"
 
@@ -31,18 +32,20 @@ func main() {
 	}
 	route := chi.NewRouter()
 	route.Use(cors.Handler(cors.Options{
-		AllowedOrigins: []string{"https://*", "http://*"},
+		AllowedOrigins:   []string{"https://*", "http://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
 	route.Mount("/swagger", httpSwagger.WrapHandler)
+	task_route.Register(route)
+	login_route.Register(route)
+	user_route.Register(route)
+	apikey_route.Register(route)
+	repo_route.Register(route)
 
-	task_route.TaskRoute(route)
-	login_route.LoginRoute(route)
-	user_route.UserRoute(route)
-	apikey_route.ApiKeyRoute(route)
-	fmt.Printf("Api started %s", configs.GetServerPort())
-	http.ListenAndServe(fmt.Sprintf(":%s", configs.GetServerPort()), route)
+	port := configs.GetServerPort()
+	fmt.Printf("API-AUTO-ASSISTANT STARTED WITH PORT %s", port)
+	http.ListenAndServe(fmt.Sprintf(":%s", port), route)
 }

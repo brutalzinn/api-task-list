@@ -7,7 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func TaskRoute(route *chi.Mux) {
+func Register(route *chi.Mux) {
 	route.Group(func(r chi.Router) {
 		r.Use(middlewares.JWTMiddleware)
 		r.Use(middlewares.ApiKeyMiddleware)

@@ -6,6 +6,6 @@ type User struct {
 	Password      string  `json:password`
 	Username      string  `json:username`
 	FirebaseToken string  `json:firebaseToken`
-	Create_at     *string `json:create_at`
-	Update_at     *string `json:update_at`
+	CreateAt      *string `json:create_at`
+	UpdateAt      *string `json:update_at`
 }

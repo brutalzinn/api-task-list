@@ -7,11 +7,12 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func ApiKeyRoute(route *chi.Mux) {
+func Register(route *chi.Mux) {
 	route.Group(func(r chi.Router) {
 		r.Use(middlewares.JWTMiddleware)
 		r.Post("/apikey/generate", apikey_controller.Generate)
-		r.Post("/apikey/revoke", apikey_controller.Revoke)
+		r.Get("/apikey", apikey_controller.List)
+		r.Post("/apikey/revoke/{id}", apikey_controller.Revoke)
 	})
 
 }

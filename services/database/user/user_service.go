@@ -32,8 +32,8 @@ func GetAll() (users []entities.User, err error) {
 	for rows.Next() {
 		var user entities.User
 		err = rows.Scan(&user.ID, &user.Email, &user.Password,
-			&user.Username, &user.FirebaseToken, &user.Create_at,
-			&user.Update_at)
+			&user.Username, &user.FirebaseToken, &user.CreateAt,
+			&user.UpdateAt)
 		if err != nil {
 			continue
 		}
@@ -49,8 +49,8 @@ func Get(id int64) (user entities.User, err error) {
 	defer conn.Close()
 	row := conn.QueryRow("SELECT * FROM users WHERE id=$1", id)
 	err = row.Scan(&user.ID, &user.Email, &user.Password,
-		&user.Username, &user.FirebaseToken, &user.Create_at,
-		&user.Update_at)
+		&user.Username, &user.FirebaseToken, &user.CreateAt,
+		&user.UpdateAt)
 	return
 }
 
@@ -71,7 +71,7 @@ func Update(id int64, user entities.User) (int64, error) {
 	}
 	defer conn.Close()
 	res, err := conn.Exec("UPDATE users SET email=$1, password=$2, username=$3, firebaseToken=$4, update_at=$5 WHERE id=$6",
-		user.Email, user.Password, user.Username, user.FirebaseToken, user.Update_at, id)
+		user.Email, user.Password, user.Username, user.FirebaseToken, user.UpdateAt, id)
 	if err != nil {
 		return 0, err
 	}

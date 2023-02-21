@@ -31,7 +31,7 @@ func GetAll() (tasks []entities.Task, err error) {
 	}
 	for rows.Next() {
 		var task entities.Task
-		err = rows.Scan(&task.ID, &task.Title, &task.Description, &task.Create_at, &task.Update_at)
+		err = rows.Scan(&task.ID, &task.Title, &task.RepoId, &task.Description, &task.CreateAt, &task.UpdateAt)
 		if err != nil {
 			continue
 		}
@@ -46,7 +46,7 @@ func Get(id int64) (task entities.Task, err error) {
 	}
 	defer conn.Close()
 	row := conn.QueryRow("SELECT * FROM tasks WHERE id=$1", id)
-	err = row.Scan(&task.ID, &task.Title, &task.Description, &task.Create_at, &task.Update_at)
+	err = row.Scan(&task.ID, &task.Title, &task.RepoId, &task.Description, &task.CreateAt, &task.UpdateAt)
 	return
 }
 
@@ -56,8 +56,8 @@ func Insert(task entities.Task) (id int64, err error) {
 		return
 	}
 	defer conn.Close()
-	sql := "INSERT INTO tasks (title, description, create_at) VALUES ($1, $2, $3) RETURNING id"
-	err = conn.QueryRow(sql, &task.Title, &task.Description, time.Now()).Scan(&id)
+	sql := "INSERT INTO tasks (title, repo_id, description, create_at) VALUES ($1, $2, $3, $4) RETURNING id"
+	err = conn.QueryRow(sql, &task.Title, &task.RepoId, &task.Description, time.Now()).Scan(&id)
 	return
 }
 func Update(id int64, task entities.Task) (int64, error) {

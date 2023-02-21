@@ -2,16 +2,17 @@ package apikey_controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 
 	entities "github.com/brutalzinn/api-task-list/models"
 	apikey_service "github.com/brutalzinn/api-task-list/services/database/apikey"
+	apikey_util "github.com/brutalzinn/api-task-list/services/utils/apikey"
 	crypt_util "github.com/brutalzinn/api-task-list/services/utils/crypt"
-
-	"github.com/google/uuid"
+	"github.com/go-chi/chi/v5"
 )
 
 // @Summary      Generate api key
@@ -30,36 +31,59 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	scopes := []string{"task_insert", "task_delete", "task_read", "task_update"}
-	count, err := apikey_service.Count(user_id)
+	var apiKeyRequest entities.ApiKeyRequest
+	err := json.NewDecoder(r.Body).Decode(&apiKeyRequest)
 	if err != nil {
-		log.Printf("error on update api key register %v", err)
+		log.Printf("error on decode json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	if count > 0 {
-		log.Printf("error on update api key register %v", err)
+	count, err := apikey_service.Count(user_id)
+	if err != nil {
+		log.Printf("error on count api key register %v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	if count >= 3 {
+		log.Printf("error on count api key register %v", err)
 		resp := map[string]any{
 			"Error":   false,
-			"Message": "You cant generate a api key. Revoke your own api key first.",
+			"Message": "You cant generate more api keys. Revoke one first.",
 		}
 		w.Header().Add("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(resp)
 		return
 	}
-	uuid := uuid.New().String()
-	uuidnormalized := strings.Replace(uuid, "-", "", -1)
-	cryptKey, _ := crypt_util.HashPassword(uuidnormalized)
-	keyhash, err := crypt_util.Encrypt(fmt.Sprintf("%d-%s", user_id, uuidnormalized))
+	name := apiKeyRequest.Name
+	nameNormalized := apikey_util.Normalize(name)
+	apiKeysSameAppName, _ := apikey_service.CountByUserAndName(user_id, nameNormalized)
+	if apiKeysSameAppName >= 1 {
+		resp := map[string]any{
+			"Error":   false,
+			"Message": "You already have a api key with same app name registred. Revoke the old api key or generate a new api key with app name different.",
+		}
+		w.Header().Add("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(resp)
+		return
+	}
+	newApiKey, _ := apikey_util.CreateApiKey(user_id, nameNormalized)
+	hashKey, _ := crypt_util.HashPassword(newApiKey)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
+	days := apiKeyRequest.ExpireAt.Days()
+	expireAt := time.Now().AddDate(0, 0, days)
+	scopes := []string{"task_insert", "task_delete", "task_read", "task_update"}
 	apikey := entities.ApiKey{
-		ApiKey: cryptKey,
-		Scopes: strings.Join(scopes, ","),
-		UserId: user_id,
+		ApiKey:         hashKey,
+		Scopes:         strings.Join(scopes, ","),
+		Name:           apiKeyRequest.Name,
+		NameNormalized: nameNormalized,
+		UserId:         user_id,
+		ExpireAt:       expireAt.Format(time.DateTime),
 	}
+
 	_, err = apikey_service.Insert(apikey)
 	if err != nil {
 		log.Printf("error on update api key register %v", err)
@@ -69,7 +93,7 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 	resp := map[string]any{
 		"Error":       false,
 		"Message":     "Api key generated",
-		"AccessToken": keyhash,
+		"AccessToken": newApiKey,
 	}
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
@@ -84,14 +108,13 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object} entities.Task
 // @Router       /tasks/{id} [put]
 func Revoke(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	user_id, ok := ctx.Value("user_id").(int64)
-	if !ok {
-		log.Printf("Error. usr dont authenticate and try to revoke api key %d", user_id)
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		log.Printf("error on decode json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	rows, err := apikey_service.Delete(int64(user_id))
+	rows, err := apikey_service.Delete(int64(id))
 	if err != nil {
 		log.Printf("error on update register %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -111,5 +134,45 @@ func Revoke(w http.ResponseWriter, r *http.Request) {
 		"Error":   false,
 		"Message": "Api key revoked.",
 	}
+	json.NewEncoder(w).Encode(resp)
+}
+
+// @Summary      List apikeys
+// @Description  List apikeys for current user
+// @Tags         apikeys
+// @Accept       json
+// @Produce      json
+// @Success      200  {object} entities.Task
+// @Router       /apikeys [get]
+func List(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	user_id, ok := ctx.Value("user_id").(int64)
+	if !ok {
+		log.Printf("Error. usr dont authenticate and try to list api key %d", user_id)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	var apiKeysResponseMapper []entities.ApiKeyResponse
+	apiKeys, err := apikey_service.GetAll(user_id)
+	if err != nil {
+		log.Printf("error on decode json %v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	for _, apiKey := range apiKeys {
+		var item = entities.ApiKeyResponse{
+			Name:     apiKey.Name,
+			ExpireAt: apiKey.ExpireAt,
+			CreateAt: apiKey.CreateAt,
+			Scopes:   apiKey.Scopes,
+			UpdateAt: apiKey.UpdateAt,
+		}
+		apiKeysResponseMapper = append(apiKeysResponseMapper, item)
+	}
+	resp := map[string]any{
+		"Error":   false,
+		"Message": apiKeysResponseMapper,
+	}
+	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
 }

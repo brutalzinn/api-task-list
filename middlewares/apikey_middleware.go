@@ -4,10 +4,9 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strconv"
-	"strings"
 
 	apikey_service "github.com/brutalzinn/api-task-list/services/database/apikey"
+	apikey_util "github.com/brutalzinn/api-task-list/services/utils/apikey"
 	crypt_util "github.com/brutalzinn/api-task-list/services/utils/crypt"
 )
 
@@ -25,24 +24,17 @@ func ApiKeyMiddleware(next http.Handler) http.Handler {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
 		}
-		apikeyformat := strings.Split(decrypt, "-")
-		if len(apikeyformat) != 2 {
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-			return
-		}
-		user_id, _ := strconv.ParseInt(apikeyformat[0], 10, 64)
-		apikeycrypt := apikeyformat[1]
-		apikeyfound, err := apikey_service.Get(user_id)
+		user_id, appName, err := apikey_util.GetApiKeyInfo(decrypt)
+		count, err := apikey_service.CountByUserAndName(user_id, appName)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
 		}
-		apiKeyValid := crypt_util.CheckPasswordHash(apikeycrypt, apikeyfound.ApiKey)
-		if apiKeyValid == false {
+		if count == 0 {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
 		}
-		ctx = context.WithValue(r.Context(), "user_id", apikeyfound.UserId)
+		ctx = context.WithValue(r.Context(), "user_id", user_id)
 		fmt.Printf("Api Key middleware OK %s", decrypt)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
