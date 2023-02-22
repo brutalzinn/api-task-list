@@ -2,13 +2,18 @@ package apikey_controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
-	entities "github.com/brutalzinn/api-task-list/models"
+	database_entities "github.com/brutalzinn/api-task-list/models/database"
+	"github.com/brutalzinn/api-task-list/models/dto"
+	request_entities "github.com/brutalzinn/api-task-list/models/request"
+	response_entities "github.com/brutalzinn/api-task-list/models/response"
+	rest_entities "github.com/brutalzinn/api-task-list/models/rest"
 	apikey_service "github.com/brutalzinn/api-task-list/services/database/apikey"
 	apikey_util "github.com/brutalzinn/api-task-list/services/utils/apikey"
 	crypt_util "github.com/brutalzinn/api-task-list/services/utils/crypt"
@@ -17,12 +22,11 @@ import (
 
 // @Summary      Generate api key
 // @Description  Generate api key for user
-// @Tags         tasks
+// @Tags         ApiKeys
 // @Accept       json
 // @Produce      json
-// @Param id path int true "ID"
-// @Success      200  {object} entities.Task
-// @Router       /tasks/{id} [get]
+// @Success      200  {object} response_entities.GenericResponse
+// @Router       /apikey/generate [post]
 func Generate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user_id, ok := ctx.Value("user_id").(int64)
@@ -31,7 +35,7 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	var apiKeyRequest entities.ApiKeyRequest
+	var apiKeyRequest request_entities.ApiKeyRequest
 	err := json.NewDecoder(r.Body).Decode(&apiKeyRequest)
 	if err != nil {
 		log.Printf("error on decode json %v", err)
@@ -75,7 +79,7 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 	days := apiKeyRequest.ExpireAt.Days()
 	expireAt := time.Now().AddDate(0, 0, days)
 	scopes := []string{"task_insert", "task_delete", "task_read", "task_update"}
-	apikey := entities.ApiKey{
+	apikey := database_entities.ApiKey{
 		ApiKey:         hashKey,
 		Scopes:         strings.Join(scopes, ","),
 		Name:           apiKeyRequest.Name,
@@ -90,10 +94,10 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	resp := map[string]any{
-		"Error":       false,
-		"Message":     "Api key generated",
-		"AccessToken": newApiKey,
+	resp := response_entities.GenericResponse{
+		Error:   false,
+		Message: "Api key generated",
+		Data:    map[string]any{"AccessToken": newApiKey},
 	}
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
@@ -101,12 +105,12 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 
 // @Summary      Revoke apikey
 // @Description  Revoke a user apikey
-// @Tags         tasks
+// @Tags         ApiKeys
 // @Accept       json
 // @Produce      json
 // @Param id path int true "ID"
-// @Success      200  {object} entities.Task
-// @Router       /tasks/{id} [put]
+// @Success      200  {object} response_entities.GenericResponse
+// @Router       /apikey/revoke/{id} [delete]
 func Revoke(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -121,29 +125,30 @@ func Revoke(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Add("Content-Type", "application/json")
-	resp := map[string]any{}
+	resp := response_entities.GenericResponse{}
 	if rows == 0 {
-		resp = map[string]any{
-			"Error":   false,
-			"Message": "Cant revoke api key.",
+		resp = response_entities.GenericResponse{
+			Error:   true,
+			Message: "Api key cant be revoked.",
 		}
 		json.NewEncoder(w).Encode(resp)
 		return
 	}
-	resp = map[string]any{
-		"Error":   false,
-		"Message": "Api key revoked.",
+
+	resp = response_entities.GenericResponse{
+		Error:   false,
+		Message: "Api key revoked.",
 	}
 	json.NewEncoder(w).Encode(resp)
 }
 
 // @Summary      List apikeys
 // @Description  List apikeys for current user
-// @Tags         apikeys
+// @Tags         ApiKeys
 // @Accept       json
 // @Produce      json
-// @Success      200  {object} entities.Task
-// @Router       /apikeys [get]
+// @Success      200  {object} response_entities.GenericResponse
+// @Router       /apikey [get]
 func List(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user_id, ok := ctx.Value("user_id").(int64)
@@ -152,26 +157,21 @@ func List(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	var apiKeysResponseMapper []entities.ApiKeyResponse
 	apiKeys, err := apikey_service.GetAll(user_id)
 	if err != nil {
 		log.Printf("error on decode json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	for _, apiKey := range apiKeys {
-		var item = entities.ApiKeyResponse{
-			Name:     apiKey.Name,
-			ExpireAt: apiKey.ExpireAt,
-			CreateAt: apiKey.CreateAt,
-			Scopes:   apiKey.Scopes,
-			UpdateAt: apiKey.UpdateAt,
-		}
-		apiKeysResponseMapper = append(apiKeysResponseMapper, item)
+	var apiKeyList = dto.ToApiKeyListDTO(apiKeys)
+	for i, apiKey := range apiKeyList {
+		var links []rest_entities.HypermediaLink
+		links = append(links, rest_entities.HypermediaLink{Rel: "revoke", Href: fmt.Sprintf("apikey/revoke/%d", apiKey.ID), Type: "POST"})
+		apiKey.Links = links
+		apiKeyList[i] = apiKey
 	}
-	resp := map[string]any{
-		"Error":   false,
-		"Message": apiKeysResponseMapper,
+	resp := response_entities.GenericResponse{
+		Data: apiKeyList,
 	}
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)

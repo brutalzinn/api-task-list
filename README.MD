@@ -10,5 +10,6 @@
 - [x] Table users
 - [x] Table tasks
 - [x] Table api keys
+- [x] Hypermedia links base
 - [ ] Swagger
 - [ ] Firebase integration

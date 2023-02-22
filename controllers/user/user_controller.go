@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	entities "github.com/brutalzinn/api-task-list/models"
+	database_entities "github.com/brutalzinn/api-task-list/models/database"
 	user_service "github.com/brutalzinn/api-task-list/services/database/user"
 	crypt_utils "github.com/brutalzinn/api-task-list/services/utils/crypt"
 	jwt_util "github.com/brutalzinn/api-task-list/services/utils/jwt"
@@ -37,7 +37,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	var user entities.User
+	var user database_entities.User
 	err = json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		log.Printf("error on decode json %v", err)
@@ -99,7 +99,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 func Create(w http.ResponseWriter, r *http.Request) {
-	var user entities.User
+	var user database_entities.User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		log.Printf("error on decode json %v", err)
@@ -125,7 +125,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 func Login(w http.ResponseWriter, r *http.Request) {
-	var auth entities.AuthRequest
+	var auth database_entities.AuthRequest
 	err := json.NewDecoder(r.Body).Decode(&auth)
 	if err != nil {
 		log.Printf("error on decode json %v", err)
@@ -139,7 +139,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	jwtToken, err := jwt_util.GenerateJWT(user.ID)
-	resp := entities.AuthResponse{
+	resp := database_entities.AuthResponse{
 		AccessToken: jwtToken,
 	}
 	// resp := map[string]any{

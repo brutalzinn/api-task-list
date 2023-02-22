@@ -15,7 +15,244 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/tasks": {
+        "/apikey": {
+            "get": {
+                "description": "List apikeys for current user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiKeys"
+                ],
+                "summary": "List apikeys",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response_entities.GenericResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/apikey/generate": {
+            "post": {
+                "description": "Generate api key for user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiKeys"
+                ],
+                "summary": "Generate api key",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response_entities.GenericResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/apikey/revoke/{id}": {
+            "delete": {
+                "description": "Revoke a user apikey",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ApiKeys"
+                ],
+                "summary": "Revoke apikey",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response_entities.GenericResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/repo": {
+            "get": {
+                "description": "List Repos for current user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Repos"
+                ],
+                "summary": "List Repos",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response_entities.GenericResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a repo for current user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Repos"
+                ],
+                "summary": "Create a repo",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response_entities.GenericResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/repo/paginate": {
+            "get": {
+                "description": "Paginate Repos for current user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Repos"
+                ],
+                "summary": "Paginate Repos",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response_entities.GenericResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/repo/{id}": {
+            "get": {
+                "description": "Get repo by id for current user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Repos"
+                ],
+                "summary": "Get repo by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response_entities.GenericResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a repo for current user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Repos"
+                ],
+                "summary": "Update a repo",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response_entities.GenericResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a repo for current user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Repos"
+                ],
+                "summary": "Delete a repo",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response_entities.GenericResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/task": {
             "get": {
                 "description": "List tasks for current user",
                 "consumes": [
@@ -25,14 +262,14 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "tasks"
+                    "Tasks"
                 ],
                 "summary": "List tasks",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entities.Task"
+                            "$ref": "#/definitions/response_entities.GenericResponse"
                         }
                     }
                 }
@@ -46,20 +283,43 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "tasks"
+                    "Tasks"
                 ],
                 "summary": "Create a task",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entities.Task"
+                            "$ref": "#/definitions/response_entities.GenericResponse"
                         }
                     }
                 }
             }
         },
-        "/tasks/{id}": {
+        "/task/paginate": {
+            "get": {
+                "description": "Paginate Tasks for current user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Paginate Tasks",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response_entities.GenericResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/task/{id}": {
             "get": {
                 "description": "Get task by id for current user",
                 "consumes": [
@@ -69,7 +329,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "tasks"
+                    "Tasks"
                 ],
                 "summary": "Get task by id",
                 "parameters": [
@@ -85,7 +345,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entities.Task"
+                            "$ref": "#/definitions/response_entities.GenericResponse"
                         }
                     }
                 }
@@ -99,7 +359,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "tasks"
+                    "Tasks"
                 ],
                 "summary": "Update a task",
                 "parameters": [
@@ -115,7 +375,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entities.Task"
+                            "$ref": "#/definitions/response_entities.GenericResponse"
                         }
                     }
                 }
@@ -129,7 +389,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "tasks"
+                    "Tasks"
                 ],
                 "summary": "Delete a task",
                 "parameters": [
@@ -145,7 +405,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/entities.Task"
+                            "$ref": "#/definitions/response_entities.GenericResponse"
                         }
                     }
                 }
@@ -153,22 +413,14 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "entities.Task": {
+        "response_entities.GenericResponse": {
             "type": "object",
             "properties": {
-                "create_at": {
-                    "type": "string"
+                "data": {},
+                "error": {
+                    "type": "boolean"
                 },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "update_at": {
+                "message": {
                     "type": "string"
                 }
             }

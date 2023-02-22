@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/brutalzinn/api-task-list/db"
-	entities "github.com/brutalzinn/api-task-list/models"
+	database_entities "github.com/brutalzinn/api-task-list/models/database"
 )
 
 func Delete(id int64) (int64, error) {
@@ -20,7 +20,7 @@ func Delete(id int64) (int64, error) {
 	return res.RowsAffected()
 }
 
-func Get(userId int64) (apiKey entities.ApiKey, err error) {
+func Get(userId int64) (apiKey database_entities.ApiKey, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return
@@ -30,7 +30,7 @@ func Get(userId int64) (apiKey entities.ApiKey, err error) {
 	err = row.Scan(&apiKey.ID, &apiKey.ApiKey, &apiKey.Scopes, &apiKey.UserId, &apiKey.Name, &apiKey.NameNormalized, &apiKey.ExpireAt, &apiKey.CreateAt, &apiKey.UpdateAt)
 	return
 }
-func GetAll(userId int64) (apiKeys []entities.ApiKey, err error) {
+func GetAll(userId int64) (apiKeys []database_entities.ApiKey, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return
@@ -41,7 +41,7 @@ func GetAll(userId int64) (apiKeys []entities.ApiKey, err error) {
 		return
 	}
 	for rows.Next() {
-		var apiKey entities.ApiKey
+		var apiKey database_entities.ApiKey
 		err = rows.Scan(&apiKey.ID, &apiKey.ApiKey, &apiKey.Scopes, &apiKey.UserId, &apiKey.Name, &apiKey.NameNormalized, &apiKey.ExpireAt, &apiKey.CreateAt, &apiKey.UpdateAt)
 		if err != nil {
 			continue
@@ -50,7 +50,7 @@ func GetAll(userId int64) (apiKeys []entities.ApiKey, err error) {
 	}
 	return
 }
-func GetByUserAndName(userId int64, appName string) (apiKey entities.ApiKey, err error) {
+func GetByUserAndName(userId int64, appName string) (apiKey database_entities.ApiKey, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return
@@ -80,7 +80,7 @@ func Count(userId int64) (count int64, err error) {
 	err = row.Scan(&count)
 	return
 }
-func Insert(apiKey entities.ApiKey) (id int64, err error) {
+func Insert(apiKey database_entities.ApiKey) (id int64, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return
@@ -90,7 +90,7 @@ func Insert(apiKey entities.ApiKey) (id int64, err error) {
 	err = conn.QueryRow(sql, &apiKey.ApiKey, &apiKey.Scopes, &apiKey.Name, &apiKey.NameNormalized, apiKey.UserId, time.Now(), &apiKey.ExpireAt).Scan(&id)
 	return
 }
-func Update(id int64, apiKey entities.ApiKey) (int64, error) {
+func Update(id int64, apiKey database_entities.ApiKey) (int64, error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return 0, err

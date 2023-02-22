@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/brutalzinn/api-task-list/db"
-	entities "github.com/brutalzinn/api-task-list/models"
+	database_entities "github.com/brutalzinn/api-task-list/models/database"
 )
 
 func Delete(id int64) (int64, error) {
@@ -19,7 +19,7 @@ func Delete(id int64) (int64, error) {
 	}
 	return res.RowsAffected()
 }
-func GetAll() (users []entities.User, err error) {
+func GetAll() (users []database_entities.User, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return
@@ -30,7 +30,7 @@ func GetAll() (users []entities.User, err error) {
 		return
 	}
 	for rows.Next() {
-		var user entities.User
+		var user database_entities.User
 		err = rows.Scan(&user.ID, &user.Email, &user.Password,
 			&user.Username, &user.FirebaseToken, &user.CreateAt,
 			&user.UpdateAt)
@@ -41,7 +41,7 @@ func GetAll() (users []entities.User, err error) {
 	}
 	return
 }
-func Get(id int64) (user entities.User, err error) {
+func Get(id int64) (user database_entities.User, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return
@@ -54,7 +54,7 @@ func Get(id int64) (user entities.User, err error) {
 	return
 }
 
-func Insert(user entities.User) (id int64, err error) {
+func Insert(user database_entities.User) (id int64, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return
@@ -64,7 +64,7 @@ func Insert(user entities.User) (id int64, err error) {
 	err = conn.QueryRow(sql, user.Email, user.Password, user.Username, user.FirebaseToken, time.Now()).Scan(&id)
 	return
 }
-func Update(id int64, user entities.User) (int64, error) {
+func Update(id int64, user database_entities.User) (int64, error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return 0, err
@@ -77,7 +77,7 @@ func Update(id int64, user entities.User) (int64, error) {
 	}
 	return res.RowsAffected()
 }
-func FindByEmail(email string) (user entities.User, err error) {
+func FindByEmail(email string) (user database_entities.User, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return

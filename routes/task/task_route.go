@@ -15,6 +15,7 @@ func Register(route *chi.Mux) {
 		r.Put("/task/{id}", task_controller.Update)
 		r.Delete("/task/{id}", task_controller.Delete)
 		r.Get("/task", task_controller.List)
+		r.Get("/task/paginate", task_controller.Paginate)
 		r.Get("/task/{id}", task_controller.Get)
 	})
 

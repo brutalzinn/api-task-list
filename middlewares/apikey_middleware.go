@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	apikey_service "github.com/brutalzinn/api-task-list/services/database/apikey"
@@ -12,7 +11,6 @@ import (
 
 func ApiKeyMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Printf("Api Key middleware called")
 		ctx := r.Context()
 		authHeader := r.Header.Get("x-api-key")
 		if authHeader == "" {
@@ -35,7 +33,6 @@ func ApiKeyMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		ctx = context.WithValue(r.Context(), "user_id", user_id)
-		fmt.Printf("Api Key middleware OK %s", decrypt)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

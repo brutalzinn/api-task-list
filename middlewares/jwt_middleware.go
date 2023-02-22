@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	jwt_util "github.com/brutalzinn/api-task-list/services/utils/jwt"
@@ -10,7 +9,6 @@ import (
 
 func JWTMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Printf("Auth middleware called")
 		ctx := r.Context()
 		authHeaderApiKey := r.Header.Get("x-api-key")
 		if authHeaderApiKey != "" {

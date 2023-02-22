@@ -1,10 +1,11 @@
 package task_service
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/brutalzinn/api-task-list/db"
-	entities "github.com/brutalzinn/api-task-list/models"
+	database_entities "github.com/brutalzinn/api-task-list/models/database"
 )
 
 func Delete(id int64) (int64, error) {
@@ -19,7 +20,7 @@ func Delete(id int64) (int64, error) {
 	}
 	return res.RowsAffected()
 }
-func GetAll() (tasks []entities.Task, err error) {
+func GetAll() (tasks []database_entities.Task, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return
@@ -30,7 +31,7 @@ func GetAll() (tasks []entities.Task, err error) {
 		return
 	}
 	for rows.Next() {
-		var task entities.Task
+		var task database_entities.Task
 		err = rows.Scan(&task.ID, &task.Title, &task.RepoId, &task.Description, &task.CreateAt, &task.UpdateAt)
 		if err != nil {
 			continue
@@ -39,7 +40,7 @@ func GetAll() (tasks []entities.Task, err error) {
 	}
 	return
 }
-func Get(id int64) (task entities.Task, err error) {
+func Get(id int64) (task database_entities.Task, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return
@@ -50,7 +51,7 @@ func Get(id int64) (task entities.Task, err error) {
 	return
 }
 
-func Insert(task entities.Task) (id int64, err error) {
+func Insert(task database_entities.Task) (id int64, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return
@@ -60,7 +61,7 @@ func Insert(task entities.Task) (id int64, err error) {
 	err = conn.QueryRow(sql, &task.Title, &task.RepoId, &task.Description, time.Now()).Scan(&id)
 	return
 }
-func Update(id int64, task entities.Task) (int64, error) {
+func Update(id int64, task database_entities.Task) (int64, error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return 0, err
@@ -71,4 +72,35 @@ func Update(id int64, task entities.Task) (int64, error) {
 		return 0, err
 	}
 	return res.RowsAffected()
+}
+func Paginate(repo_id int, limit int, offset int, order string) (tasks []database_entities.Task, err error) {
+	conn, err := db.OpenConnection()
+	if err != nil {
+		return
+	}
+	defer conn.Close()
+	query := fmt.Sprintf("SELECT * FROM tasks WHERE repo_id=$1 ORDER BY create_at %s LIMIT $2 OFFSET $3", order)
+	rows, err := conn.Query(query, repo_id, limit, offset)
+	if err != nil {
+		return
+	}
+	for rows.Next() {
+		var task database_entities.Task
+		err = rows.Scan(&task.ID, &task.Title, &task.RepoId, &task.Description, &task.CreateAt, &task.UpdateAt)
+		if err != nil {
+			continue
+		}
+		tasks = append(tasks, task)
+	}
+	return
+}
+func Count() (count int, err error) {
+	conn, err := db.OpenConnection()
+	if err != nil {
+		return
+	}
+	defer conn.Close()
+	row := conn.QueryRow("SELECT COUNT(*) FROM tasks")
+	err = row.Scan(&count)
+	return
 }
