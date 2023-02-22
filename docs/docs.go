@@ -435,7 +435,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "github.com/brutalzinn/api-task-list",
-	Description:      "Swagger example",
+	Description:      "API TASK LIST",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

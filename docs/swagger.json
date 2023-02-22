@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Swagger example",
+        "description": "API TASK LIST",
         "title": "github.com/brutalzinn/api-task-list",
         "contact": {},
         "version": "1.0"

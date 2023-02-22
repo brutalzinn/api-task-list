@@ -20,7 +20,7 @@ import (
 
 // @title           github.com/brutalzinn/api-task-list
 // @version         1.0
-// @description     Swagger example
+// @description     API TASK LIST
 
 // @host      localhost:9000
 // @BasePath  /api/v1

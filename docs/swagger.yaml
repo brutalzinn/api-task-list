@@ -11,7 +11,7 @@ definitions:
 host: localhost:9000
 info:
   contact: {}
-  description: Swagger example
+  description: API TASK LIST
   title: github.com/brutalzinn/api-task-list
   version: "1.0"
 paths:
