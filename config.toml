@@ -7,7 +7,7 @@ aeskey = "abc&1*~#^2^#s0^=)^^7%b34"
 expiration = 900
 
 [database]
-host = "database_service"
+host = "localhost"
 user = "postgres"
 pass = "postgres"
 database = "test"

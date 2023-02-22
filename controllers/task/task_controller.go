@@ -8,7 +8,9 @@ import (
 	"strconv"
 
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
+	"github.com/brutalzinn/api-task-list/models/dto"
 	response_entities "github.com/brutalzinn/api-task-list/models/response"
+	rest_entities "github.com/brutalzinn/api-task-list/models/rest"
 	task_service "github.com/brutalzinn/api-task-list/services/database/task"
 
 	"github.com/go-chi/chi/v5"
@@ -24,14 +26,19 @@ import (
 // @Router       /task/{id} [get]
 func Get(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
-	tasks, err := task_service.Get(int64(id))
+	task, err := task_service.Get(int64(id))
 	if err != nil {
 		log.Printf("error on decode json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
+	var links []rest_entities.HypermediaLink
+	links = append(links, rest_entities.HypermediaLink{Rel: "delete", Href: fmt.Sprintf("task/%d", task.ID), Type: "DELETE"})
+	links = append(links, rest_entities.HypermediaLink{Rel: "update", Href: fmt.Sprintf("task/%d", task.ID), Type: "PUT"})
+	taskDto := dto.ToTaskDTO(task)
+	taskDto.Links = links
 	resp := response_entities.GenericResponse{
-		Data: tasks,
+		Data: taskDto,
 	}
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
@@ -92,8 +99,22 @@ func List(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
+	var taskList = dto.ToTaskListDTO(tasks)
+	for i, task := range taskList {
+		var links []rest_entities.HypermediaLink
+		links = append(links, rest_entities.HypermediaLink{Rel: "delete", Href: fmt.Sprintf("task/%d", task.ID), Type: "DELETE"})
+		links = append(links, rest_entities.HypermediaLink{Rel: "update", Href: fmt.Sprintf("task/%d", task.ID), Type: "PUT"})
+		links = append(links, rest_entities.HypermediaLink{Rel: "detail", Href: fmt.Sprintf("task/%d", task.ID), Type: "GET"})
+		task.Links = links
+		taskList[i] = task
+	}
+	data := struct {
+		Tasks []dto.TaskDTO `json:"tasks"`
+	}{
+		Tasks: taskList,
+	}
 	resp := response_entities.GenericResponse{
-		Data: tasks,
+		Data: data,
 	}
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
@@ -191,7 +212,7 @@ func Paginate(w http.ResponseWriter, r *http.Request) {
 	}
 	offset := (page - 1) * limit
 
-	repos, err := task_service.Paginate(repo_id, limit, offset, order)
+	tasks, err := task_service.Paginate(repo_id, limit, offset, order)
 	if err != nil {
 		log.Printf("error on decode paginate json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -200,14 +221,25 @@ func Paginate(w http.ResponseWriter, r *http.Request) {
 	totalTasks, _ := task_service.Count()
 	totalPages := (totalTasks + limit - 1) / limit
 	currentPage := page
+
+	var taskList = dto.ToTaskListDTO(tasks)
+	for i, task := range taskList {
+		var links []rest_entities.HypermediaLink
+		links = append(links, rest_entities.HypermediaLink{Rel: "delete", Href: fmt.Sprintf("task/%d", task.ID), Type: "DELETE"})
+		links = append(links, rest_entities.HypermediaLink{Rel: "update", Href: fmt.Sprintf("task/%d", task.ID), Type: "PUT"})
+		links = append(links, rest_entities.HypermediaLink{Rel: "detail", Href: fmt.Sprintf("task/%d", task.ID), Type: "GET"})
+		task.Links = links
+		taskList[i] = task
+	}
+
 	data := struct {
-		Tasks       []database_entities.Task `json:"repos"`
-		TotalItems  int                      `json:"totalItems"`
-		TotalPages  int                      `json:"totalPages"`
-		CurrentPage int                      `json:"currentPage"`
+		Tasks       []dto.TaskDTO `json:"tasks"`
+		TotalItems  int           `json:"totalItems"`
+		TotalPages  int           `json:"totalPages"`
+		CurrentPage int           `json:"currentPage"`
 	}{
-		Tasks:       repos,
-		TotalItems:  len(repos),
+		Tasks:       taskList,
+		TotalItems:  len(taskList),
 		TotalPages:  totalPages,
 		CurrentPage: currentPage,
 	}

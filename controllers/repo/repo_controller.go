@@ -85,14 +85,29 @@ func Update(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /repo [get]
 func List(w http.ResponseWriter, r *http.Request) {
-	Repos, err := repo_service.GetAll()
+	repos, err := repo_service.GetAll()
 	if err != nil {
 		log.Printf("error on decode json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
+	var repoList = dto.ToRepoListDTO(repos)
+	for i, repo := range repoList {
+		var links []rest_entities.HypermediaLink
+		links = append(links, rest_entities.HypermediaLink{Rel: "task_list", Href: fmt.Sprintf("task/paginate?page=1&limit=10&repo_id=%d&order=DESC", repo.ID), Type: "GET"})
+		links = append(links, rest_entities.HypermediaLink{Rel: "delete", Href: fmt.Sprintf("repo/%d", repo.ID), Type: "DELETE"})
+		links = append(links, rest_entities.HypermediaLink{Rel: "update", Href: fmt.Sprintf("repo/%d", repo.ID), Type: "PUT"})
+		links = append(links, rest_entities.HypermediaLink{Rel: "detail", Href: fmt.Sprintf("repo/%d", repo.ID), Type: "GET"})
+		repo.Links = links
+		repoList[i] = repo
+	}
+	data := struct {
+		Repos []dto.RepoDTO `json:"repos"`
+	}{
+		Repos: repoList,
+	}
 	resp := response_entities.GenericResponse{
-		Data: Repos,
+		Data: data,
 	}
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
@@ -134,7 +149,7 @@ func Paginate(w http.ResponseWriter, r *http.Request) {
 	var repoList = dto.ToRepoListDTO(repos)
 	for i, repo := range repoList {
 		var links []rest_entities.HypermediaLink
-		links = append(links, rest_entities.HypermediaLink{Rel: "tasks", Href: fmt.Sprintf("task/paginate?page=1&limit=10&repo_id=%d&order=DESC", repo.ID), Type: "GET"})
+		links = append(links, rest_entities.HypermediaLink{Rel: "task_list", Href: fmt.Sprintf("task/paginate?page=1&limit=10&repo_id=%d&order=DESC", repo.ID), Type: "GET"})
 		links = append(links, rest_entities.HypermediaLink{Rel: "delete", Href: fmt.Sprintf("repo/%d", repo.ID), Type: "DELETE"})
 		links = append(links, rest_entities.HypermediaLink{Rel: "update", Href: fmt.Sprintf("repo/%d", repo.ID), Type: "PUT"})
 		links = append(links, rest_entities.HypermediaLink{Rel: "detail", Href: fmt.Sprintf("repo/%d", repo.ID), Type: "GET"})

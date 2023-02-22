@@ -6,13 +6,13 @@ import (
 )
 
 type ApiKeyDTO struct {
-	ID       int64
-	Name     string
-	ExpireAt string
-	Scopes   string
-	UpdateAt *string
-	CreateAt *string
-	Links    []rest_entities.HypermediaLink
+	ID       int64                          `json:"id"`
+	Name     string                         `json:"name"`
+	ExpireAt string                         `json:"expireAt"`
+	Scopes   string                         `json:"scopes"`
+	UpdateAt *string                        `json:"updateAt"`
+	CreateAt *string                        `json:"createAt"`
+	Links    []rest_entities.HypermediaLink `json:"links"`
 }
 
 func ToApiKeyDTO(apiKey database_entities.ApiKey) ApiKeyDTO {

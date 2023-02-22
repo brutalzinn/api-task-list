@@ -7,7 +7,7 @@ type AuthRequest struct {
 	Password string `json:password`
 }
 type AuthResponse struct {
-	AccessToken string `json:access_token`
+	AccessToken string `json:"accesstoken"`
 }
 type Claims struct {
 	ID int64 `json:id`

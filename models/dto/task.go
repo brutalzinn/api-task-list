@@ -5,19 +5,20 @@ import (
 	rest_entities "github.com/brutalzinn/api-task-list/models/rest"
 )
 
-type RepoDTO struct {
+type TaskDTO struct {
 	ID          int64                          `json:"id"`
 	Title       string                         `json:"title"`
 	Description string                         `json:"description"`
-	UserId      int64                          `json:"user_id"`
+	RepoId      int64                          `json:"repo_id"`
 	CreateAt    *string                        `json:"create_at"`
 	UpdateAt    *string                        `json:"update_at"`
 	Links       []rest_entities.HypermediaLink `json:"links"`
 }
 
-func ToRepoDTO(repo database_entities.Repo) RepoDTO {
-	return RepoDTO{
+func ToTaskDTO(repo database_entities.Task) TaskDTO {
+	return TaskDTO{
 		ID:          repo.ID,
+		RepoId:      repo.RepoId,
 		Title:       repo.Title,
 		Description: repo.Description,
 		CreateAt:    repo.CreateAt,
@@ -25,9 +26,9 @@ func ToRepoDTO(repo database_entities.Repo) RepoDTO {
 	}
 }
 
-func ToRepoListDTO(original_repos []database_entities.Repo) (new_repos []RepoDTO) {
+func ToTaskListDTO(original_repos []database_entities.Task) (new_repos []TaskDTO) {
 	for _, item := range original_repos {
-		repoDto := ToRepoDTO(item)
+		repoDto := ToTaskDTO(item)
 		new_repos = append(new_repos, repoDto)
 	}
 	return new_repos
