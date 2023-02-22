@@ -13,10 +13,10 @@ import (
 	"github.com/brutalzinn/api-task-list/models/dto"
 	request_entities "github.com/brutalzinn/api-task-list/models/request"
 	response_entities "github.com/brutalzinn/api-task-list/models/response"
-	rest_entities "github.com/brutalzinn/api-task-list/models/rest"
 	apikey_service "github.com/brutalzinn/api-task-list/services/database/apikey"
 	apikey_util "github.com/brutalzinn/api-task-list/services/utils/apikey"
 	crypt_util "github.com/brutalzinn/api-task-list/services/utils/crypt"
+	hypermedia_util "github.com/brutalzinn/api-task-list/services/utils/hypermedia"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -97,7 +97,7 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 	resp := response_entities.GenericResponse{
 		Error:   false,
 		Message: "Api key generated",
-		Data:    map[string]any{"AccessToken": newApiKey},
+		Data:    map[string]any{"accesstoken": newApiKey},
 	}
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
@@ -165,11 +165,11 @@ func List(w http.ResponseWriter, r *http.Request) {
 	}
 	var apiKeyList = dto.ToApiKeyListDTO(apiKeys)
 	for i, apiKey := range apiKeyList {
-		var links []rest_entities.HypermediaLink
-		links = append(links, rest_entities.HypermediaLink{Rel: "revoke", Href: fmt.Sprintf("apikey/revoke/%d", apiKey.ID), Type: "POST"})
-		apiKey.Links = links
+		links := map[string]any{}
+		hypermedia_util.CreateHyperMedia(links, "revoke", fmt.Sprintf("apikey/revoke/%d", apiKey.ID), "POST")
 		apiKeyList[i] = apiKey
 	}
+
 	resp := response_entities.GenericResponse{
 		Data: apiKeyList,
 	}

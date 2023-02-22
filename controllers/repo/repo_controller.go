@@ -10,8 +10,8 @@ import (
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
 	"github.com/brutalzinn/api-task-list/models/dto"
 	response_entities "github.com/brutalzinn/api-task-list/models/response"
-	rest_entities "github.com/brutalzinn/api-task-list/models/rest"
 	repo_service "github.com/brutalzinn/api-task-list/services/database/repo"
+	hypermedia_util "github.com/brutalzinn/api-task-list/services/utils/hypermedia"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -25,15 +25,20 @@ import (
 // @Router       /repo/{id} [get]
 func Get(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
-	Repos, err := repo_service.Get(int64(id))
+	repo, err := repo_service.Get(int64(id))
 	if err != nil {
 		log.Printf("error on decode json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-
+	links := map[string]any{}
+	var repoMap = dto.ToRepoDTO(repo)
+	hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("repo/%d", repo.ID), "DELETE")
+	hypermedia_util.CreateHyperMedia(links, "update", fmt.Sprintf("repo/%d", repo.ID), "PUT")
+	hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("repo/%d", repo.ID), "GET")
+	repoMap.Links = links
 	resp := response_entities.GenericResponse{
-		Data: Repos,
+		Data: repoMap,
 	}
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
@@ -93,11 +98,11 @@ func List(w http.ResponseWriter, r *http.Request) {
 	}
 	var repoList = dto.ToRepoListDTO(repos)
 	for i, repo := range repoList {
-		var links []rest_entities.HypermediaLink
-		links = append(links, rest_entities.HypermediaLink{Rel: "task_list", Href: fmt.Sprintf("task/paginate?page=1&limit=10&repo_id=%d&order=DESC", repo.ID), Type: "GET"})
-		links = append(links, rest_entities.HypermediaLink{Rel: "delete", Href: fmt.Sprintf("repo/%d", repo.ID), Type: "DELETE"})
-		links = append(links, rest_entities.HypermediaLink{Rel: "update", Href: fmt.Sprintf("repo/%d", repo.ID), Type: "PUT"})
-		links = append(links, rest_entities.HypermediaLink{Rel: "detail", Href: fmt.Sprintf("repo/%d", repo.ID), Type: "GET"})
+		links := map[string]any{}
+		hypermedia_util.CreateHyperMedia(links, "task_list", fmt.Sprintf("task/paginate?page=1&limit=10&repo_id=%d&order=DESC", repo.ID), "GET")
+		hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("repo/%d", repo.ID), "DELETE")
+		hypermedia_util.CreateHyperMedia(links, "update", fmt.Sprintf("repo/%d", repo.ID), "PUT")
+		hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("repo/%d", repo.ID), "GET")
 		repo.Links = links
 		repoList[i] = repo
 	}
@@ -148,11 +153,11 @@ func Paginate(w http.ResponseWriter, r *http.Request) {
 
 	var repoList = dto.ToRepoListDTO(repos)
 	for i, repo := range repoList {
-		var links []rest_entities.HypermediaLink
-		links = append(links, rest_entities.HypermediaLink{Rel: "task_list", Href: fmt.Sprintf("task/paginate?page=1&limit=10&repo_id=%d&order=DESC", repo.ID), Type: "GET"})
-		links = append(links, rest_entities.HypermediaLink{Rel: "delete", Href: fmt.Sprintf("repo/%d", repo.ID), Type: "DELETE"})
-		links = append(links, rest_entities.HypermediaLink{Rel: "update", Href: fmt.Sprintf("repo/%d", repo.ID), Type: "PUT"})
-		links = append(links, rest_entities.HypermediaLink{Rel: "detail", Href: fmt.Sprintf("repo/%d", repo.ID), Type: "GET"})
+		links := map[string]any{}
+		hypermedia_util.CreateHyperMedia(links, "task_list", fmt.Sprintf("task/paginate?page=1&limit=10&repo_id=%d&order=DESC", repo.ID), "GET")
+		hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("repo/%d", repo.ID), "DELETE")
+		hypermedia_util.CreateHyperMedia(links, "update", fmt.Sprintf("repo/%d", repo.ID), "PUT")
+		hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("repo/%d", repo.ID), "GET")
 		repo.Links = links
 		repoList[i] = repo
 	}
