@@ -14,6 +14,7 @@ import (
 	_ "github.com/brutalzinn/api-task-list/docs"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
@@ -28,7 +29,7 @@ import (
 func main() {
 	err := configs.Load()
 	if err != nil {
-		panic((err))
+		panic(err)
 	}
 	route := chi.NewRouter()
 	route.Use(cors.Handler(cors.Options{
@@ -38,6 +39,7 @@ func main() {
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
+	route.Use(middleware.Logger)
 	route.Mount("/swagger", httpSwagger.WrapHandler)
 	task_route.Register(route)
 	login_route.Register(route)
