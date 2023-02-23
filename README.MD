@@ -27,7 +27,7 @@
 
 # Purpose of existence
 
-## This project is designed to my estudies case of hypermedia REST apis.
+## This project is designed to my estudies case of hypermedia REST apis(HATEOAS).
 
 #### This example shows a repository paging route. These routes list all repositories created by the user. The cool part here is that the API client can see all available actions to perform.
 <img src="docs/imgs/postman_example_repo_pagination.png" alt="postman example of api keys list" width="500"/>
