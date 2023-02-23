@@ -1,8 +1,8 @@
 package request_entities
 
 type ApiKeyRequest struct {
-	Name     string
-	ExpireAt ExpireDays
+	Name     string     `json:"name"`
+	ExpireAt ExpireDays `json:"expire_at"`
 }
 
 type ExpireDays int64
