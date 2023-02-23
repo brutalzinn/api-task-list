@@ -1,7 +1,9 @@
 package task_service
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/brutalzinn/api-task-list/db"
@@ -19,6 +21,48 @@ func Delete(id int64) (int64, error) {
 		return 0, err
 	}
 	return res.RowsAffected()
+}
+
+func DeleteTasksByRepo(repo_id int64) (int64, error) {
+	conn, err := db.OpenConnection()
+	if err != nil {
+		return 0, err
+	}
+	defer conn.Close()
+	res, err := conn.Exec("DELETE FROM tasks WHERE repo_id=$1", repo_id)
+	if err != nil {
+		return 0, err
+	}
+	return res.RowsAffected()
+}
+func InsertTasksByRepo(tasks []database_entities.Task, repo_id int64) (err error) {
+	conn, err := db.OpenConnection()
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	tx, err := conn.BeginTx(context.Background(), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer tx.Rollback()
+	stmt, err := tx.PrepareContext(context.Background(), "INSERT INTO tasks (title, repo_id, description, create_at) VALUES ($1, $2, $3, $4)")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	for _, task := range tasks {
+		_, err := stmt.ExecContext(context.Background(), task.Title, repo_id, task.Description, task.CreateAt)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return
 }
 func GetAll() (tasks []database_entities.Task, err error) {
 	conn, err := db.OpenConnection()
@@ -73,6 +117,7 @@ func Update(id int64, task database_entities.Task) (int64, error) {
 	}
 	return res.RowsAffected()
 }
+
 func Paginate(repo_id int, limit int, offset int, order string) (tasks []database_entities.Task, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {

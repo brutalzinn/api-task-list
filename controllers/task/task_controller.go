@@ -33,8 +33,9 @@ func Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	links := map[string]any{}
-	hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("task/%d", task.ID), "DELETE")
-	hypermedia_util.CreateHyperMedia(links, "update", fmt.Sprintf("task/%d", task.ID), "PUT")
+	hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/task/%d", task.ID), "DELETE")
+	hypermedia_util.CreateHyperMedia(links, "update_all", fmt.Sprintf("/task/%d", task.ID), "PUT")
+	hypermedia_util.CreateHyperMedia(links, "update_one", fmt.Sprintf("/task/%d", task.ID), "PATCH")
 	taskDto := dto.ToTaskDTO(task)
 	taskDto.Links = links
 	resp := response_entities.GenericResponse{
@@ -52,7 +53,7 @@ func Get(w http.ResponseWriter, r *http.Request) {
 // @Param id path int true "ID"
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /task/{id} [put]
-func Update(w http.ResponseWriter, r *http.Request) {
+func Patch(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		log.Printf("wron url format %v", err)
@@ -85,6 +86,41 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
+// @Summary      Update a task
+// @Description  Update a task for current user
+// @Tags         Tasks
+// @Accept       json
+// @Produce      json
+// @Param id path int true "ID"
+// @Success      200  {object} response_entities.GenericResponse
+// @Router       /task/{id} [put]
+func Put(w http.ResponseWriter, r *http.Request) {
+	repo_id, err := strconv.ParseInt(r.URL.Query().Get("repo_id"), 10, 64)
+	if err != nil {
+		repo_id = -1
+	}
+	var tasks []database_entities.Task
+	err = json.NewDecoder(r.Body).Decode(&tasks)
+	if err != nil {
+		log.Printf("error on decode json %v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	task_service.DeleteTasksByRepo(repo_id)
+	err = task_service.InsertTasksByRepo(tasks, repo_id)
+	if err != nil {
+		log.Printf("error on replace data %v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	resp := response_entities.GenericResponse{
+		Message: "All tasks replaced",
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+}
+
 // @Summary      List tasks
 // @Description  List tasks for current user
 // @Tags         Tasks
@@ -102,9 +138,10 @@ func List(w http.ResponseWriter, r *http.Request) {
 	var taskList = dto.ToTaskListDTO(tasks)
 	for i, task := range taskList {
 		links := map[string]any{}
-		hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("task/%d", task.ID), "DELETE")
-		hypermedia_util.CreateHyperMedia(links, "update", fmt.Sprintf("task/%d", task.ID), "PUT")
-		hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("task/%d", task.ID), "GET")
+		hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/task/%d", task.ID), "DELETE")
+		hypermedia_util.CreateHyperMedia(links, "update_one", fmt.Sprintf("/task/%d", task.ID), "PATCH")
+		hypermedia_util.CreateHyperMedia(links, "update_all", fmt.Sprintf("/task/%d", task.ID), "PUT")
+		hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("/task/%d", task.ID), "GET")
 		task.Links = links
 		taskList[i] = task
 	}
@@ -192,7 +229,6 @@ func Create(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /task/paginate [get]
 func Paginate(w http.ResponseWriter, r *http.Request) {
-
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
 	if err != nil {
 		page = 1
@@ -225,9 +261,10 @@ func Paginate(w http.ResponseWriter, r *http.Request) {
 	var taskList = dto.ToTaskListDTO(tasks)
 	for i, task := range taskList {
 		links := map[string]any{}
-		hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("task/%d", task.ID), "DELETE")
-		hypermedia_util.CreateHyperMedia(links, "update", fmt.Sprintf("task/%d", task.ID), "PUT")
-		hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("task/%d", task.ID), "GET")
+		hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/task/%d", task.ID), "DELETE")
+		hypermedia_util.CreateHyperMedia(links, "update_one", fmt.Sprintf("/task/%d", task.ID), "PATCH")
+		hypermedia_util.CreateHyperMedia(links, "update_all", fmt.Sprintf("/task/%d", task.ID), "PUT")
+		hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("/task/%d", task.ID), "GET")
 		task.Links = links
 		taskList[i] = task
 	}

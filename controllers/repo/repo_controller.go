@@ -33,9 +33,9 @@ func Get(w http.ResponseWriter, r *http.Request) {
 	}
 	links := map[string]any{}
 	var repoMap = dto.ToRepoDTO(repo)
-	hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("repo/%d", repo.ID), "DELETE")
-	hypermedia_util.CreateHyperMedia(links, "update", fmt.Sprintf("repo/%d", repo.ID), "PUT")
-	hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("repo/%d", repo.ID), "GET")
+	hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/repo/%d", repo.ID), "DELETE")
+	hypermedia_util.CreateHyperMedia(links, "update_one", fmt.Sprintf("/repo/%d", repo.ID), "PUT")
+	hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("/repo/%d", repo.ID), "GET")
 	repoMap.Links = links
 	resp := response_entities.GenericResponse{
 		Data: repoMap,
@@ -99,10 +99,10 @@ func List(w http.ResponseWriter, r *http.Request) {
 	var repoList = dto.ToRepoListDTO(repos)
 	for i, repo := range repoList {
 		links := map[string]any{}
-		hypermedia_util.CreateHyperMedia(links, "task_list", fmt.Sprintf("task/paginate?page=1&limit=10&repo_id=%d&order=DESC", repo.ID), "GET")
-		hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("repo/%d", repo.ID), "DELETE")
-		hypermedia_util.CreateHyperMedia(links, "update", fmt.Sprintf("repo/%d", repo.ID), "PUT")
-		hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("repo/%d", repo.ID), "GET")
+		hypermedia_util.CreateHyperMedia(links, "task_list", fmt.Sprintf("/task/paginate?page=1&limit=10&repo_id=%d&order=DESC", repo.ID), "GET")
+		hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/repo/%d", repo.ID), "DELETE")
+		hypermedia_util.CreateHyperMedia(links, "update_one", fmt.Sprintf("/repo/%d", repo.ID), "PUT")
+		hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("/repo/%d", repo.ID), "GET")
 		repo.Links = links
 		repoList[i] = repo
 	}
@@ -154,10 +154,10 @@ func Paginate(w http.ResponseWriter, r *http.Request) {
 	var repoList = dto.ToRepoListDTO(repos)
 	for i, repo := range repoList {
 		links := map[string]any{}
-		hypermedia_util.CreateHyperMedia(links, "task_list", fmt.Sprintf("task/paginate?page=1&limit=10&repo_id=%d&order=DESC", repo.ID), "GET")
-		hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("repo/%d", repo.ID), "DELETE")
-		hypermedia_util.CreateHyperMedia(links, "update", fmt.Sprintf("repo/%d", repo.ID), "PUT")
-		hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("repo/%d", repo.ID), "GET")
+		hypermedia_util.CreateHyperMedia(links, "task_list", fmt.Sprintf("/task/paginate?page=1&limit=10&repo_id=%d&order=DESC", repo.ID), "GET")
+		hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/repo/%d", repo.ID), "DELETE")
+		hypermedia_util.CreateHyperMedia(links, "update_one", fmt.Sprintf("/repo/%d", repo.ID), "PUT")
+		hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("/repo/%d", repo.ID), "GET")
 		repo.Links = links
 		repoList[i] = repo
 	}
