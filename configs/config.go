@@ -11,8 +11,8 @@ type config struct {
 }
 
 type APIConfig struct {
-	Port      string
-	JwtSecret string
+	Port       string
+	MaxApiKeys int64
 }
 
 type AuthConfig struct {
@@ -47,7 +47,8 @@ func Load() error {
 	}
 	cfg = new(config)
 	cfg.API = APIConfig{
-		Port: viper.GetString("api.port"),
+		Port:       viper.GetString("api.port"),
+		MaxApiKeys: viper.GetInt64("api.maxapikeys"),
 	}
 	cfg.Authentication = AuthConfig{
 		Secret:     viper.GetString("authentication.secret"),
@@ -68,8 +69,8 @@ func GetDB() DBConfig {
 	return cfg.DB
 }
 
-func GetServerPort() string {
-	return cfg.API.Port
+func GetApiConfig() APIConfig {
+	return cfg.API
 }
 
 func GetAuthSecret() []byte {

@@ -1,5 +1,6 @@
 [api]
 port = "9000"
+maxapikeys = 5
 
 [authentication]
 secret = "secretket"

@@ -12,7 +12,7 @@ func Register(route *chi.Mux) {
 		r.Use(middlewares.JWTMiddleware)
 		r.Use(middlewares.ApiKeyMiddleware)
 		r.Post("/task", task_controller.Create)
-		r.Patch("/task/{id}", task_controller.Patch)
+		r.Patch("/task", task_controller.Patch)
 		r.Put("/task", task_controller.Put)
 		r.Delete("/task/{id}", task_controller.Delete)
 		r.Get("/task", task_controller.List)

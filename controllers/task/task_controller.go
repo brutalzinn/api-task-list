@@ -45,8 +45,8 @@ func Get(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
-// @Summary      Update a task
-// @Description  Update a task for current user
+// @Summary      Updates tasks
+// @Description  Updates array of tasks
 // @Tags         Tasks
 // @Accept       json
 // @Produce      json
@@ -54,40 +54,29 @@ func Get(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /task/{id} [put]
 func Patch(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
-	if err != nil {
-		log.Printf("wron url format %v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-	var task database_entities.Task
-	err = json.NewDecoder(r.Body).Decode(&task)
+	var tasks []database_entities.Task
+	err := json.NewDecoder(r.Body).Decode(&tasks)
 	if err != nil {
 		log.Printf("error on decode json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	rows, err := task_service.Update(int64(id), task)
+	err = task_service.UpdateTasks(tasks)
 	if err != nil {
-		log.Printf("error on update register %v", err)
+		log.Printf("error on update  tasks register %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	resp := response_entities.GenericResponse{
-		Message: "Task updated",
-	}
-	if rows == 0 {
-		resp = response_entities.GenericResponse{
-			Message: "Cant update task",
-		}
+		Message: "All tasks updated",
 	}
 
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
 }
 
-// @Summary      Update a task
-// @Description  Update a task for current user
+// @Summary      Replace all tasks
+// @Description  Replace all tasks for a repo
 // @Tags         Tasks
 // @Accept       json
 // @Produce      json
@@ -106,8 +95,7 @@ func Put(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	task_service.DeleteTasksByRepo(repo_id)
-	err = task_service.InsertTasksByRepo(tasks, repo_id)
+	err = task_service.ReplaceTasksByRepo(tasks, repo_id)
 	if err != nil {
 		log.Printf("error on replace data %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -137,7 +125,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 	}
 	var taskList = dto.ToTaskListDTO(tasks)
 	for i, task := range taskList {
-		links := map[string]any{}
+		links := make(map[string]any)
 		hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/task/%d", task.ID), "DELETE")
 		hypermedia_util.CreateHyperMedia(links, "update_one", fmt.Sprintf("/task/%d", task.ID), "PATCH")
 		hypermedia_util.CreateHyperMedia(links, "update_all", fmt.Sprintf("/task/%d", task.ID), "PUT")

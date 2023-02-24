@@ -5,6 +5,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 
 	crypt_util "github.com/brutalzinn/api-task-list/services/utils/crypt"
@@ -13,24 +14,40 @@ import (
 	"golang.org/x/text/unicode/norm"
 )
 
-func CreateApiKey(user_id int64, appName string) (string, error) {
+func CreateUUID() string {
 	uuid := uuid.New().String()
 	uuidNormalized := strings.Replace(uuid, "-", "", -1)
-	keyhash, err := crypt_util.Encrypt(fmt.Sprintf("%d-%s-%s", user_id, appName, uuidNormalized))
+	return uuidNormalized
+}
+func CreateApiHash(user_id int64, appName string, uuid string, expireAt string) (string, error) {
+	keyhash, err := crypt_util.Encrypt(fmt.Sprintf("%d#%s#%s#%s", user_id, appName, uuid, expireAt))
 	if err != nil {
 		return "", err
 	}
 	return keyhash, nil
 }
-func GetApiKeyInfo(apiKeyDescrypted string) (int64, string, error) {
-	apikeyformat := strings.Split(apiKeyDescrypted, "-")
-	if len(apikeyformat) != 3 {
-		return 0, "", nil
+func GetApiKeyInfo(apiKeyDescrypted string) (user_id int64, appName string, expireAt string, err error) {
+	apikeyformat := strings.Split(apiKeyDescrypted, "#")
+	if len(apikeyformat) != 4 {
+		return 0, "", "", nil
 	}
+	user_id, _ = strconv.ParseInt(apikeyformat[0], 10, 64)
+	appName = apikeyformat[1]
+	expireAt = apikeyformat[3]
+	return user_id, appName, expireAt, nil
+}
 
-	user_id, _ := strconv.ParseInt(apikeyformat[0], 10, 64)
-	appName := apikeyformat[1]
-	return user_id, appName, nil
+func IsKeyExpired(expireAt string) bool {
+	date, error := time.Parse(time.RFC3339, expireAt)
+	if error != nil {
+		fmt.Println(error)
+		return true
+	}
+	currentDateTime := time.Now()
+	if date.Before(currentDateTime) {
+		return false
+	}
+	return true
 }
 
 // thahnks to https://gist.github.com/micheltlutz/8398f801abf3ac61ff002dd5be7caeb4

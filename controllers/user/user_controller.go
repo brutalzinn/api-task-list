@@ -2,12 +2,12 @@ package user_controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
+	response_entities "github.com/brutalzinn/api-task-list/models/response"
 	user_service "github.com/brutalzinn/api-task-list/services/database/user"
 	crypt_utils "github.com/brutalzinn/api-task-list/services/utils/crypt"
 	jwt_util "github.com/brutalzinn/api-task-list/services/utils/jwt"
@@ -108,17 +108,15 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 	hash, _ := crypt_utils.HashPassword(user.Password)
 	user.Password = hash
-	id, err := user_service.Insert(user)
-	var resp map[string]any
+	_, err = user_service.Insert(user)
+	resp := response_entities.GenericResponse{
+		Error:   true,
+		Message: "Registred with sucess",
+	}
 	if err != nil {
-		resp = map[string]any{
-			"Error":   true,
-			"Message": fmt.Sprintf("User creation failed %v", err),
-		}
-	} else {
-		resp = map[string]any{
-			"Error":   false,
-			"Message": fmt.Sprintf("User create %d", id),
+		resp = response_entities.GenericResponse{
+			Error:   true,
+			Message: "Cant register now",
 		}
 	}
 	w.Header().Add("Content-Type", "application/json")
@@ -142,11 +140,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	resp := database_entities.AuthResponse{
 		AccessToken: jwtToken,
 	}
-	// resp := map[string]any{
-	// 	"Auth":    validPassword,
-	// 	"Error":   false,
-	// 	"Message": user,
-	// }
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
 }

@@ -70,6 +70,19 @@ func CountByUserAndName(userId int64, appName string) (count int64, err error) {
 	err = row.Scan(&count)
 	return
 }
+
+func Revoke(id int64, userId int64) (int64, error) {
+	conn, err := db.OpenConnection()
+	if err != nil {
+		return 0, err
+	}
+	defer conn.Close()
+	res, err := conn.Exec("DELETE FROM api_keys WHERE id=$1 and user_id=$2", id, userId)
+	if err != nil {
+		return 0, err
+	}
+	return res.RowsAffected()
+}
 func Count(userId int64) (count int64, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {

@@ -47,7 +47,7 @@ func main() {
 	apikey_route.Register(route)
 	repo_route.Register(route)
 
-	port := configs.GetServerPort()
+	port := configs.GetApiConfig().Port
 	fmt.Printf("API-AUTO-ASSISTANT STARTED WITH PORT %s", port)
 	http.ListenAndServe(fmt.Sprintf(":%s", port), route)
 }

@@ -35,7 +35,7 @@ func DeleteTasksByRepo(repo_id int64) (int64, error) {
 	}
 	return res.RowsAffected()
 }
-func InsertTasksByRepo(tasks []database_entities.Task, repo_id int64) (err error) {
+func ReplaceTasksByRepo(tasks []database_entities.Task, repo_id int64) (err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return err
@@ -46,14 +46,56 @@ func InsertTasksByRepo(tasks []database_entities.Task, repo_id int64) (err error
 		log.Fatal(err)
 	}
 	defer tx.Rollback()
+
+	delmt, err := tx.PrepareContext(context.Background(), "DELETE FROM tasks WHERE repo_id=$1")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer delmt.Close()
+	_, err = delmt.ExecContext(context.Background(), repo_id)
 	stmt, err := tx.PrepareContext(context.Background(), "INSERT INTO tasks (title, repo_id, description, create_at) VALUES ($1, $2, $3, $4)")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer stmt.Close()
 
+	if err != nil {
+		log.Fatal(err)
+	}
 	for _, task := range tasks {
-		_, err := stmt.ExecContext(context.Background(), task.Title, repo_id, task.Description, task.CreateAt)
+		_, err := stmt.ExecContext(context.Background(), task.Title, repo_id, task.Description, time.Now())
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return
+}
+func UpdateTasks(tasks []database_entities.Task) (err error) {
+	conn, err := db.OpenConnection()
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	tx, err := conn.BeginTx(context.Background(), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer tx.Rollback()
+	stmt, err := tx.PrepareContext(context.Background(), "UPDATE tasks SET title=$1,repo_id=$2,description=$3,update_at=$4 WHERE id=$5")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, task := range tasks {
+		_, err := stmt.ExecContext(context.Background(), task.Title, task.RepoId, task.Description, time.Now(), task.ID)
 		if err != nil {
 			log.Fatal(err)
 		}
