@@ -1,4 +1,4 @@
-package jwt_util
+package authentication_util
 
 import (
 	"errors"

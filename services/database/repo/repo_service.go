@@ -8,13 +8,13 @@ import (
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
 )
 
-func Delete(id int64) (int64, error) {
+func Delete(id int64, userId int64) (int64, error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return 0, err
 	}
 	defer conn.Close()
-	res, err := conn.Exec("DELETE FROM repos WHERE id=$1", id)
+	res, err := conn.Exec("DELETE FROM repos WHERE id=$1 and user_id=$2", id, userId)
 	if err != nil {
 		return 0, err
 	}
@@ -42,14 +42,14 @@ func GetAll() (repos []database_entities.Repo, err error) {
 }
 
 // /where is the user id?
-func Paginate(limit int, offset int, order string) (repos []database_entities.Repo, err error) {
+func Paginate(limit int64, offset int64, order string, userId int64) (repos []database_entities.Repo, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return
 	}
 	defer conn.Close()
-	query := fmt.Sprintf("SELECT * FROM repos ORDER BY create_at %s LIMIT $1 OFFSET $2", order)
-	rows, err := conn.Query(query, limit, offset)
+	query := fmt.Sprintf("SELECT * FROM repos where user_id=$1 ORDER BY create_at %s LIMIT $2 OFFSET $3", order)
+	rows, err := conn.Query(query, userId, limit, offset)
 	if err != nil {
 		return
 	}
@@ -63,7 +63,7 @@ func Paginate(limit int, offset int, order string) (repos []database_entities.Re
 	}
 	return
 }
-func Count() (count int, err error) {
+func Count() (count int64, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return
@@ -94,13 +94,13 @@ func Insert(repo database_entities.Repo) (id int64, err error) {
 	err = conn.QueryRow(sql, &repo.Title, &repo.Description, &repo.UserId, time.Now()).Scan(&id)
 	return
 }
-func Update(id int64, repo database_entities.Repo) (int64, error) {
+func Update(id int64, userId int64, repo database_entities.Repo) (int64, error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return 0, err
 	}
 	defer conn.Close()
-	res, err := conn.Exec("UPDATE repos SET title=$1,description=$2,user_id=$3,update_at=$4 WHERE id=$5", &repo.Title, &repo.Description, &repo.UserId, time.Now(), id)
+	res, err := conn.Exec("UPDATE repos SET title=$1,description=$2,user_id=$3,update_at=$4 WHERE id=$5 and user_id=$6", &repo.Title, &repo.Description, &repo.UserId, time.Now(), id, userId)
 	if err != nil {
 		return 0, err
 	}

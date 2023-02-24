@@ -9,8 +9,8 @@ import (
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
 	response_entities "github.com/brutalzinn/api-task-list/models/response"
 	user_service "github.com/brutalzinn/api-task-list/services/database/user"
+	authentication_util "github.com/brutalzinn/api-task-list/services/utils/authentication"
 	crypt_utils "github.com/brutalzinn/api-task-list/services/utils/crypt"
-	jwt_util "github.com/brutalzinn/api-task-list/services/utils/jwt"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -136,7 +136,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
-	jwtToken, err := jwt_util.GenerateJWT(user.ID)
+	jwtToken, err := authentication_util.GenerateJWT(user.ID)
 	resp := database_entities.AuthResponse{
 		AccessToken: jwtToken,
 	}

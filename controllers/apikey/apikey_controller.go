@@ -16,6 +16,7 @@ import (
 	response_entities "github.com/brutalzinn/api-task-list/models/response"
 	apikey_service "github.com/brutalzinn/api-task-list/services/database/apikey"
 	apikey_util "github.com/brutalzinn/api-task-list/services/utils/apikey"
+	authentication_util "github.com/brutalzinn/api-task-list/services/utils/authentication"
 	converter_util "github.com/brutalzinn/api-task-list/services/utils/converter"
 	crypt_util "github.com/brutalzinn/api-task-list/services/utils/crypt"
 	hypermedia_util "github.com/brutalzinn/api-task-list/services/utils/hypermedia"
@@ -30,14 +31,8 @@ import (
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /apikey/generate [post]
 func Generate(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	user_id, ok := ctx.Value("user_id").(int64)
+	user_id := authentication_util.GetCurrentUser(w, r)
 	maxApiKeys := configs.GetApiConfig().MaxApiKeys
-	if !ok {
-		log.Printf("Error. usr dont authenticate and try to generate api key %d", user_id)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
 	var apiKeyRequest request_entities.ApiKeyRequest
 	err := json.NewDecoder(r.Body).Decode(&apiKeyRequest)
 	if err != nil {
@@ -116,16 +111,10 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /apikey/generate [post]
 func Regenerate(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	user_id, ok := ctx.Value("user_id").(int64)
+	user_id := authentication_util.GetCurrentUser(w, r)
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		log.Printf("error on decode json %v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-	if !ok {
-		log.Printf("Error. usr dont authenticate and try to regenerate api key %d", user_id)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -177,13 +166,7 @@ func Regenerate(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /apikey/revoke/{id} [delete]
 func Delete(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	user_id, ok := ctx.Value("user_id").(int64)
-	if !ok {
-		log.Printf("Error. usr dont authenticate and try to generate api key %d", user_id)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
+	user_id := authentication_util.GetCurrentUser(w, r)
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		log.Printf("error on decode json %v", err)
@@ -222,13 +205,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /apikey [get]
 func List(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	user_id, ok := ctx.Value("user_id").(int64)
-	if !ok {
-		log.Printf("Error. usr dont authenticate and try to list api key %d", user_id)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
+	user_id := authentication_util.GetCurrentUser(w, r)
 	apiKeys, err := apikey_service.GetAll(user_id)
 	if err != nil {
 		log.Printf("error on decode json %v", err)

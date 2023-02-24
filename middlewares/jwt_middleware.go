@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	jwt_util "github.com/brutalzinn/api-task-list/services/utils/jwt"
+	authentication_util "github.com/brutalzinn/api-task-list/services/utils/authentication"
 )
 
 func JWTMiddleware(next http.Handler) http.Handler {
@@ -16,7 +16,7 @@ func JWTMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		authHeaderBaerer := r.Header.Get("Authorization")
-		token, err := jwt_util.VerifyJWT(authHeaderBaerer)
+		token, err := authentication_util.VerifyJWT(authHeaderBaerer)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
