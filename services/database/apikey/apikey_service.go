@@ -60,6 +60,16 @@ func GetByUserAndName(userId int64, appName string) (apiKey database_entities.Ap
 	err = row.Scan(&apiKey.ID, &apiKey.ApiKey, &apiKey.Scopes, &apiKey.UserId, &apiKey.Name, &apiKey.NameNormalized, &apiKey.ExpireAt, &apiKey.CreateAt, &apiKey.UpdateAt)
 	return
 }
+func GetByIdAndUser(id int64, userId int64) (apiKey database_entities.ApiKey, err error) {
+	conn, err := db.OpenConnection()
+	if err != nil {
+		return
+	}
+	defer conn.Close()
+	row := conn.QueryRow("SELECT * FROM api_keys WHERE id=$1 and user_id=$2", id, userId)
+	err = row.Scan(&apiKey.ID, &apiKey.ApiKey, &apiKey.Scopes, &apiKey.UserId, &apiKey.Name, &apiKey.NameNormalized, &apiKey.ExpireAt, &apiKey.CreateAt, &apiKey.UpdateAt)
+	return
+}
 func CountByUserAndName(userId int64, appName string) (count int64, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
@@ -71,7 +81,7 @@ func CountByUserAndName(userId int64, appName string) (count int64, err error) {
 	return
 }
 
-func Revoke(id int64, userId int64) (int64, error) {
+func DeleteByIdAndUser(id int64, userId int64) (int64, error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return 0, err

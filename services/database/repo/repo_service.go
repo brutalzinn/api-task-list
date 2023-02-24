@@ -40,6 +40,8 @@ func GetAll() (repos []database_entities.Repo, err error) {
 	}
 	return
 }
+
+// /where is the user id?
 func Paginate(limit int, offset int, order string) (repos []database_entities.Repo, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {

@@ -10,9 +10,10 @@ import (
 func Register(route *chi.Mux) {
 	route.Group(func(r chi.Router) {
 		r.Use(middlewares.JWTMiddleware)
-		r.Post("/apikey/generate", apikey_controller.Generate)
 		r.Get("/apikey", apikey_controller.List)
-		r.Post("/apikey/revoke/{id}", apikey_controller.Revoke)
+		r.Post("/apikey/generate", apikey_controller.Generate)
+		r.Post("/apikey/regenerate/{id}", apikey_controller.Regenerate)
+		r.Delete("/apikey/delete/{id}", apikey_controller.Delete)
 	})
 
 }

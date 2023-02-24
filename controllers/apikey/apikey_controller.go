@@ -16,6 +16,7 @@ import (
 	response_entities "github.com/brutalzinn/api-task-list/models/response"
 	apikey_service "github.com/brutalzinn/api-task-list/services/database/apikey"
 	apikey_util "github.com/brutalzinn/api-task-list/services/utils/apikey"
+	converter_util "github.com/brutalzinn/api-task-list/services/utils/converter"
 	crypt_util "github.com/brutalzinn/api-task-list/services/utils/crypt"
 	hypermedia_util "github.com/brutalzinn/api-task-list/services/utils/hypermedia"
 	"github.com/go-chi/chi/v5"
@@ -76,15 +77,15 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 	expireAt := time.Now().AddDate(0, 0, days)
 	expireAtFormat := expireAt.Format(time.RFC3339)
 	uuid := apikey_util.CreateUUID()
-	apiKeyHash, _ := apikey_util.CreateApiHash(user_id, nameNormalized, uuid, expireAtFormat)
-	apiKeyCrypt, _ := crypt_util.HashPassword(apiKeyHash)
+	apiKeyCrypt, _ := apikey_util.CreateApiHash(user_id, nameNormalized, uuid, expireAtFormat)
+	apiKeyHash, _ := crypt_util.HashPassword(apiKeyCrypt)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	scopes := []string{"task_insert", "task_delete", "task_read", "task_update"}
 	apikey := database_entities.ApiKey{
-		ApiKey:         apiKeyCrypt,
+		ApiKey:         apiKeyHash,
 		Scopes:         strings.Join(scopes, ","),
 		Name:           apiKeyRequest.Name,
 		NameNormalized: nameNormalized,
@@ -101,7 +102,67 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 	resp := response_entities.GenericResponse{
 		Error:   false,
 		Message: "Api key generated",
-		Data:    map[string]any{"api_key": apiKeyHash},
+		Data:    map[string]any{"api_key": apiKeyCrypt},
+	}
+	w.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+}
+
+// @Summary      Generate api key
+// @Description  Generate api key for user
+// @Tags         ApiKeys
+// @Accept       json
+// @Produce      json
+// @Success      200  {object} response_entities.GenericResponse
+// @Router       /apikey/generate [post]
+func Regenerate(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	user_id, ok := ctx.Value("user_id").(int64)
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		log.Printf("error on decode json %v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	if !ok {
+		log.Printf("Error. usr dont authenticate and try to regenerate api key %d", user_id)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	apiKey, err := apikey_service.GetByIdAndUser(id, user_id)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	date, err := converter_util.ToDateTime(apiKey.ExpireAt)
+	expireAtFormat := date.Format(time.RFC3339)
+	uuid := apikey_util.CreateUUID()
+	nameNormalized := apiKey.NameNormalized
+	apiKeyCrypt, _ := apikey_util.CreateApiHash(user_id, nameNormalized, uuid, expireAtFormat)
+	apiKeyHash, _ := crypt_util.HashPassword(apiKeyCrypt)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	apikey := database_entities.ApiKey{
+		ApiKey:         apiKeyHash,
+		Scopes:         apiKey.Scopes,
+		Name:           apiKey.Name,
+		NameNormalized: nameNormalized,
+		UserId:         user_id,
+		ExpireAt:       expireAtFormat,
+	}
+
+	_, err = apikey_service.Insert(apikey)
+	if err != nil {
+		log.Printf("error on update api key register %v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	resp := response_entities.GenericResponse{
+		Error:   false,
+		Message: "Api key regenerated.",
+		Data:    map[string]any{"api_key": apiKeyCrypt},
 	}
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
@@ -115,7 +176,7 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 // @Param id path int true "ID"
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /apikey/revoke/{id} [delete]
-func Revoke(w http.ResponseWriter, r *http.Request) {
+func Delete(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user_id, ok := ctx.Value("user_id").(int64)
 	if !ok {
@@ -129,7 +190,7 @@ func Revoke(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	rows, err := apikey_service.Revoke(id, user_id)
+	rows, err := apikey_service.DeleteByIdAndUser(id, user_id)
 	if err != nil {
 		log.Printf("error on update register %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -177,7 +238,11 @@ func List(w http.ResponseWriter, r *http.Request) {
 	var apiKeyList = dto.ToApiKeyListDTO(apiKeys)
 	for i, apiKey := range apiKeyList {
 		links := map[string]any{}
-		hypermedia_util.CreateHyperMedia(links, "revoke", fmt.Sprintf("/apikey/revoke/%d", apiKey.ID), "POST")
+		//because i dont want to break web app here now.
+		hypermedia_util.CreateHyperMedia(links, "regenerate", fmt.Sprintf("/apikey/regenerate/%d", apiKey.ID), "POST")
+		hypermedia_util.CreateHyperMedia(links, "revoke", fmt.Sprintf("/apikey/delete/%d", apiKey.ID), "DELETE")
+		hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/apikey/delete/%d", apiKey.ID), "DELETE")
+
 		apiKey.Links = links
 		apiKeyList[i] = apiKey
 	}

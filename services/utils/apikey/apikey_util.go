@@ -8,6 +8,7 @@ import (
 	"time"
 	"unicode"
 
+	converter_util "github.com/brutalzinn/api-task-list/services/utils/converter"
 	crypt_util "github.com/brutalzinn/api-task-list/services/utils/crypt"
 	"github.com/google/uuid"
 	"golang.org/x/text/transform"
@@ -38,13 +39,13 @@ func GetApiKeyInfo(apiKeyDescrypted string) (user_id int64, appName string, expi
 }
 
 func IsKeyExpired(expireAt string) bool {
-	date, error := time.Parse(time.RFC3339, expireAt)
-	if error != nil {
-		fmt.Println(error)
+	date, err := converter_util.ToDateTime(expireAt)
+	if err != nil {
+		fmt.Println(err)
 		return true
 	}
 	currentDateTime := time.Now()
-	if date.Before(currentDateTime) {
+	if date.After(currentDateTime) {
 		return false
 	}
 	return true

@@ -27,20 +27,20 @@ func ApiKeyMiddleware(next http.Handler) http.Handler {
 		user_id, appName, expire_at, err := apikey_util.GetApiKeyInfo(decrypt)
 		count, err := apikey_service.CountByUserAndName(user_id, appName)
 		isKeyExpired := apikey_util.IsKeyExpired(expire_at)
-		if isKeyExpired {
-			resp := response_entities.GenericResponse{
-				Data: "Api key is expired.",
-			}
-			w.Header().Add("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(resp)
-			return
-		}
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
 		}
 		if count == 0 {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			return
+		}
+		if isKeyExpired {
+			resp := response_entities.GenericResponse{
+				Data: "Api key is expired.",
+			}
+			w.Header().Add("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(resp)
 			return
 		}
 		ctx = context.WithValue(r.Context(), "user_id", user_id)
