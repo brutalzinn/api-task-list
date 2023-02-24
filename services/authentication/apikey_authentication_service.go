@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	apikey_service "github.com/brutalzinn/api-task-list/services/database/apikey"
 	converter_util "github.com/brutalzinn/api-task-list/services/utils/converter"
 	crypt_util "github.com/brutalzinn/api-task-list/services/utils/crypt"
 	"github.com/google/uuid"
@@ -22,6 +23,18 @@ func CreateApiHash(user_id int64, appName string, uuid string, expireAt string) 
 		return "", err
 	}
 	return keyhash, nil
+}
+func VerifyApiKey(apiKeyCrypt string) error {
+	decrypt, err := crypt_util.Decrypt(apiKeyCrypt)
+	if err != nil {
+
+		return err
+	}
+	user_id, appName, expire_at, err := getApiKeyInfo(decrypt)
+	count, err := apikey_service.CountByUserAndName(user_id, appName)
+	isKeyExpired := isKeyExpired(expire_at)
+
+	user_id, appName, expire_at, err := apikey_util.GetApiKeyInfo(decrypt)
 }
 func getApiKeyInfo(apiKeyDescrypted string) (user_id int64, appName string, expireAt string, err error) {
 	apikeyformat := strings.Split(apiKeyDescrypted, "#")

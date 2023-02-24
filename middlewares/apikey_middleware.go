@@ -24,9 +24,7 @@ func ApiKeyMiddleware(next http.Handler) http.Handler {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
 		}
-		user_id, appName, expire_at, err := apikey_util.GetApiKeyInfo(decrypt)
-		count, err := apikey_service.CountByUserAndName(user_id, appName)
-		isKeyExpired := apikey_util.IsKeyExpired(expire_at)
+		
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
