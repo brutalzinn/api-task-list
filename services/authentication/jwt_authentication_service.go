@@ -1,7 +1,8 @@
-package authentication_util
+package authentication_service
 
 import (
 	"errors"
+	"net/http"
 	"strings"
 	"time"
 
@@ -15,7 +16,6 @@ func GenerateJWT(id int64) (string, error) {
 	var secretKey = configs.GetAuthSecret()
 	var authConfig = configs.GetAuthConfig()
 	expirationTime := time.Now().Add(time.Duration(authConfig.Expiration) * time.Second)
-	// Create the JWT claims, which includes the username and expiry time
 	claims := database_entities.Claims{
 		ID: id,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -41,4 +41,13 @@ func VerifyJWT(tokenJWT string) (*database_entities.Claims, error) {
 		return nil, errors.New("No valid token provided")
 	}
 	return &claims, err
+}
+func GetCurrentUser(w http.ResponseWriter, r *http.Request) (user_id int64) {
+	ctx := r.Context()
+	user_id, ok := ctx.Value("user_id").(int64)
+	if !ok {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+	return
 }
