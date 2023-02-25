@@ -224,11 +224,8 @@ func List(w http.ResponseWriter, r *http.Request) {
 	var apiKeyList = dto.ToApiKeyListDTO(apiKeys)
 	for i, apiKey := range apiKeyList {
 		links := map[string]any{}
-		//because i dont want to break web app here now.
 		hypermedia_util.CreateHyperMedia(links, "regenerate", fmt.Sprintf("/apikey/regenerate/%d", apiKey.ID), "POST")
-		hypermedia_util.CreateHyperMedia(links, "revoke", fmt.Sprintf("/apikey/delete/%d", apiKey.ID), "DELETE")
 		hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/apikey/delete/%d", apiKey.ID), "DELETE")
-
 		apiKey.Links = links
 		apiKeyList[i] = apiKey
 	}
