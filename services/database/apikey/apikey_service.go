@@ -82,7 +82,7 @@ func CountByUserAndName(userId string, appName string) (count int64, err error) 
 	return
 }
 
-func DeleteByIdAndUser(id int64, userId string) (int64, error) {
+func DeleteByIdAndUser(id string, userId string) (int64, error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return 0, err
@@ -120,7 +120,7 @@ func Update(id string, apiKey database_entities.ApiKey) (int64, error) {
 		return 0, err
 	}
 	defer conn.Close()
-	res, err := conn.Exec("UPDATE api_keys SET id=$1,apiKey=$2,scopes=$3,name=$4,update_at=$5,expire_at=$6 WHERE id=$7", &apiKey.ID, &apiKey.ApiKey, &apiKey.Scopes, &apiKey.Name, converter_util.ToDateTimeString(time.Now()), &apiKey.ExpireAt, id)
+	res, err := conn.Exec("UPDATE api_keys SET apiKey=$1,scopes=$2,name=$3,update_at=$4,expire_at=$5 WHERE id=$6", &apiKey.ApiKey, &apiKey.Scopes, &apiKey.Name, converter_util.ToDateTimeString(time.Now()), &apiKey.ExpireAt, id)
 	if err != nil {
 		return 0, err
 	}

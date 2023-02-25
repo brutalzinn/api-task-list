@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -72,8 +71,10 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 	expireAt := time.Now().Add(time.Hour * 24 * time.Duration(days))
 	expireAtFormat := converter_util.ToDateString(expireAt)
 	uuid := authentication_service.CreateUUID()
-	apiKeyCrypt, _ := authentication_service.CreateApiHash(uuid)
-	apiKeyHash, err := crypt_util.HashPassword(apiKeyCrypt)
+	randomFactor := authentication_service.CreateRandomFactor()
+	apiKeyCrypt, _ := authentication_service.CreateApiKeyCrypt(uuid, randomFactor)
+	newApiKey := authentication_service.CreateApiPrefix(apiKeyCrypt, nameNormalized)
+	apiKeyHash, err := crypt_util.HashPassword(newApiKey)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
@@ -88,7 +89,6 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 		UserId:         userId,
 		ExpireAt:       expireAtFormat,
 	}
-
 	_, err = apikey_service.Insert(apikey)
 	if err != nil {
 		log.Printf("error on update api key register %v", err)
@@ -98,7 +98,7 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 	resp := response_entities.GenericResponse{
 		Error:   false,
 		Message: "Api key generated",
-		Data:    map[string]any{"api_key": apiKeyCrypt},
+		Data:    map[string]any{"api_key": newApiKey},
 	}
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
@@ -134,16 +134,16 @@ func Regenerate(w http.ResponseWriter, r *http.Request) {
 	}
 	expireAt = time.Now().Add(expireDiff)
 	expireAtFormat := converter_util.ToDateString(expireAt)
-	uuid := authentication_service.CreateUUID()
 	nameNormalized := apiKey.NameNormalized
-	apiKeyCrypt, _ := authentication_service.CreateApiHash(uuid)
-	apiKeyHash, _ := crypt_util.HashPassword(apiKeyCrypt)
+	randomFactor := authentication_service.CreateRandomFactor()
+	apiKeyCrypt, _ := authentication_service.CreateApiKeyCrypt(apiKey.ID, randomFactor)
+	newApiKey := authentication_service.CreateApiPrefix(apiKeyCrypt, nameNormalized)
+	apiKeyHash, _ := crypt_util.HashPassword(newApiKey)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	apikey := database_entities.ApiKey{
-		ID:             uuid,
 		ApiKey:         apiKeyHash,
 		Scopes:         apiKey.Scopes,
 		Name:           apiKey.Name,
@@ -151,7 +151,6 @@ func Regenerate(w http.ResponseWriter, r *http.Request) {
 		UserId:         userId,
 		ExpireAt:       expireAtFormat,
 	}
-
 	_, err = apikey_service.Update(id, apikey)
 	if err != nil {
 		log.Printf("error on update api key register %v", err)
@@ -161,7 +160,7 @@ func Regenerate(w http.ResponseWriter, r *http.Request) {
 	resp := response_entities.GenericResponse{
 		Error:   false,
 		Message: "Api key regenerated.",
-		Data:    map[string]any{"api_key": apiKeyCrypt},
+		Data:    map[string]any{"api_key": newApiKey},
 	}
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
@@ -177,12 +176,7 @@ func Regenerate(w http.ResponseWriter, r *http.Request) {
 // @Router       /apikey/revoke/{id} [delete]
 func Delete(w http.ResponseWriter, r *http.Request) {
 	userId := authentication_util.GetCurrentUser(w, r)
-	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-	if err != nil {
-		log.Printf("error on decode json %v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
+	id := chi.URLParam(r, "id")
 	rows, err := apikey_service.DeleteByIdAndUser(id, userId)
 	if err != nil {
 		log.Printf("error on update register %v", err)
