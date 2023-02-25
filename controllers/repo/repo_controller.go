@@ -11,7 +11,7 @@ import (
 	"github.com/brutalzinn/api-task-list/models/dto"
 	response_entities "github.com/brutalzinn/api-task-list/models/response"
 	repo_service "github.com/brutalzinn/api-task-list/services/database/repo"
-	authentication_util "github.com/brutalzinn/api-task-list/services/utils/authentication"
+	authentication_util "github.com/brutalzinn/api-task-list/services/authentication"
 	hypermedia_util "github.com/brutalzinn/api-task-list/services/utils/hypermedia"
 	"github.com/go-chi/chi/v5"
 )

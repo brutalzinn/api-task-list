@@ -8,8 +8,8 @@ import (
 
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
 	response_entities "github.com/brutalzinn/api-task-list/models/response"
+	authentication_util "github.com/brutalzinn/api-task-list/services/authentication"
 	user_service "github.com/brutalzinn/api-task-list/services/database/user"
-	authentication_util "github.com/brutalzinn/api-task-list/services/utils/authentication"
 	crypt_utils "github.com/brutalzinn/api-task-list/services/utils/crypt"
 
 	"github.com/go-chi/chi/v5"

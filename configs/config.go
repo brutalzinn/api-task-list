@@ -76,6 +76,9 @@ func GetApiConfig() APIConfig {
 func GetAuthSecret() []byte {
 	return []byte(cfg.Authentication.Secret)
 }
+func GetAesSecret() []byte {
+	return []byte(cfg.Authentication.AesKey)
+}
 func GetAuthConfig() AuthConfig {
 	return cfg.Authentication
 }

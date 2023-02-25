@@ -5,6 +5,7 @@ import (
 
 	"github.com/brutalzinn/api-task-list/db"
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
+	converter_util "github.com/brutalzinn/api-task-list/services/utils/converter"
 )
 
 func Delete(id int64) (int64, error) {
@@ -110,7 +111,7 @@ func Insert(apiKey database_entities.ApiKey) (id int64, err error) {
 	}
 	defer conn.Close()
 	sql := "INSERT INTO api_keys (apiKey, scopes, name, name_normalized, user_id, create_at, expire_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id"
-	err = conn.QueryRow(sql, &apiKey.ApiKey, &apiKey.Scopes, &apiKey.Name, &apiKey.NameNormalized, apiKey.UserId, time.Now(), &apiKey.ExpireAt).Scan(&id)
+	err = conn.QueryRow(sql, &apiKey.ApiKey, &apiKey.Scopes, &apiKey.Name, &apiKey.NameNormalized, apiKey.UserId, converter_util.ToDateTimeString(time.Now()), &apiKey.ExpireAt).Scan(&id)
 	return
 }
 func Update(id int64, apiKey database_entities.ApiKey) (int64, error) {
@@ -119,7 +120,7 @@ func Update(id int64, apiKey database_entities.ApiKey) (int64, error) {
 		return 0, err
 	}
 	defer conn.Close()
-	res, err := conn.Exec("UPDATE api_keys SET apiKey=$1,scopes=$2,name=$3,user_id=$4,update_at=$5 WHERE id=$6", &apiKey.ApiKey, &apiKey.Scopes, &apiKey.Name, &apiKey.UserId, time.Now(), id)
+	res, err := conn.Exec("UPDATE api_keys SET apiKey=$1,scopes=$2,name=$3,update_at=$4,expire_at=$5 WHERE id=$6 and user_id=$7", &apiKey.ApiKey, &apiKey.Scopes, &apiKey.Name, converter_util.ToDateTimeString(time.Now()), &apiKey.ExpireAt, id, &apiKey.UserId)
 	if err != nil {
 		return 0, err
 	}

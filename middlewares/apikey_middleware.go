@@ -2,13 +2,9 @@ package middlewares
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 
-	response_entities "github.com/brutalzinn/api-task-list/models/response"
-	apikey_service "github.com/brutalzinn/api-task-list/services/database/apikey"
-	apikey_util "github.com/brutalzinn/api-task-list/services/utils/apikey"
-	crypt_util "github.com/brutalzinn/api-task-list/services/utils/crypt"
+	authentication_service "github.com/brutalzinn/api-task-list/services/authentication"
 )
 
 func ApiKeyMiddleware(next http.Handler) http.Handler {
@@ -19,29 +15,12 @@ func ApiKeyMiddleware(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r.WithContext(ctx))
 			return
 		}
-		decrypt, err := crypt_util.Decrypt(authHeader)
+		apiKey, err := authentication_service.VerifyApiKey(authHeader)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
 		}
-		
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-			return
-		}
-		if count == 0 {
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-			return
-		}
-		if isKeyExpired {
-			resp := response_entities.GenericResponse{
-				Data: "Api key is expired.",
-			}
-			w.Header().Add("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(resp)
-			return
-		}
-		ctx = context.WithValue(r.Context(), "user_id", user_id)
+		ctx = context.WithValue(r.Context(), "user_id", apiKey.UserId)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

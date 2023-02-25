@@ -36,8 +36,8 @@ func Decode(s string) ([]byte, error) {
 
 // Encrypt method is to encrypt or hide any classified text
 func Encrypt(text string) (string, error) {
-	var authConfig = configs.GetAuthConfig()
-	block, err := aes.NewCipher([]byte(authConfig.AesKey))
+	var aesSecret = configs.GetAesSecret()
+	block, err := aes.NewCipher([]byte(aesSecret))
 	if err != nil {
 		return "", err
 	}
@@ -50,8 +50,8 @@ func Encrypt(text string) (string, error) {
 
 // Decrypt method is to extract back the encrypted text
 func Decrypt(text string) (string, error) {
-	var authConfig = configs.GetAuthConfig()
-	block, err := aes.NewCipher([]byte(authConfig.AesKey))
+	var aesSecret = configs.GetAesSecret()
+	block, err := aes.NewCipher([]byte(aesSecret))
 	if err != nil {
 		return "", err
 	}

@@ -1,11 +1,15 @@
 package authentication_service
 
 import (
+	"crypto/rand"
+	"encoding/hex"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
+	database_entities "github.com/brutalzinn/api-task-list/models/database"
 	apikey_service "github.com/brutalzinn/api-task-list/services/database/apikey"
 	converter_util "github.com/brutalzinn/api-task-list/services/utils/converter"
 	crypt_util "github.com/brutalzinn/api-task-list/services/utils/crypt"
@@ -17,24 +21,38 @@ func CreateUUID() string {
 	uuidNormalized := strings.Replace(uuid, "-", "", -1)
 	return uuidNormalized
 }
-func CreateApiHash(user_id int64, appName string, uuid string, expireAt string) (keyhash string, err error) {
-	keyhash, err = crypt_util.Encrypt(fmt.Sprintf("%d#%s#%s#%s", user_id, appName, uuid, expireAt))
+func CreateRandomFactor() (result string) {
+	b := make([]byte, 4) //equals 8 characters
+	rand.Read(b)
+	result = hex.EncodeToString(b)
+	return result
+}
+func CreateApiHash(user_id int64, appName string, randomFactor string, expireAt string) (keyhash string, err error) {
+	keyhash, err = crypt_util.Encrypt(fmt.Sprintf("%d#%s#%s#%s", user_id, appName, randomFactor, expireAt))
 	if err != nil {
 		return "", err
 	}
 	return keyhash, nil
 }
-func VerifyApiKey(apiKeyCrypt string) error {
+func VerifyApiKey(apiKeyCrypt string) (*database_entities.ApiKey, error) {
 	decrypt, err := crypt_util.Decrypt(apiKeyCrypt)
 	if err != nil {
-
-		return err
+		return nil, errors.New("Api key invalid")
 	}
 	user_id, appName, expire_at, err := getApiKeyInfo(decrypt)
-	count, err := apikey_service.CountByUserAndName(user_id, appName)
+	apiKey, err := apikey_service.GetByUserAndName(user_id, appName)
+	if err != nil {
+		return nil, errors.New("Api key invalid")
+	}
 	isKeyExpired := isKeyExpired(expire_at)
-
-	user_id, appName, expire_at, err := apikey_util.GetApiKeyInfo(decrypt)
+	if isKeyExpired {
+		return nil, errors.New("Api key expired")
+	}
+	isKeyInvalid := crypt_util.CheckPasswordHash(apiKeyCrypt, apiKey.ApiKey)
+	if isKeyInvalid == false {
+		return nil, errors.New("Api key invalid")
+	}
+	return &apiKey, err
 }
 func getApiKeyInfo(apiKeyDescrypted string) (user_id int64, appName string, expireAt string, err error) {
 	apikeyformat := strings.Split(apiKeyDescrypted, "#")

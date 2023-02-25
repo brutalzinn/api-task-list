@@ -14,9 +14,9 @@ import (
 	"github.com/brutalzinn/api-task-list/models/dto"
 	request_entities "github.com/brutalzinn/api-task-list/models/request"
 	response_entities "github.com/brutalzinn/api-task-list/models/response"
+	authentication_service "github.com/brutalzinn/api-task-list/services/authentication"
+	authentication_util "github.com/brutalzinn/api-task-list/services/authentication"
 	apikey_service "github.com/brutalzinn/api-task-list/services/database/apikey"
-	apikey_util "github.com/brutalzinn/api-task-list/services/utils/apikey"
-	authentication_util "github.com/brutalzinn/api-task-list/services/utils/authentication"
 	converter_util "github.com/brutalzinn/api-task-list/services/utils/converter"
 	crypt_util "github.com/brutalzinn/api-task-list/services/utils/crypt"
 	hypermedia_util "github.com/brutalzinn/api-task-list/services/utils/hypermedia"
@@ -57,7 +57,7 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	name := apiKeyRequest.Name
-	nameNormalized := apikey_util.Normalize(name)
+	nameNormalized := converter_util.Normalize(name)
 	apiKeysSameAppName, _ := apikey_service.CountByUserAndName(user_id, nameNormalized)
 	if apiKeysSameAppName >= 1 {
 		resp := response_entities.GenericResponse{
@@ -69,11 +69,11 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	days := apiKeyRequest.ExpireAt.Days()
-	expireAt := time.Now().AddDate(0, 0, days)
-	expireAtFormat := expireAt.Format(time.RFC3339)
-	uuid := apikey_util.CreateUUID()
-	apiKeyCrypt, _ := apikey_util.CreateApiHash(user_id, nameNormalized, uuid, expireAtFormat)
-	apiKeyHash, _ := crypt_util.HashPassword(apiKeyCrypt)
+	expireAt := time.Now().Add(time.Hour * 24 * time.Duration(days))
+	expireAtFormat := converter_util.ToDateString(expireAt)
+	randomFactor := authentication_service.CreateRandomFactor()
+	apiKeyCrypt, _ := authentication_service.CreateApiHash(user_id, nameNormalized, randomFactor, expireAtFormat)
+	apiKeyHash, err := crypt_util.HashPassword(apiKeyCrypt)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
@@ -123,11 +123,20 @@ func Regenerate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	date, err := converter_util.ToDateTime(apiKey.ExpireAt)
-	expireAtFormat := date.Format(time.RFC3339)
-	uuid := apikey_util.CreateUUID()
+	expireAt, _ := converter_util.ToDateTime(apiKey.ExpireAt)
+	var expireDiff time.Duration
+	if apiKey.UpdateAt != nil {
+		updateAt, _ := converter_util.ToDateTime(*apiKey.UpdateAt)
+		expireDiff = expireAt.Sub(updateAt)
+	} else {
+		createAt, _ := converter_util.ToDateTime(*apiKey.CreateAt)
+		expireDiff = expireAt.Sub(createAt)
+	}
+	expireAt = time.Now().Add(expireDiff)
+	expireAtFormat := converter_util.ToDateString(expireAt)
+	randomFactor := authentication_service.CreateRandomFactor()
 	nameNormalized := apiKey.NameNormalized
-	apiKeyCrypt, _ := apikey_util.CreateApiHash(user_id, nameNormalized, uuid, expireAtFormat)
+	apiKeyCrypt, _ := authentication_service.CreateApiHash(user_id, nameNormalized, randomFactor, expireAtFormat)
 	apiKeyHash, _ := crypt_util.HashPassword(apiKeyCrypt)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -142,7 +151,7 @@ func Regenerate(w http.ResponseWriter, r *http.Request) {
 		ExpireAt:       expireAtFormat,
 	}
 
-	_, err = apikey_service.Insert(apikey)
+	_, err = apikey_service.Update(id, apikey)
 	if err != nil {
 		log.Printf("error on update api key register %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
