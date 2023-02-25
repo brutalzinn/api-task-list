@@ -31,7 +31,7 @@ import (
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /apikey/generate [post]
 func Generate(w http.ResponseWriter, r *http.Request) {
-	user_id := authentication_util.GetCurrentUser(w, r)
+	userId := authentication_util.GetCurrentUser(w, r)
 	maxApiKeys := configs.GetApiConfig().MaxApiKeys
 	var apiKeyRequest request_entities.ApiKeyRequest
 	err := json.NewDecoder(r.Body).Decode(&apiKeyRequest)
@@ -40,7 +40,7 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	count, err := apikey_service.Count(user_id)
+	count, err := apikey_service.Count(userId)
 	if err != nil {
 		log.Printf("error on count api key register %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -58,7 +58,7 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 	}
 	name := apiKeyRequest.Name
 	nameNormalized := converter_util.Normalize(name)
-	apiKeysSameAppName, _ := apikey_service.CountByUserAndName(user_id, nameNormalized)
+	apiKeysSameAppName, _ := apikey_service.CountByUserAndName(userId, nameNormalized)
 	if apiKeysSameAppName >= 1 {
 		resp := response_entities.GenericResponse{
 			Error:   true,
@@ -71,20 +71,21 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 	days := apiKeyRequest.ExpireAt.Days()
 	expireAt := time.Now().Add(time.Hour * 24 * time.Duration(days))
 	expireAtFormat := converter_util.ToDateString(expireAt)
-	randomFactor := authentication_service.CreateRandomFactor()
-	apiKeyCrypt, _ := authentication_service.CreateApiHash(user_id, nameNormalized, randomFactor, expireAtFormat)
+	uuid := authentication_service.CreateUUID()
+	apiKeyCrypt, _ := authentication_service.CreateApiHash(uuid)
 	apiKeyHash, err := crypt_util.HashPassword(apiKeyCrypt)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	scopes := []string{"task_insert", "task_delete", "task_read", "task_update"}
+	scopes := []string{"task_manager", "repo_manager"}
 	apikey := database_entities.ApiKey{
+		ID:             uuid,
 		ApiKey:         apiKeyHash,
 		Scopes:         strings.Join(scopes, ","),
 		Name:           apiKeyRequest.Name,
 		NameNormalized: nameNormalized,
-		UserId:         user_id,
+		UserId:         userId,
 		ExpireAt:       expireAtFormat,
 	}
 
@@ -111,16 +112,15 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /apikey/generate [post]
 func Regenerate(w http.ResponseWriter, r *http.Request) {
-	user_id := authentication_util.GetCurrentUser(w, r)
-	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-	if err != nil {
-		log.Printf("error on decode json %v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	userId := authentication_util.GetCurrentUser(w, r)
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		http.Error(w, http.StatusText(http.StatusNotAcceptable), http.StatusNotAcceptable)
 		return
 	}
-	apiKey, err := apikey_service.GetByIdAndUser(id, user_id)
+	apiKey, err := apikey_service.GetByIdAndUser(id, userId)
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		http.Error(w, http.StatusText(http.StatusNotAcceptable), http.StatusNotAcceptable)
 		return
 	}
 	expireAt, _ := converter_util.ToDateTime(apiKey.ExpireAt)
@@ -134,20 +134,21 @@ func Regenerate(w http.ResponseWriter, r *http.Request) {
 	}
 	expireAt = time.Now().Add(expireDiff)
 	expireAtFormat := converter_util.ToDateString(expireAt)
-	randomFactor := authentication_service.CreateRandomFactor()
+	uuid := authentication_service.CreateUUID()
 	nameNormalized := apiKey.NameNormalized
-	apiKeyCrypt, _ := authentication_service.CreateApiHash(user_id, nameNormalized, randomFactor, expireAtFormat)
+	apiKeyCrypt, _ := authentication_service.CreateApiHash(uuid)
 	apiKeyHash, _ := crypt_util.HashPassword(apiKeyCrypt)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	apikey := database_entities.ApiKey{
+		ID:             uuid,
 		ApiKey:         apiKeyHash,
 		Scopes:         apiKey.Scopes,
 		Name:           apiKey.Name,
 		NameNormalized: nameNormalized,
-		UserId:         user_id,
+		UserId:         userId,
 		ExpireAt:       expireAtFormat,
 	}
 
@@ -175,14 +176,14 @@ func Regenerate(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /apikey/revoke/{id} [delete]
 func Delete(w http.ResponseWriter, r *http.Request) {
-	user_id := authentication_util.GetCurrentUser(w, r)
+	userId := authentication_util.GetCurrentUser(w, r)
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		log.Printf("error on decode json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	rows, err := apikey_service.DeleteByIdAndUser(id, user_id)
+	rows, err := apikey_service.DeleteByIdAndUser(id, userId)
 	if err != nil {
 		log.Printf("error on update register %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -214,8 +215,8 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /apikey [get]
 func List(w http.ResponseWriter, r *http.Request) {
-	user_id := authentication_util.GetCurrentUser(w, r)
-	apiKeys, err := apikey_service.GetAll(user_id)
+	userId := authentication_util.GetCurrentUser(w, r)
+	apiKeys, err := apikey_service.GetAll(userId)
 	if err != nil {
 		log.Printf("error on decode json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -224,8 +225,8 @@ func List(w http.ResponseWriter, r *http.Request) {
 	var apiKeyList = dto.ToApiKeyListDTO(apiKeys)
 	for i, apiKey := range apiKeyList {
 		links := map[string]any{}
-		hypermedia_util.CreateHyperMedia(links, "regenerate", fmt.Sprintf("/apikey/regenerate/%d", apiKey.ID), "POST")
-		hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/apikey/delete/%d", apiKey.ID), "DELETE")
+		hypermedia_util.CreateHyperMedia(links, "regenerate", fmt.Sprintf("/apikey/regenerate/%s", apiKey.ID), "POST")
+		hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/apikey/delete/%s", apiKey.ID), "DELETE")
 		apiKey.Links = links
 		apiKeyList[i] = apiKey
 	}

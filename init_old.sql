@@ -1,5 +1,3 @@
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 CREATE TABLE IF NOT EXISTS tasks (
     id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	title TEXT,
@@ -13,13 +11,13 @@ CREATE TABLE IF NOT EXISTS repos (
     id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	title TEXT default NULL,
     description TEXT default NULL,
-    user_id uuid NOT NULL,
+    user_id INT NOT NULL,
     create_at timestamp default NULL,
     update_at timestamp default NULL
 );
 
 CREATE TABLE IF NOT EXISTS users (
-    id uuid DEFAULT uuid_generate_v4(),
+    id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	email varchar(100),
     password varchar(100),
     username TEXT,
@@ -29,10 +27,10 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS api_keys (
-    id uuid DEFAULT uuid_generate_v4(),
+    id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	apikey text NOT NULL,
 	scopes text NOT NULL,
-	user_id uuid NOT NULL,
+	user_id INT NOT NULL,
     name text NOT NULL,
     name_normalized text NOT NULL,
     expire_at timestamp default NULL,

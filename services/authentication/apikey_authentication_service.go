@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -18,8 +17,7 @@ import (
 
 func CreateUUID() string {
 	uuid := uuid.New().String()
-	uuidNormalized := strings.Replace(uuid, "-", "", -1)
-	return uuidNormalized
+	return uuid
 }
 func CreateRandomFactor() (result string) {
 	b := make([]byte, 4) //equals 8 characters
@@ -27,8 +25,8 @@ func CreateRandomFactor() (result string) {
 	result = hex.EncodeToString(b)
 	return result
 }
-func CreateApiHash(user_id int64, appName string, randomFactor string, expireAt string) (keyhash string, err error) {
-	keyhash, err = crypt_util.Encrypt(fmt.Sprintf("%d#%s#%s#%s", user_id, appName, randomFactor, expireAt))
+func CreateApiHash(keyId string) (keyhash string, err error) {
+	keyhash, err = crypt_util.Encrypt(fmt.Sprintf("%s", keyId))
 	if err != nil {
 		return "", err
 	}
@@ -39,12 +37,12 @@ func VerifyApiKey(apiKeyCrypt string) (*database_entities.ApiKey, error) {
 	if err != nil {
 		return nil, errors.New("Api key invalid")
 	}
-	user_id, appName, expire_at, err := getApiKeyInfo(decrypt)
-	apiKey, err := apikey_service.GetByUserAndName(user_id, appName)
+	keyId, err := getApiKeyInfo(decrypt)
+	apiKey, err := apikey_service.Get(keyId)
 	if err != nil {
 		return nil, errors.New("Api key invalid")
 	}
-	isKeyExpired := isKeyExpired(expire_at)
+	isKeyExpired := isKeyExpired(apiKey.ExpireAt)
 	if isKeyExpired {
 		return nil, errors.New("Api key expired")
 	}
@@ -54,15 +52,13 @@ func VerifyApiKey(apiKeyCrypt string) (*database_entities.ApiKey, error) {
 	}
 	return &apiKey, err
 }
-func getApiKeyInfo(apiKeyDescrypted string) (user_id int64, appName string, expireAt string, err error) {
+func getApiKeyInfo(apiKeyDescrypted string) (keyId string, err error) {
 	apikeyformat := strings.Split(apiKeyDescrypted, "#")
 	if len(apikeyformat) != 4 {
-		return 0, "", "", nil
+		return "", nil
 	}
-	user_id, _ = strconv.ParseInt(apikeyformat[0], 10, 64)
-	appName = apikeyformat[1]
-	expireAt = apikeyformat[3]
-	return user_id, appName, expireAt, nil
+	keyId = apikeyformat[0]
+	return keyId, nil
 }
 
 func isKeyExpired(expireAt string) bool {

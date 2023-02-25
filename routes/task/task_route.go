@@ -19,5 +19,4 @@ func Register(route *chi.Mux) {
 		r.Get("/task/paginate", task_controller.Paginate)
 		r.Get("/task/{id}", task_controller.Get)
 	})
-
 }

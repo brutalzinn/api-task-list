@@ -54,7 +54,7 @@ func Get(id int64) (user database_entities.User, err error) {
 	return
 }
 
-func Insert(user database_entities.User) (id int64, err error) {
+func Insert(user database_entities.User) (id string, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return

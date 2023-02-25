@@ -1,14 +1,14 @@
 version: '3.2'
 
 services:
-    app:
-        build: 
-            context: .
-            dockerfile: Dockerfile
-        ports:
-            - 9000:9000
-        volumes:
-          - ./:/app
+    # app:
+    #     build: 
+    #         context: .
+    #         dockerfile: Dockerfile
+    #     ports:
+    #         - 9000:9000
+    #     volumes:
+    #       - ./:/app
 #comment to remember that this database its not attached to any volume
     database_service:
         image: postgres

@@ -1,15 +1,13 @@
 package database_entities
 
 type ApiKey struct {
-	ID             int64
+	ID             string
 	ApiKey         string
 	Scopes         string
 	Name           string
 	NameNormalized string
-	UserId         int64
+	UserId         string
 	CreateAt       *string
 	UpdateAt       *string
 	ExpireAt       string
 }
-
-

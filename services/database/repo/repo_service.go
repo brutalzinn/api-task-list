@@ -8,7 +8,7 @@ import (
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
 )
 
-func Delete(id int64, userId int64) (int64, error) {
+func Delete(id int64, userId string) (int64, error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return 0, err
@@ -42,7 +42,7 @@ func GetAll() (repos []database_entities.Repo, err error) {
 }
 
 // /where is the user id?
-func Paginate(limit int64, offset int64, order string, userId int64) (repos []database_entities.Repo, err error) {
+func Paginate(limit int64, offset int64, order string, userId string) (repos []database_entities.Repo, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return
@@ -94,7 +94,7 @@ func Insert(repo database_entities.Repo) (id int64, err error) {
 	err = conn.QueryRow(sql, &repo.Title, &repo.Description, &repo.UserId, time.Now()).Scan(&id)
 	return
 }
-func Update(id int64, userId int64, repo database_entities.Repo) (int64, error) {
+func Update(id int64, userId string, repo database_entities.Repo) (int64, error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return 0, err

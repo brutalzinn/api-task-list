@@ -12,7 +12,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func GenerateJWT(id int64) (string, error) {
+func GenerateJWT(id string) (string, error) {
 	var secretKey = configs.GetAuthSecret()
 	var authConfig = configs.GetAuthConfig()
 	expirationTime := time.Now().Add(time.Duration(authConfig.Expiration) * time.Second)
@@ -42,9 +42,9 @@ func VerifyJWT(tokenJWT string) (*database_entities.Claims, error) {
 	}
 	return &claims, err
 }
-func GetCurrentUser(w http.ResponseWriter, r *http.Request) (user_id int64) {
+func GetCurrentUser(w http.ResponseWriter, r *http.Request) (user_id string) {
 	ctx := r.Context()
-	user_id, ok := ctx.Value("user_id").(int64)
+	user_id, ok := ctx.Value("user_id").(string)
 	if !ok {
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return

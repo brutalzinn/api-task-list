@@ -5,7 +5,7 @@ import (
 )
 
 type ApiKeyDTO struct {
-	ID       int64   `json:"id"`
+	ID       string  `json:"id"`
 	Name     string  `json:"name"`
 	ExpireAt string  `json:"expireAt"`
 	Scopes   string  `json:"scopes"`
