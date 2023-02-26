@@ -10,6 +10,7 @@ import (
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
 	"github.com/brutalzinn/api-task-list/models/dto"
 	response_entities "github.com/brutalzinn/api-task-list/models/response"
+	repo_service "github.com/brutalzinn/api-task-list/services/database/repo"
 	task_service "github.com/brutalzinn/api-task-list/services/database/task"
 	hypermedia_util "github.com/brutalzinn/api-task-list/services/utils/hypermedia"
 
@@ -59,8 +60,7 @@ func Patch(w http.ResponseWriter, r *http.Request) {
 	}
 	err = task_service.UpdateTasks(tasks)
 	if err != nil {
-		log.Printf("error on update  tasks register %v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		response_entities.GenericOK(w, r, "Cant update tasks")
 		return
 	}
 	response_entities.GenericOK(w, r, "All tasks updated")
@@ -75,9 +75,9 @@ func Patch(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /task/{id} [put]
 func Put(w http.ResponseWriter, r *http.Request) {
-	repo_id, err := strconv.ParseInt(r.URL.Query().Get("repo_id"), 10, 64)
+	repoId, err := strconv.ParseInt(r.URL.Query().Get("repo_id"), 10, 64)
 	if err != nil {
-		repo_id = -1
+		repoId = -1
 	}
 	var tasks []database_entities.Task
 	err = json.NewDecoder(r.Body).Decode(&tasks)
@@ -86,7 +86,12 @@ func Put(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	err = task_service.ReplaceTasksByRepo(tasks, repo_id)
+	_, err = repo_service.Get(repoId)
+	if err != nil {
+		response_entities.GenericMessageError(w, r, "Repo not found")
+		return
+	}
+	err = task_service.ReplaceTasksByRepo(tasks, repoId)
 	if err != nil {
 		log.Printf("error on replace data %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -117,7 +122,6 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if rows == 0 {
-
 		response_entities.GenericMessageError(w, r, "Cant delete this Task")
 		return
 	}
@@ -137,6 +141,11 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("error on decode json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	_, err = repo_service.Get(task.RepoId)
+	if err != nil {
+		response_entities.GenericMessageError(w, r, "Repo dont found")
 		return
 	}
 	id, err := task_service.Insert(task)

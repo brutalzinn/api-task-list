@@ -1,14 +1,15 @@
-version: '3.2'
+version: '3.8'
 
 services:
-    # app:
-    #     build: 
-    #         context: .
-    #         dockerfile: Dockerfile
-    #     ports:
-    #         - 9000:9000
-    #     volumes:
-    #       - ./:/app
+    app:
+        build: 
+            dockerfile: Dockerfile
+            context: .
+        ports:
+            - 9000:9000
+        volumes:
+            - ./:/app
+        restart: unless-stopped
 #comment to remember that this database its not attached to any volume
     database_service:
         image: postgres

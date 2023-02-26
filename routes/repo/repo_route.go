@@ -12,7 +12,7 @@ func Register(route *chi.Mux) {
 		r.Use(middlewares.JWTMiddleware)
 		r.Use(middlewares.ApiKeyMiddleware)
 		r.Post("/repo", repo_controller.Create)
-		r.Put("/repo/{id}", repo_controller.Update)
+		r.Patch("/repo/{id}", repo_controller.Patch)
 		r.Delete("/repo/{id}", repo_controller.Delete)
 		r.Get("/repo/paginate", repo_controller.Paginate)
 		r.Get("/repo/{id}", repo_controller.Get)

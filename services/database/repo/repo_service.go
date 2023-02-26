@@ -100,7 +100,7 @@ func Update(id int64, userId string, repo database_entities.Repo) (int64, error)
 		return 0, err
 	}
 	defer conn.Close()
-	res, err := conn.Exec("UPDATE repos SET title=$1,description=$2,user_id=$3,update_at=$4 WHERE id=$5 and user_id=$6", &repo.Title, &repo.Description, &repo.UserId, time.Now(), id, userId)
+	res, err := conn.Exec("UPDATE repos SET title=$1,description=$2,user_id=$3,update_at=$4 WHERE id=$5 and user_id=$6", &repo.Title, &repo.Description, userId, time.Now(), id, userId)
 	if err != nil {
 		return 0, err
 	}

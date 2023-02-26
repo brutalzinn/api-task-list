@@ -35,7 +35,7 @@ func Get(w http.ResponseWriter, r *http.Request) {
 	links := map[string]any{}
 	var repoMap = dto.ToRepoDTO(repo)
 	hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/repo/%d", repo.ID), "DELETE")
-	hypermedia_util.CreateHyperMedia(links, "update_one", fmt.Sprintf("/repo/%d", repo.ID), "PUT")
+	hypermedia_util.CreateHyperMedia(links, "update_one", fmt.Sprintf("/repo/%d", repo.ID), "PATCH")
 	hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("/repo/%d", repo.ID), "GET")
 	repoMap.Links = links
 	response_entities.GenericOK(w, r, repoMap)
@@ -49,9 +49,9 @@ func Get(w http.ResponseWriter, r *http.Request) {
 // @Param id path int true "ID"
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /repo/{id} [put]
-func Update(w http.ResponseWriter, r *http.Request) {
+func Patch(w http.ResponseWriter, r *http.Request) {
 	user_id := authentication_util.GetCurrentUser(w, r)
-	id, err := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64)
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		log.Printf("wron url format %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -70,7 +70,11 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	response_entities.GenericOK(w, r, fmt.Sprintf("updates on %d repos", rows))
+	if rows == 0 {
+		response_entities.GenericMessageError(w, r, "Cant update this repo")
+		return
+	}
+	response_entities.GenericOK(w, r, "Repo updated")
 }
 
 // @Summary      Paginate Repos
@@ -108,7 +112,7 @@ func Paginate(w http.ResponseWriter, r *http.Request) {
 		links := map[string]any{}
 		hypermedia_util.CreateHyperMedia(links, "task_list", fmt.Sprintf("/task/paginate?page=[page]&limit=[limit]&repo_id=%d&order=[DESC]", repo.ID), "GET")
 		hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/repo/%d", repo.ID), "DELETE")
-		hypermedia_util.CreateHyperMedia(links, "update_one", fmt.Sprintf("/repo/%d", repo.ID), "PUT")
+		hypermedia_util.CreateHyperMedia(links, "update_one", fmt.Sprintf("/repo/%d", repo.ID), "PATCH")
 		hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("/repo/%d", repo.ID), "GET")
 		repo.Links = links
 		repoList[i] = repo
@@ -126,7 +130,7 @@ func Paginate(w http.ResponseWriter, r *http.Request) {
 // @Router       /repo/{id} [delete]
 func Delete(w http.ResponseWriter, r *http.Request) {
 	user_id := authentication_util.GetCurrentUser(w, r)
-	id, err := strconv.ParseInt(r.URL.Query().Get("id"), 10, 64)
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		log.Printf("error on decode json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
