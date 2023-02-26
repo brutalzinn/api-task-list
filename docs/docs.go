@@ -94,27 +94,6 @@ const docTemplate = `{
             }
         },
         "/repo": {
-            "get": {
-                "description": "List Repos for current user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Repos"
-                ],
-                "summary": "List Repos",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response_entities.GenericResponse"
-                        }
-                    }
-                }
-            },
             "post": {
                 "description": "Create a repo for current user",
                 "consumes": [
@@ -253,27 +232,6 @@ const docTemplate = `{
             }
         },
         "/task": {
-            "get": {
-                "description": "List tasks for current user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Tasks"
-                ],
-                "summary": "List tasks",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response_entities.GenericResponse"
-                        }
-                    }
-                }
-            },
             "post": {
                 "description": "Create a task for current user",
                 "consumes": [
@@ -351,7 +309,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Update a task for current user",
+                "description": "Replace all tasks for a repo",
                 "consumes": [
                     "application/json"
                 ],
@@ -361,7 +319,7 @@ const docTemplate = `{
                 "tags": [
                     "Tasks"
                 ],
-                "summary": "Update a task",
+                "summary": "Replace all tasks",
                 "parameters": [
                     {
                         "type": "integer",

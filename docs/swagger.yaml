@@ -67,20 +67,6 @@ paths:
       tags:
       - ApiKeys
   /repo:
-    get:
-      consumes:
-      - application/json
-      description: List Repos for current user
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/response_entities.GenericResponse'
-      summary: List Repos
-      tags:
-      - Repos
     post:
       consumes:
       - application/json
@@ -172,20 +158,6 @@ paths:
       tags:
       - Repos
   /task:
-    get:
-      consumes:
-      - application/json
-      description: List tasks for current user
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/response_entities.GenericResponse'
-      summary: List tasks
-      tags:
-      - Tasks
     post:
       consumes:
       - application/json
@@ -244,7 +216,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: Update a task for current user
+      description: Replace all tasks for a repo
       parameters:
       - description: ID
         in: path
@@ -258,7 +230,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/response_entities.GenericResponse'
-      summary: Update a task
+      summary: Replace all tasks
       tags:
       - Tasks
   /task/paginate:
