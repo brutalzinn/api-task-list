@@ -8,7 +8,6 @@ type RepoDTO struct {
 	ID          int64   `json:"id"`
 	Title       string  `json:"title"`
 	Description string  `json:"description"`
-	UserId      int64   `json:"user_id"`
 	CreateAt    *string `json:"create_at"`
 	UpdateAt    *string `json:"update_at"`
 	Links       any     `json:"links"`
@@ -24,7 +23,8 @@ func ToRepoDTO(repo database_entities.Repo) RepoDTO {
 	}
 }
 
-func ToRepoListDTO(original_repos []database_entities.Repo) (new_repos []RepoDTO) {
+func ToRepoListDTO(original_repos []database_entities.Repo) []RepoDTO {
+	new_repos := make([]RepoDTO, 0)
 	for _, item := range original_repos {
 		repoDto := ToRepoDTO(item)
 		new_repos = append(new_repos, repoDto)

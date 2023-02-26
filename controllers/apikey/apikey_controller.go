@@ -59,12 +59,7 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 	nameNormalized := converter_util.Normalize(name)
 	apiKeysSameAppName, _ := apikey_service.CountByUserAndName(userId, nameNormalized)
 	if apiKeysSameAppName >= 1 {
-		resp := response_entities.GenericResponse{
-			Error:   true,
-			Message: "You already have a api key with same app name registred. Revoke the old api key or generate a new api key with app name different.",
-		}
-		w.Header().Add("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		response_entities.GenericMessageError(w, r, "You already have a api key with same app name registred. Revoke the old api key or generate a new api key with app name different.")
 		return
 	}
 	days := apiKeyRequest.ExpireAt.Days()
@@ -74,9 +69,10 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 	randomFactor := authentication_service.CreateRandomFactor()
 	apiKeyCrypt, _ := authentication_service.CreateApiKeyCrypt(uuid, randomFactor)
 	newApiKey := authentication_service.CreateApiPrefix(apiKeyCrypt, nameNormalized)
-	apiKeyHash, err := crypt_util.HashPassword(newApiKey)
+	apiKeyHash, err := crypt_util.HashPassword(newApiKey, 4)
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		///temporary because we have a limit of 72 bytes. We need change the hash algorithm or remove the nameNormalized for hash generation3
+		response_entities.GenericMessageError(w, r, "Name needs be max 11 length")
 		return
 	}
 	scopes := []string{"task_manager", "repo_manager"}
@@ -95,13 +91,7 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	resp := response_entities.GenericResponse{
-		Error:   false,
-		Message: "Api key generated",
-		Data:    map[string]any{"api_key": newApiKey},
-	}
-	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	response_entities.GenericOK(w, r, map[string]any{"api_key": newApiKey})
 }
 
 // @Summary      Generate api key
@@ -138,7 +128,7 @@ func Regenerate(w http.ResponseWriter, r *http.Request) {
 	randomFactor := authentication_service.CreateRandomFactor()
 	apiKeyCrypt, _ := authentication_service.CreateApiKeyCrypt(apiKey.ID, randomFactor)
 	newApiKey := authentication_service.CreateApiPrefix(apiKeyCrypt, nameNormalized)
-	apiKeyHash, _ := crypt_util.HashPassword(newApiKey)
+	apiKeyHash, _ := crypt_util.HashPassword(newApiKey, 4)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
@@ -157,13 +147,7 @@ func Regenerate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	resp := response_entities.GenericResponse{
-		Error:   false,
-		Message: "Api key regenerated.",
-		Data:    map[string]any{"api_key": newApiKey},
-	}
-	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	response_entities.GenericOK(w, r, map[string]any{"api_key": newApiKey})
 }
 
 // @Summary      Revoke apikey
@@ -183,22 +167,11 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Add("Content-Type", "application/json")
-	resp := response_entities.GenericResponse{}
 	if rows == 0 {
-		resp = response_entities.GenericResponse{
-			Error:   true,
-			Message: "Api key cant be revoked.",
-		}
-		json.NewEncoder(w).Encode(resp)
+		response_entities.GenericMessageError(w, r, "Something happened. Api key cant be revoked.")
 		return
 	}
-
-	resp = response_entities.GenericResponse{
-		Error:   false,
-		Message: "Api key revoked.",
-	}
-	json.NewEncoder(w).Encode(resp)
+	response_entities.GenericOK(w, r, "Api key revoked.")
 }
 
 // @Summary      List apikeys
@@ -224,10 +197,5 @@ func List(w http.ResponseWriter, r *http.Request) {
 		apiKey.Links = links
 		apiKeyList[i] = apiKey
 	}
-
-	resp := response_entities.GenericResponse{
-		Data: apiKeyList,
-	}
-	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	response_entities.GenericOK(w, r, apiKeyList)
 }

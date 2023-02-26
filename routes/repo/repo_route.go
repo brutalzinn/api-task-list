@@ -14,7 +14,6 @@ func Register(route *chi.Mux) {
 		r.Post("/repo", repo_controller.Create)
 		r.Put("/repo/{id}", repo_controller.Update)
 		r.Delete("/repo/{id}", repo_controller.Delete)
-		r.Get("/repo", repo_controller.List)
 		r.Get("/repo/paginate", repo_controller.Paginate)
 		r.Get("/repo/{id}", repo_controller.Get)
 	})

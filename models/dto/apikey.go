@@ -25,7 +25,8 @@ func ToApiKeyDTO(apiKey database_entities.ApiKey) ApiKeyDTO {
 	}
 }
 
-func ToApiKeyListDTO(original_apikeys []database_entities.ApiKey) (new_apikeys []ApiKeyDTO) {
+func ToApiKeyListDTO(original_apikeys []database_entities.ApiKey) []ApiKeyDTO {
+	new_apikeys := make([]ApiKeyDTO, 0)
 	for _, item := range original_apikeys {
 		apiKeyDTO := ToApiKeyDTO(item)
 		new_apikeys = append(new_apikeys, apiKeyDTO)

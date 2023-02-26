@@ -7,5 +7,4 @@ type Repo struct {
 	UserId      string  `json:"user_id"`
 	CreateAt    *string `json:"create_at"`
 	UpdateAt    *string `json:"update_at"`
-	Tasks       *[]Task `json:"tasks"`
 }

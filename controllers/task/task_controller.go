@@ -38,11 +38,7 @@ func Get(w http.ResponseWriter, r *http.Request) {
 	hypermedia_util.CreateHyperMedia(links, "update_one", fmt.Sprintf("/task/%d", task.ID), "PATCH")
 	taskDto := dto.ToTaskDTO(task)
 	taskDto.Links = links
-	resp := response_entities.GenericResponse{
-		Data: taskDto,
-	}
-	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	response_entities.GenericOK(w, r, taskDto)
 }
 
 // @Summary      Updates tasks
@@ -67,12 +63,7 @@ func Patch(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	resp := response_entities.GenericResponse{
-		Message: "All tasks updated",
-	}
-
-	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	response_entities.GenericOK(w, r, "All tasks updated")
 }
 
 // @Summary      Replace all tasks
@@ -101,48 +92,7 @@ func Put(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	resp := response_entities.GenericResponse{
-		Message: "All tasks replaced",
-	}
-
-	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
-}
-
-// @Summary      List tasks
-// @Description  List tasks for current user
-// @Tags         Tasks
-// @Accept       json
-// @Produce      json
-// @Success      200  {object} response_entities.GenericResponse
-// @Router       /task [get]
-func List(w http.ResponseWriter, r *http.Request) {
-	tasks, err := task_service.GetAll()
-	if err != nil {
-		log.Printf("error on decode json %v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-	var taskList = dto.ToTaskListDTO(tasks)
-	for i, task := range taskList {
-		links := make(map[string]any)
-		hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/task/%d", task.ID), "DELETE")
-		hypermedia_util.CreateHyperMedia(links, "update_one", fmt.Sprintf("/task/%d", task.ID), "PATCH")
-		hypermedia_util.CreateHyperMedia(links, "update_all", fmt.Sprintf("/task/%d", task.ID), "PUT")
-		hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("/task/%d", task.ID), "GET")
-		task.Links = links
-		taskList[i] = task
-	}
-	data := struct {
-		Tasks []dto.TaskDTO `json:"tasks"`
-	}{
-		Tasks: taskList,
-	}
-	resp := response_entities.GenericResponse{
-		Data: data,
-	}
-	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	response_entities.GenericOK(w, r, "All tasks replaced")
 }
 
 // @Summary      Delete a task
@@ -166,17 +116,12 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	resp := response_entities.GenericResponse{
-		Message: "Task deleted",
-	}
-
 	if rows == 0 {
-		resp = response_entities.GenericResponse{
-			Message: "Cant delete this Task",
-		}
+
+		response_entities.GenericMessageError(w, r, "Cant delete this Task")
+		return
 	}
-	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	response_entities.GenericOK(w, r, "Task deleted")
 }
 
 // @Summary      Create a task
@@ -195,18 +140,11 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id, err := task_service.Insert(task)
-	task.ID = id
-	resp := response_entities.GenericResponse{
-		Message: fmt.Sprintf("Task created %d", id),
-		Data:    task,
-	}
 	if err != nil {
-		resp = response_entities.GenericResponse{
-			Message: "Cant create this task",
-		}
+		response_entities.GenericMessageError(w, r, "Cant create this task")
+		return
 	}
-	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	response_entities.GenericOK(w, r, id)
 }
 
 // @Summary      Paginate Tasks
@@ -217,61 +155,40 @@ func Create(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /task/paginate [get]
 func Paginate(w http.ResponseWriter, r *http.Request) {
-	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	currentPage, err := strconv.ParseInt(r.URL.Query().Get("page"), 10, 64)
 	if err != nil {
-		page = 1
+		currentPage = 1
 	}
-	//order: 1 ASC -1 DESC
 	order := r.URL.Query().Get("order")
 	if order == "" {
 		order = "ASC"
 	}
-	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
+	limit, err := strconv.ParseInt(r.URL.Query().Get("limit"), 10, 64)
 	if err != nil {
 		limit = 10
 	}
-	repo_id, err := strconv.Atoi(r.URL.Query().Get("repo_id"))
+	repoId, err := strconv.ParseInt(r.URL.Query().Get("repo_id"), 10, 64)
 	if err != nil {
-		repo_id = -1
+		repoId = -1
 	}
-	offset := (page - 1) * limit
-
-	tasks, err := task_service.Paginate(repo_id, limit, offset, order)
+	offset := (currentPage - 1) * limit
+	tasks, err := task_service.Paginate(repoId, limit, offset, order)
 	if err != nil {
 		log.Printf("error on decode paginate json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	totalTasks, _ := task_service.Count()
+	totalTasks, _ := task_service.Count(repoId)
 	totalPages := (totalTasks + limit - 1) / limit
-	currentPage := page
-
-	var taskList = dto.ToTaskListDTO(tasks)
+	taskList := dto.ToTaskListDTO(tasks)
 	for i, task := range taskList {
 		links := map[string]any{}
 		hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/task/%d", task.ID), "DELETE")
 		hypermedia_util.CreateHyperMedia(links, "update_one", fmt.Sprintf("/task/%d", task.ID), "PATCH")
-		hypermedia_util.CreateHyperMedia(links, "update_all", fmt.Sprintf("/task/%d", task.ID), "PUT")
+		hypermedia_util.CreateHyperMedia(links, "update_all", fmt.Sprintf("/task?repo_id=%d", task.RepoId), "PUT")
 		hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("/task/%d", task.ID), "GET")
 		task.Links = links
 		taskList[i] = task
 	}
-
-	data := struct {
-		Tasks       []dto.TaskDTO `json:"tasks"`
-		TotalItems  int           `json:"totalItems"`
-		TotalPages  int           `json:"totalPages"`
-		CurrentPage int           `json:"currentPage"`
-	}{
-		Tasks:       taskList,
-		TotalItems:  len(taskList),
-		TotalPages:  totalPages,
-		CurrentPage: currentPage,
-	}
-
-	resp := response_entities.GenericResponse{
-		Data: data,
-	}
-	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	response_entities.PaginateTask(w, r, taskList, totalPages, currentPage)
 }

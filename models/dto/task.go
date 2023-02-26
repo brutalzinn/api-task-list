@@ -25,7 +25,8 @@ func ToTaskDTO(repo database_entities.Task) TaskDTO {
 	}
 }
 
-func ToTaskListDTO(original_repos []database_entities.Task) (new_repos []TaskDTO) {
+func ToTaskListDTO(original_repos []database_entities.Task) []TaskDTO {
+	new_repos := make([]TaskDTO, 0)
 	for _, item := range original_repos {
 		repoDto := ToTaskDTO(item)
 		new_repos = append(new_repos, repoDto)

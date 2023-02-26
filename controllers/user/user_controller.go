@@ -106,7 +106,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	hash, _ := crypt_utils.HashPassword(user.Password)
+	hash, _ := crypt_utils.HashPassword(user.Password, 15)
 	user.Password = hash
 	_, err = user_service.Insert(user)
 	resp := response_entities.GenericResponse{

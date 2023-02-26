@@ -63,13 +63,13 @@ func Paginate(limit int64, offset int64, order string, userId string) (repos []d
 	}
 	return
 }
-func Count() (count int64, err error) {
+func Count(userId string) (count int64, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return
 	}
 	defer conn.Close()
-	row := conn.QueryRow("SELECT COUNT(*) FROM repos")
+	row := conn.QueryRow("SELECT COUNT(*) FROM repos user_id=$1", userId)
 	err = row.Scan(&count)
 	return
 }

@@ -11,8 +11,8 @@ import (
 )
 
 // /https://blog.logrocket.com/learn-golang-encryption-decryption/
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 4)
+func HashPassword(password string, cost int) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), cost)
 	return string(bytes), err
 }
 

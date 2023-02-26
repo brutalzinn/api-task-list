@@ -160,7 +160,7 @@ func Update(id int64, task database_entities.Task) (int64, error) {
 	return res.RowsAffected()
 }
 
-func Paginate(repo_id int, limit int, offset int, order string) (tasks []database_entities.Task, err error) {
+func Paginate(repo_id int64, limit int64, offset int64, order string) (tasks []database_entities.Task, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return
@@ -181,13 +181,13 @@ func Paginate(repo_id int, limit int, offset int, order string) (tasks []databas
 	}
 	return
 }
-func Count() (count int, err error) {
+func Count(repo_id int64) (count int64, err error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return
 	}
 	defer conn.Close()
-	row := conn.QueryRow("SELECT COUNT(*) FROM tasks")
+	row := conn.QueryRow("SELECT COUNT(*) FROM tasks where repo_id=$1", repo_id)
 	err = row.Scan(&count)
 	return
 }
