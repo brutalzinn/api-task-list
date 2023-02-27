@@ -18,7 +18,6 @@ import (
 	apikey_service "github.com/brutalzinn/api-task-list/services/database/apikey"
 	converter_util "github.com/brutalzinn/api-task-list/services/utils/converter"
 	crypt_util "github.com/brutalzinn/api-task-list/services/utils/crypt"
-	hypermedia_util "github.com/brutalzinn/api-task-list/services/utils/hypermedia"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -190,12 +189,12 @@ func List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var apiKeyList = dto.ToApiKeyListDTO(apiKeys)
-	for i, apiKey := range apiKeyList {
-		links := map[string]any{}
-		hypermedia_util.CreateHyperMedia(links, "regenerate", fmt.Sprintf("/apikey/regenerate/%s", apiKey.ID), "POST")
-		hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/apikey/delete/%s", apiKey.ID), "DELETE")
-		apiKey.Links = links
-		apiKeyList[i] = apiKey
-	}
+	// for i, apiKey := range apiKeyList {
+	// 	links := map[string]any{}
+	// 	hypermedia_util.CreateHyperMedia(links, "regenerate", fmt.Sprintf("/apikey/regenerate/%s", apiKey.ID), "POST")
+	// 	hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/apikey/delete/%s", apiKey.ID), "DELETE")
+	// 	apiKey.Links = links
+	// 	apiKeyList[i] = apiKey
+	// }
 	response_entities.GenericOK(w, r, apiKeyList)
 }

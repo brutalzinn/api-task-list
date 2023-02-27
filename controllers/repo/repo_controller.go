@@ -2,17 +2,16 @@ package repo_controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 
+	"github.com/brutalzinn/api-task-list/middlewares/hypermedia"
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
 	"github.com/brutalzinn/api-task-list/models/dto"
 	response_entities "github.com/brutalzinn/api-task-list/models/response"
 	authentication_util "github.com/brutalzinn/api-task-list/services/authentication"
 	repo_service "github.com/brutalzinn/api-task-list/services/database/repo"
-	hypermedia_util "github.com/brutalzinn/api-task-list/services/utils/hypermedia"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -34,9 +33,9 @@ func Get(w http.ResponseWriter, r *http.Request) {
 	}
 	links := map[string]any{}
 	var repoMap = dto.ToRepoDTO(repo)
-	hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/repo/%d", repo.ID), "DELETE")
-	hypermedia_util.CreateHyperMedia(links, "update_one", fmt.Sprintf("/repo/%d", repo.ID), "PATCH")
-	hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("/repo/%d", repo.ID), "GET")
+	// hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/repo/%d", repo.ID), "DELETE")
+	// hypermedia_util.CreateHyperMedia(links, "update_one", fmt.Sprintf("/repo/%d", repo.ID), "PATCH")
+	// hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("/repo/%d", repo.ID), "GET")
 	repoMap.Links = links
 	response_entities.GenericOK(w, r, repoMap)
 }
@@ -108,15 +107,28 @@ func Paginate(w http.ResponseWriter, r *http.Request) {
 	totalTasks, _ := repo_service.Count(userId)
 	totalPages := (totalTasks + limit - 1) / limit
 	var repoList = dto.ToRepoListDTO(repos)
+
+	//test
+
+	ctx := r.Context()
+	links, ok := ctx.Value("links").([]hypermedia.HypermediaLink)
+	if !ok {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+
 	for i, repo := range repoList {
-		links := map[string]any{}
-		hypermedia_util.CreateHyperMedia(links, "task_list", fmt.Sprintf("/task/paginate?page=[page]&limit=[limit]&repo_id=%d&order=[DESC]", repo.ID), "GET")
-		hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/repo/%d", repo.ID), "DELETE")
-		hypermedia_util.CreateHyperMedia(links, "update_one", fmt.Sprintf("/repo/%d", repo.ID), "PATCH")
-		hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("/repo/%d", repo.ID), "GET")
 		repo.Links = links
 		repoList[i] = repo
 	}
+	// 	links := map[string]any{}
+	// 	hypermedia_util.CreateHyperMedia(links, "task_list", fmt.Sprintf("/task/paginate?page=[page]&limit=[limit]&repo_id=%d&order=[DESC]", repo.ID), "GET")
+	// 	hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/repo/%d", repo.ID), "DELETE")
+	// 	hypermedia_util.CreateHyperMedia(links, "update_one", fmt.Sprintf("/repo/%d", repo.ID), "PATCH")
+	// 	hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("/repo/%d", repo.ID), "GET")
+	// 	repo.Links = links
+	// 	repoList[i] = repo
+	// }
 	response_entities.PaginateRepo(w, r, repoList, totalPages, currentPage)
 }
 
