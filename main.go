@@ -5,15 +5,16 @@ import (
 	"net/http"
 
 	"github.com/brutalzinn/api-task-list/configs"
+	_ "github.com/brutalzinn/api-task-list/oauth"
+	oauth_api_server "github.com/brutalzinn/api-task-list/oauth"
+
+	_ "github.com/brutalzinn/api-task-list/docs"
 	apikey_route "github.com/brutalzinn/api-task-list/routes/apikey"
 	login_route "github.com/brutalzinn/api-task-list/routes/login"
 	oauth_route "github.com/brutalzinn/api-task-list/routes/oauth"
 	repo_route "github.com/brutalzinn/api-task-list/routes/repo"
 	task_route "github.com/brutalzinn/api-task-list/routes/task"
 	user_route "github.com/brutalzinn/api-task-list/routes/user"
-
-	_ "github.com/brutalzinn/api-task-list/docs"
-
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -32,7 +33,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
+	config := configs.GetConfig().API
+	oauth_api_server.InitOauthServer()
 	route := chi.NewRouter()
 	route.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
@@ -49,7 +51,6 @@ func main() {
 	apikey_route.Register(route)
 	repo_route.Register(route)
 	oauth_route.Register(route)
-	port := configs.GetApiConfig().Port
-	fmt.Printf("API-AUTO-ASSISTANT STARTED WITH PORT %s", port)
-	http.ListenAndServe(fmt.Sprintf(":%s", port), route)
+	fmt.Printf("API-AUTO-ASSISTANT STARTED WITH PORT %s", config.Port)
+	http.ListenAndServe(fmt.Sprintf(":%s", config.Port), route)
 }

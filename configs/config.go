@@ -8,6 +8,7 @@ type config struct {
 	API            APIConfig
 	DB             DBConfig
 	Authentication AuthConfig
+	Redis          RedisConfig
 }
 
 type APIConfig struct {
@@ -20,7 +21,10 @@ type AuthConfig struct {
 	Expiration int64
 	AesKey     string
 }
-
+type RedisConfig struct {
+	Host string
+	Db   int
+}
 type DBConfig struct {
 	Host     string
 	Port     string
@@ -33,6 +37,9 @@ func init() {
 	viper.SetDefault("api.port", 9000)
 	viper.SetDefault("database.host", "localhost")
 	viper.SetDefault("database.port", "5432")
+	viper.SetDefault("redis.host", "localhost")
+	viper.SetDefault("redis.db", 1)
+
 }
 
 func Load() error {
@@ -62,15 +69,15 @@ func Load() error {
 		Pass:     viper.GetString("database.pass"),
 		Database: viper.GetString("database.database"),
 	}
+	cfg.Redis = RedisConfig{
+		Host: viper.GetString("redis.host"),
+		Db:   viper.GetInt("redis.db"),
+	}
 	return nil
 }
 
-func GetDB() DBConfig {
-	return cfg.DB
-}
-
-func GetApiConfig() APIConfig {
-	return cfg.API
+func GetConfig() *config {
+	return cfg
 }
 
 func GetAuthSecret() []byte {
@@ -78,7 +85,4 @@ func GetAuthSecret() []byte {
 }
 func GetAesSecret() []byte {
 	return []byte(cfg.Authentication.AesKey)
-}
-func GetAuthConfig() AuthConfig {
-	return cfg.Authentication
 }

@@ -7,6 +7,10 @@ secret = "secretket"
 aeskey = "abc&1*~#^2^#s0^=)^^7%b34"
 expiration = 900
 
+[redis]
+host = "localhost:6379"
+db = 0
+
 [database]
 host = "localhost"
 user = "postgres"

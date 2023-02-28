@@ -31,7 +31,7 @@ import (
 // @Router       /apikey/generate [post]
 func Generate(w http.ResponseWriter, r *http.Request) {
 	userId := authentication_util.GetCurrentUser(w, r)
-	maxApiKeys := configs.GetApiConfig().MaxApiKeys
+	maxApiKeys := configs.GetConfig().API.MaxApiKeys
 	var apiKeyRequest request_entities.ApiKeyRequest
 	err := json.NewDecoder(r.Body).Decode(&apiKeyRequest)
 	if err != nil {

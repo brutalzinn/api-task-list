@@ -1,41 +1,94 @@
 package oauth_controller
 
 import (
-	"fmt"
 	"net/http"
+	"net/url"
+	"os"
+
+	oauth_api_server "github.com/brutalzinn/api-task-list/oauth"
+	"github.com/go-session/session"
 )
 
-func Login(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, `
-            <html>
-                <body>
-                    <form action="/oauth/auth" method="post">
-                        <input type="text" name="email" placeholder="Email">
-                        <input type="password" name="password" placeholder="Password">
-                        <button type="submit">Log in</button>
-                    </form>
-                </body>
-            </html>
-        `)
-
+func LoginForm(w http.ResponseWriter, r *http.Request) {
+	outputHTML(w, r, "static/login.html")
 }
 
-func Authentication(w http.ResponseWriter, r *http.Request) {
-	email := r.FormValue("email")
-	password := r.FormValue("password")
+func Token(w http.ResponseWriter, r *http.Request) {
+	srv := oauth_api_server.GetOauthServer()
+	err := srv.HandleTokenRequest(w, r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
 
-	if email != "user@example.com" || password != "password" {
-		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+func Authorize(w http.ResponseWriter, r *http.Request) {
+	srv := oauth_api_server.GetOauthServer()
+	store, err := session.Start(r.Context(), w, r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// authCode, err := srv.NewAuthorizeRequest(r)
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
+	var form url.Values
+	if v, ok := store.Get("ReturnUri"); ok {
+		form = v.(url.Values)
+	}
+	r.Form = form
 
-	// Redirect to the OAuth2 provider's login page
-	//url := authCode.GetAuthorizeURL()
-	//http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+	store.Delete("ReturnUri")
+	store.Save()
+
+	err = srv.HandleAuthorizeRequest(w, r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+}
+
+func authHandler(w http.ResponseWriter, r *http.Request) {
+	store, err := session.Start(nil, w, r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if _, ok := store.Get("LoggedInUserID"); !ok {
+		w.Header().Set("Location", "/login")
+		w.WriteHeader(http.StatusFound)
+		return
+	}
+
+	outputHTML(w, r, "static/auth.html")
+}
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	store, err := session.Start(r.Context(), w, r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if r.Method == "POST" {
+		if r.Form == nil {
+			if err := r.ParseForm(); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		}
+		store.Set("LoggedInUserID", r.Form.Get("username"))
+		store.Save()
+
+		w.Header().Set("Location", "/auth")
+		w.WriteHeader(http.StatusFound)
+		return
+	}
+	outputHTML(w, r, "static/login.html")
+}
+
+func outputHTML(w http.ResponseWriter, req *http.Request, filename string) {
+	file, err := os.Open(filename)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	defer file.Close()
+	fi, _ := file.Stat()
+	http.ServeContent(w, req, file.Name(), fi.ModTime(), file)
 }

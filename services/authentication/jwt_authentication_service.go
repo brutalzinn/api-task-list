@@ -14,8 +14,8 @@ import (
 
 func GenerateJWT(id string) (string, error) {
 	var secretKey = configs.GetAuthSecret()
-	var authConfig = configs.GetAuthConfig()
-	expirationTime := time.Now().Add(time.Duration(authConfig.Expiration) * time.Second)
+	var authConfig = configs.GetConfig()
+	expirationTime := time.Now().Add(time.Duration(authConfig.Authentication.Expiration) * time.Second)
 	claims := database_entities.Claims{
 		ID: id,
 		RegisteredClaims: jwt.RegisteredClaims{
