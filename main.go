@@ -7,6 +7,7 @@ import (
 	"github.com/brutalzinn/api-task-list/configs"
 	apikey_route "github.com/brutalzinn/api-task-list/routes/apikey"
 	login_route "github.com/brutalzinn/api-task-list/routes/login"
+	oauth_route "github.com/brutalzinn/api-task-list/routes/oauth"
 	repo_route "github.com/brutalzinn/api-task-list/routes/repo"
 	task_route "github.com/brutalzinn/api-task-list/routes/task"
 	user_route "github.com/brutalzinn/api-task-list/routes/user"
@@ -31,6 +32,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	route := chi.NewRouter()
 	route.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
@@ -46,7 +48,7 @@ func main() {
 	user_route.Register(route)
 	apikey_route.Register(route)
 	repo_route.Register(route)
-
+	oauth_route.Register(route)
 	port := configs.GetApiConfig().Port
 	fmt.Printf("API-AUTO-ASSISTANT STARTED WITH PORT %s", port)
 	http.ListenAndServe(fmt.Sprintf(":%s", port), route)
