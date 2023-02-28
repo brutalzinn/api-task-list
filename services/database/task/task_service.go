@@ -53,7 +53,7 @@ func ReplaceTasksByRepo(tasks []database_entities.Task, repo_id int64) (err erro
 	}
 	defer delmt.Close()
 	_, err = delmt.ExecContext(context.Background(), repo_id)
-	stmt, err := tx.PrepareContext(context.Background(), "INSERT INTO tasks (title, repo_id, description, create_at) VALUES ($1, $2, $3, $4)")
+	stmt, err := tx.PrepareContext(context.Background(), "INSERT INTO tasks (title, repo_id, description, text, create_at) VALUES ($1, $2, $3,$4, $5)")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -63,7 +63,7 @@ func ReplaceTasksByRepo(tasks []database_entities.Task, repo_id int64) (err erro
 		log.Fatal(err)
 	}
 	for _, task := range tasks {
-		_, err := stmt.ExecContext(context.Background(), task.Title, repo_id, task.Description, time.Now())
+		_, err := stmt.ExecContext(context.Background(), task.Title, repo_id, task.Description, task.Text, time.Now())
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -85,7 +85,7 @@ func UpdateTasks(tasks []database_entities.Task) (err error) {
 		log.Fatal(err)
 	}
 	defer tx.Rollback()
-	stmt, err := tx.PrepareContext(context.Background(), "UPDATE tasks SET title=$1,repo_id=$2,description=$3,update_at=$4 WHERE id=$5")
+	stmt, err := tx.PrepareContext(context.Background(), "UPDATE tasks SET title=$1,repo_id=$2,description=$3,text=$4, update_at=$5 WHERE id=$6")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -95,7 +95,7 @@ func UpdateTasks(tasks []database_entities.Task) (err error) {
 		log.Fatal(err)
 	}
 	for _, task := range tasks {
-		_, err := stmt.ExecContext(context.Background(), task.Title, task.RepoId, task.Description, time.Now(), task.ID)
+		_, err := stmt.ExecContext(context.Background(), task.Title, task.RepoId, task.Description, task.Text, time.Now(), task.ID)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -133,7 +133,7 @@ func Get(id int64) (task database_entities.Task, err error) {
 	}
 	defer conn.Close()
 	row := conn.QueryRow("SELECT * FROM tasks WHERE id=$1", id)
-	err = row.Scan(&task.ID, &task.Title, &task.RepoId, &task.Description, &task.CreateAt, &task.UpdateAt)
+	err = row.Scan(&task.ID, &task.Title, &task.RepoId, &task.Description, &task.Text, &task.CreateAt, &task.UpdateAt)
 	return
 }
 
@@ -143,8 +143,8 @@ func Insert(task database_entities.Task) (id int64, err error) {
 		return
 	}
 	defer conn.Close()
-	sql := "INSERT INTO tasks (title, repo_id, description, create_at) VALUES ($1, $2, $3, $4) RETURNING id"
-	err = conn.QueryRow(sql, &task.Title, &task.RepoId, &task.Description, time.Now()).Scan(&id)
+	sql := "INSERT INTO tasks (title, repo_id, description, text, create_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
+	err = conn.QueryRow(sql, &task.Title, &task.RepoId, &task.Description, &task.Text, time.Now()).Scan(&id)
 	return
 }
 func Update(id int64, task database_entities.Task) (int64, error) {
@@ -153,7 +153,7 @@ func Update(id int64, task database_entities.Task) (int64, error) {
 		return 0, err
 	}
 	defer conn.Close()
-	res, err := conn.Exec("UPDATE tasks SET title=$1,description=$2,update_at=$3 WHERE id=$4", &task.Title, &task.Description, time.Now(), id)
+	res, err := conn.Exec("UPDATE tasks SET title=$1,description=$2,text=$3, update_at=$4 WHERE id=$5", &task.Title, &task.Description, &task.Text, time.Now(), id)
 	if err != nil {
 		return 0, err
 	}

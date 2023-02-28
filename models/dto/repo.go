@@ -1,16 +1,17 @@
 package dto
 
 import (
+	"github.com/brutalzinn/api-task-list/middlewares/hypermedia"
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
 )
 
 type RepoDTO struct {
-	ID          int64   `json:"id"`
-	Title       string  `json:"title"`
-	Description string  `json:"description"`
-	CreateAt    *string `json:"create_at"`
-	UpdateAt    *string `json:"update_at"`
-	Links       any     `json:"links"`
+	ID          int64            `json:"id"`
+	Title       string           `json:"title"`
+	Description string           `json:"description"`
+	CreateAt    *string          `json:"create_at"`
+	UpdateAt    *string          `json:"update_at"`
+	Links       []hypermedia.HypermediaLink `json:"links"`
 }
 
 func ToRepoDTO(repo database_entities.Repo) RepoDTO {

@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS tasks (
 	title TEXT,
     repo_id INT NOT NULL,
     description TEXT,
+    text TEXT,
     create_at timestamp default NULL,
     update_at timestamp default NULL
 );

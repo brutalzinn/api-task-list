@@ -2,10 +2,12 @@ package task_controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 
+	"github.com/brutalzinn/api-task-list/middlewares/hypermedia"
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
 	"github.com/brutalzinn/api-task-list/models/dto"
 	response_entities "github.com/brutalzinn/api-task-list/models/response"
@@ -24,19 +26,22 @@ import (
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /task/{id} [get]
 func Get(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
-	task, err := task_service.Get(int64(id))
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	task, err := task_service.Get(id)
 	if err != nil {
 		log.Printf("error on decode json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	links := map[string]any{}
-	// hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/task/%d", task.ID), "DELETE")
-	// hypermedia_util.CreateHyperMedia(links, "update_all", fmt.Sprintf("/task/%d", task.ID), "PUT")
-	// hypermedia_util.CreateHyperMedia(links, "update_one", fmt.Sprintf("/task/%d", task.ID), "PATCH")
 	taskDto := dto.ToTaskDTO(task)
-	taskDto.Links = links
+	ctx := r.Context()
+	links, _ := ctx.Value("links").([]hypermedia.HypermediaLink)
+	var hypermediaLink []hypermedia.HypermediaLink
+	for _, link := range links {
+		link.Href = fmt.Sprintf(link.Href, task.ID)
+		hypermediaLink = append(hypermediaLink, link)
+	}
+	taskDto.Links = hypermediaLink
 	response_entities.GenericOK(w, r, taskDto)
 }
 
@@ -188,14 +193,15 @@ func Paginate(w http.ResponseWriter, r *http.Request) {
 	totalTasks, _ := task_service.Count(repoId)
 	totalPages := (totalTasks + limit - 1) / limit
 	taskList := dto.ToTaskListDTO(tasks)
-	// for i, task := range taskList {
-	// 	links := map[string]any{}
-	// 	hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/task/%d", task.ID), "DELETE")
-	// 	hypermedia_util.CreateHyperMedia(links, "update_one", fmt.Sprintf("/task/%d", task.ID), "PATCH")
-	// 	hypermedia_util.CreateHyperMedia(links, "update_all", fmt.Sprintf("/task?repo_id=%d", task.RepoId), "PUT")
-	// 	hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("/task/%d", task.ID), "GET")
-	// 	task.Links = links
-	// 	taskList[i] = task
-	// }
+	ctx := r.Context()
+	links, _ := ctx.Value("links").([]hypermedia.HypermediaLink)
+	for i, repo := range taskList {
+		var hypermediaLink []hypermedia.HypermediaLink
+		for _, link := range links {
+			link.Href = fmt.Sprintf(link.Href, repo.ID)
+			hypermediaLink = append(hypermediaLink, link)
+		}
+		taskList[i].Links = hypermediaLink
+	}
 	response_entities.PaginateTask(w, r, taskList, totalPages, currentPage)
 }

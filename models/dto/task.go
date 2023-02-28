@@ -7,6 +7,7 @@ import (
 type TaskDTO struct {
 	ID          int64   `json:"id"`
 	Title       string  `json:"title"`
+	Text        string  `json:"text"`
 	Description string  `json:"description"`
 	RepoId      int64   `json:"repo_id"`
 	CreateAt    *string `json:"create_at"`
@@ -14,14 +15,15 @@ type TaskDTO struct {
 	Links       any     `json:"links"`
 }
 
-func ToTaskDTO(repo database_entities.Task) TaskDTO {
+func ToTaskDTO(task database_entities.Task) TaskDTO {
 	return TaskDTO{
-		ID:          repo.ID,
-		RepoId:      repo.RepoId,
-		Title:       repo.Title,
-		Description: repo.Description,
-		CreateAt:    repo.CreateAt,
-		UpdateAt:    repo.UpdateAt,
+		ID:          task.ID,
+		Text:        task.Text,
+		RepoId:      task.RepoId,
+		Title:       task.Title,
+		Description: task.Description,
+		CreateAt:    task.CreateAt,
+		UpdateAt:    task.UpdateAt,
 	}
 }
 

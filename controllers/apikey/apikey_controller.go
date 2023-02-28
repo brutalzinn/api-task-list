@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/brutalzinn/api-task-list/configs"
+	"github.com/brutalzinn/api-task-list/middlewares/hypermedia"
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
 	"github.com/brutalzinn/api-task-list/models/dto"
 	request_entities "github.com/brutalzinn/api-task-list/models/request"
@@ -189,12 +190,15 @@ func List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var apiKeyList = dto.ToApiKeyListDTO(apiKeys)
-	// for i, apiKey := range apiKeyList {
-	// 	links := map[string]any{}
-	// 	hypermedia_util.CreateHyperMedia(links, "regenerate", fmt.Sprintf("/apikey/regenerate/%s", apiKey.ID), "POST")
-	// 	hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/apikey/delete/%s", apiKey.ID), "DELETE")
-	// 	apiKey.Links = links
-	// 	apiKeyList[i] = apiKey
-	// }
+	ctx := r.Context()
+	links, _ := ctx.Value("links").([]hypermedia.HypermediaLink)
+	for i, repo := range apiKeyList {
+		var hypermediaLink []hypermedia.HypermediaLink
+		for _, link := range links {
+			link.Href = fmt.Sprintf(link.Href, repo.ID)
+			hypermediaLink = append(hypermediaLink, link)
+		}
+		apiKeyList[i].Links = hypermediaLink
+	}
 	response_entities.GenericOK(w, r, apiKeyList)
 }
