@@ -1,27 +1,30 @@
 package oauth_api_server
 
 import (
+	"context"
 	"flag"
 	"io"
 	"log"
 	"net/http"
 	"net/http/httputil"
+	"time"
 
-	"github.com/brutalzinn/api-task-list/configs"
+	"github.com/brutalzinn/api-task-list/db"
 	"github.com/go-oauth2/oauth2/v4/errors"
 	"github.com/go-oauth2/oauth2/v4/generates"
 	"github.com/go-oauth2/oauth2/v4/manage"
-	"github.com/go-oauth2/oauth2/v4/models"
 	"github.com/go-oauth2/oauth2/v4/server"
-	"github.com/go-oauth2/oauth2/v4/store"
-	oredis "github.com/go-oauth2/redis/v4"
-	"github.com/go-redis/redis/v8"
 	"github.com/go-session/session"
 	"github.com/golang-jwt/jwt"
-	_ "github.com/lib/pq"
+	"github.com/jackc/pgx/v4"
+	pg "github.com/vgarvardt/go-oauth2-pg/v4"
+	"github.com/vgarvardt/go-pg-adapter/pgx4adapter"
 )
 
 var oauthserver *server.Server
+var oauthClientManager *pg.ClientStore
+var oauthTokenStore *pg.TokenStore
+
 var (
 	idvar     string
 	secretvar string
@@ -44,29 +47,28 @@ func InitOauthServer() {
 func GetOauthServer() *server.Server {
 	return oauthserver
 }
+func GetClientStore() *pg.ClientStore {
+	return oauthClientManager
+}
+func GetTokenStore() *pg.TokenStore {
+	return oauthTokenStore
+}
 func createOAuthServer() (*server.Server, error) {
-	config := configs.GetConfig()
+	pgxConn, _ := pgx.ConnectConfig(context.TODO(), db.GetConnectionAdapter())
 	manager := manage.NewDefaultManager()
+
+	adapter := pgx4adapter.NewConn(pgxConn)
+	tokenStore, _ := pg.NewTokenStore(adapter, pg.WithTokenStoreGCInterval(time.Minute))
+	defer tokenStore.Close()
 	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
-	// token store
-	manager.MapTokenStorage(oredis.NewRedisStore(&redis.Options{
-		Addr: config.Redis.Host,
-		DB:   config.Redis.Db,
-	}))
+	clientStore, _ := pg.NewClientStore(adapter)
+
 	// generate jwt access token
 	manager.MapAccessGenerate(generates.NewJWTAccessGenerate("", []byte("00000000"), jwt.SigningMethodHS512))
-	// manager.MapAccessGenerate(generates.NewAccessGenerate())
-	clientStore := store.NewClientStore()
-	clientStore.Set(idvar, &models.Client{
-		ID:     idvar,
-		Secret: secretvar,
-		Domain: domainvar,
-	})
+	manager.MapTokenStorage(tokenStore)
 	manager.MapClientStorage(clientStore)
-
 	srv := server.NewServer(server.NewConfig(), manager)
 	srv.SetUserAuthorizationHandler(userAuthorizeHandler)
-
 	srv.SetInternalErrorHandler(func(err error) (re *errors.Response) {
 		log.Println("Internal Error:", err.Error())
 		return
@@ -75,6 +77,9 @@ func createOAuthServer() (*server.Server, error) {
 	srv.SetResponseErrorHandler(func(re *errors.Response) {
 		log.Println("Response Error:", re.Error.Error())
 	})
+
+	oauthClientManager = clientStore
+	oauthTokenStore = tokenStore
 	return srv, nil
 }
 

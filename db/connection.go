@@ -5,8 +5,7 @@ import (
 	"fmt"
 
 	"github.com/brutalzinn/api-task-list/configs"
-
-	_ "github.com/lib/pq"
+	"github.com/jackc/pgx/v4"
 )
 
 func OpenConnection() (*sql.DB, error) {
@@ -19,4 +18,12 @@ func OpenConnection() (*sql.DB, error) {
 	}
 	err = conn.Ping()
 	return conn, err
+}
+
+func GetConnectionAdapter() *pgx.ConnConfig {
+	conf := configs.GetConfig().DB
+	sc := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		conf.Host, conf.Port, conf.User, conf.Pass, conf.Database)
+	pgConfig, _ := pgx.ParseConfig(sc)
+	return pgConfig
 }

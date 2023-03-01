@@ -13,7 +13,6 @@ services:
 #comment to remember that this database its not attached to any volume
     database_service:
         image: postgres
-        restart: always
         hostname: postgree_hostname
         environment:
             - POSTGRES_USER=postgres
@@ -23,8 +22,9 @@ services:
             - "5432:5432"
         volumes:
             - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    redis_service:
-        image: redis:6.2-alpine
-        hostname: redis_hostname
-        ports:
-        - "6379:6379"
+        restart: unless-stopped
+    # redis_service:
+    #     image: redis:6.2-alpine
+    #     hostname: redis_hostname
+    #     ports:
+    #     - "6379:6379"

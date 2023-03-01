@@ -1,14 +1,18 @@
 package oauth_controller
 
 import (
+	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"time"
 
+	request_entities "github.com/brutalzinn/api-task-list/models/request"
 	oauth_api_server "github.com/brutalzinn/api-task-list/oauth"
 	authentication_service "github.com/brutalzinn/api-task-list/services/authentication"
+	"github.com/go-oauth2/oauth2/v4"
 	"github.com/go-session/session"
 )
 
@@ -118,4 +122,36 @@ func Test(w http.ResponseWriter, r *http.Request) {
 	e := json.NewEncoder(w)
 	e.SetIndent("", "  ")
 	e.Encode(data)
+}
+
+func Generate(w http.ResponseWriter, r *http.Request) {
+	var request request_entities.OauthGenerateRequest
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		log.Printf("error on decode json %v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	// userId := authentication_service.GetCurrentUser(w, r)
+	// srv := oauth_api_server.GetOauthServer()
+	tokenManager := oauth_api_server.GetTokenStore()
+	clientId := authentication_service.CreateRandomFactor()
+	secretId := authentication_service.CreateUUID()
+	tokenInfo := oauth2.TokenInfo.New(nil)
+	tokenManager.Create(context.TODO(), tokenInfo)
+
+	// clientManager.Create(clientId, &models.Client{
+	// 	ID:     clientId,
+	// 	UserID: userId,
+	// 	Secret: secretId,
+	// 	Domain: request.Callback,
+	// })
+
+	data := map[string]interface{}{
+		// "user_id":   token.GetUserID(),
+		"client_id": clientId,
+		"secret_id": secretId,
+	}
+	w.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
 }
