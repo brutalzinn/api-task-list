@@ -8,6 +8,7 @@ import (
 	"time"
 
 	oauth_api_server "github.com/brutalzinn/api-task-list/oauth"
+	authentication_service "github.com/brutalzinn/api-task-list/services/authentication"
 	"github.com/go-session/session"
 )
 
@@ -38,7 +39,8 @@ func Authorize(w http.ResponseWriter, r *http.Request) {
 
 	err = srv.HandleAuthorizeRequest(w, r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusUnauthorized)
+		outputHTML(w, r, "static/auth.html")
 	}
 }
 
@@ -49,7 +51,7 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, ok := store.Get("LoggedInUserID"); !ok {
+	if _, ok := store.Get("LoggedUserId"); !ok {
 		w.Header().Set("Location", "/oauth/login")
 		w.WriteHeader(http.StatusFound)
 		return
@@ -72,9 +74,16 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		store.Set("LoggedInUserID", r.Form.Get("email"))
-		store.Save()
+		email := r.Form.Get("email")
+		password := r.Form.Get("password")
 
+		user, err := authentication_service.Authentication(email, password)
+		if err != nil {
+			outputHTML(w, r, "static/error.html")
+			return
+		}
+		store.Set("LoggedUserId", user.ID)
+		store.Save()
 		w.Header().Set("Location", "/oauth/auth")
 		w.WriteHeader(http.StatusFound)
 		return

@@ -8,9 +8,23 @@ import (
 
 	"github.com/brutalzinn/api-task-list/configs"
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
+	user_service "github.com/brutalzinn/api-task-list/services/database/user"
+	crypt_util "github.com/brutalzinn/api-task-list/services/utils/crypt"
 
 	"github.com/golang-jwt/jwt/v4"
 )
+
+func Authentication(email string, password string) (user database_entities.User, err error) {
+	user, err = user_service.FindByEmail(email)
+	if err != nil {
+		return user, errors.New("Invalid user")
+	}
+	validPassword := crypt_util.CheckPasswordHash(password, user.Password)
+	if validPassword == false {
+		return user, errors.New("Invalid user")
+	}
+	return user, nil
+}
 
 func GenerateJWT(id string) (string, error) {
 	var secretKey = configs.GetAuthSecret()

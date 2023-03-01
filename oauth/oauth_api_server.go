@@ -84,7 +84,7 @@ func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string
 		return
 	}
 
-	uid, ok := store.Get("LoggedInUserID")
+	uid, ok := store.Get("LoggedUserId")
 	if !ok {
 		if r.Form == nil {
 			r.ParseForm()
@@ -99,9 +99,8 @@ func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string
 	}
 
 	userID = uid.(string)
-	store.Delete("LoggedInUserID")
+	store.Delete("LoggedUserId")
 	store.Save()
-	w.Header().Set("Location", r.Form.Get("redirect_uri"))
 	return
 }
 
