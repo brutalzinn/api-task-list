@@ -8,8 +8,11 @@ import (
 
 func Register(route *chi.Mux) {
 	route.Group(func(r chi.Router) {
-		r.Get("/oauth/login", oauth_controller.LoginForm)
-		r.Post("/oauth/token", oauth_controller.Token)
-		r.Post("/oauth/authorize", oauth_controller.Authorize)
+		r.HandleFunc("/oauth/login", oauth_controller.LoginHandler)
+		r.HandleFunc("/oauth/auth", oauth_controller.AuthHandler)
+		r.HandleFunc("/oauth/authorize", oauth_controller.Authorize)
+		r.HandleFunc("/oauth/token", oauth_controller.Token)
+		r.HandleFunc("/oauth/test", oauth_controller.Test)
+
 	})
 }

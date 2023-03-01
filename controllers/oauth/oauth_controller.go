@@ -1,17 +1,15 @@
 package oauth_controller
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 
 	oauth_api_server "github.com/brutalzinn/api-task-list/oauth"
 	"github.com/go-session/session"
 )
-
-func LoginForm(w http.ResponseWriter, r *http.Request) {
-	outputHTML(w, r, "static/login.html")
-}
 
 func Token(w http.ResponseWriter, r *http.Request) {
 	srv := oauth_api_server.GetOauthServer()
@@ -44,7 +42,7 @@ func Authorize(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func authHandler(w http.ResponseWriter, r *http.Request) {
+func AuthHandler(w http.ResponseWriter, r *http.Request) {
 	store, err := session.Start(nil, w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -52,19 +50,21 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, ok := store.Get("LoggedInUserID"); !ok {
-		w.Header().Set("Location", "/login")
+		w.Header().Set("Location", "/oauth/login")
 		w.WriteHeader(http.StatusFound)
 		return
 	}
 
 	outputHTML(w, r, "static/auth.html")
+
 }
-func loginHandler(w http.ResponseWriter, r *http.Request) {
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	store, err := session.Start(r.Context(), w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	if r.Method == "POST" {
 		if r.Form == nil {
 			if err := r.ParseForm(); err != nil {
@@ -72,10 +72,10 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		store.Set("LoggedInUserID", r.Form.Get("username"))
+		store.Set("LoggedInUserID", r.Form.Get("email"))
 		store.Save()
 
-		w.Header().Set("Location", "/auth")
+		w.Header().Set("Location", "/oauth/auth")
 		w.WriteHeader(http.StatusFound)
 		return
 	}
@@ -91,4 +91,22 @@ func outputHTML(w http.ResponseWriter, req *http.Request, filename string) {
 	defer file.Close()
 	fi, _ := file.Stat()
 	http.ServeContent(w, req, file.Name(), fi.ModTime(), file)
+}
+
+func Test(w http.ResponseWriter, r *http.Request) {
+	srv := oauth_api_server.GetOauthServer()
+	token, err := srv.ValidationBearerToken(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	data := map[string]interface{}{
+		"expires_in": int64(token.GetAccessCreateAt().Add(token.GetAccessExpiresIn()).Sub(time.Now()).Seconds()),
+		"client_id":  token.GetClientID(),
+		"user_id":    token.GetUserID(),
+	}
+	e := json.NewEncoder(w)
+	e.SetIndent("", "  ")
+	e.Encode(data)
 }

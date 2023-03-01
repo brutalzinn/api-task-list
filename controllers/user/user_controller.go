@@ -76,13 +76,8 @@ func List(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 func Delete(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
-	if err != nil {
-		log.Printf("error on decode json %v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-	rows, err := user_service.Delete(int64(id))
+	id := chi.URLParam(r, "id")
+	rows, err := user_service.Delete(id)
 	if err != nil {
 		log.Printf("error on delete register %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -93,7 +88,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	}
 	resp := map[string]any{
 		"Error":   false,
-		"Message": "Task deleted",
+		"Message": "User deleted",
 	}
 	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)

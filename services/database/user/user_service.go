@@ -7,7 +7,7 @@ import (
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
 )
 
-func Delete(id int64) (int64, error) {
+func Delete(id string) (int64, error) {
 	conn, err := db.OpenConnection()
 	if err != nil {
 		return 0, err

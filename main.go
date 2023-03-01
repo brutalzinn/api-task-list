@@ -34,7 +34,6 @@ func main() {
 		panic(err)
 	}
 	config := configs.GetConfig().API
-	oauth_api_server.InitOauthServer()
 	route := chi.NewRouter()
 	route.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
@@ -51,6 +50,7 @@ func main() {
 	apikey_route.Register(route)
 	repo_route.Register(route)
 	oauth_route.Register(route)
+	oauth_api_server.InitOauthServer()
 	fmt.Printf("API-AUTO-ASSISTANT STARTED WITH PORT %s", config.Port)
 	http.ListenAndServe(fmt.Sprintf(":%s", config.Port), route)
 }
