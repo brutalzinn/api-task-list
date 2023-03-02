@@ -10,14 +10,13 @@ import (
 
 	request_entities "github.com/brutalzinn/api-task-list/models/request"
 	response_entities "github.com/brutalzinn/api-task-list/models/response"
-	oauth_api_server "github.com/brutalzinn/api-task-list/oauth"
 	authentication_service "github.com/brutalzinn/api-task-list/services/authentication"
 	"github.com/go-oauth2/oauth2/v4/models"
 	"github.com/go-session/session"
 )
 
 func Token(w http.ResponseWriter, r *http.Request) {
-	srv := oauth_api_server.GetOauthServer()
+	srv := authentication_service.GetOauthServer()
 	err := srv.HandleTokenRequest(w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -25,7 +24,7 @@ func Token(w http.ResponseWriter, r *http.Request) {
 }
 
 func Authorize(w http.ResponseWriter, r *http.Request) {
-	srv := oauth_api_server.GetOauthServer()
+	srv := authentication_service.GetOauthServer()
 	store, err := session.Start(r.Context(), w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -96,7 +95,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func Test(w http.ResponseWriter, r *http.Request) {
-	srv := oauth_api_server.GetOauthServer()
+	srv := authentication_service.GetOauthServer()
 	token, err := srv.ValidationBearerToken(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -121,7 +120,7 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	clientStore := oauth_api_server.GetClientStore()
+	clientStore := authentication_service.GetClientStore()
 	clientId := authentication_service.CreateUUID()
 	secretId := authentication_service.CreateUUID()
 	clientStore.Create(&models.Client{
@@ -130,27 +129,15 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 		Domain: request.Callback,
 	})
 	data := map[string]interface{}{
-		"client_id": clientId,
-		"secret_id": secretId,
+		"client_id":     clientId,
+		"client_secret": secretId,
 	}
-	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(data)
+	response_entities.GenericOK(w, r, data)
 }
 
 func List(w http.ResponseWriter, r *http.Request) {
-	srv := oauth_api_server.GetOauthServer()
-	token, err := srv.ValidationBearerToken(r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
 
-	data := map[string]interface{}{
-		"expires_in": int64(token.GetAccessCreateAt().Add(token.GetAccessExpiresIn()).Sub(time.Now()).Seconds()),
-		"client_id":  token.GetClientID(),
-		"user_id":    token.GetUserID(),
-	}
-	response_entities.GenericOK(w, r, data)
+	response_entities.GenericOK(w, r, "OK")
 }
 
 func outputHTML(w http.ResponseWriter, req *http.Request, filename string) {

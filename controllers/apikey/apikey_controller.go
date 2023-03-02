@@ -17,8 +17,8 @@ import (
 	authentication_service "github.com/brutalzinn/api-task-list/services/authentication"
 	authentication_util "github.com/brutalzinn/api-task-list/services/authentication"
 	apikey_service "github.com/brutalzinn/api-task-list/services/database/apikey"
-	converter_util "github.com/brutalzinn/api-task-list/services/utils/converter"
-	crypt_util "github.com/brutalzinn/api-task-list/services/utils/crypt"
+	converter_util "github.com/brutalzinn/api-task-list/utils/converter"
+	crypt_util "github.com/brutalzinn/api-task-list/utils/crypt"
 	"github.com/go-chi/chi/v5"
 )
 

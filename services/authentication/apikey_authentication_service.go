@@ -10,7 +10,7 @@ import (
 
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
 	apikey_service "github.com/brutalzinn/api-task-list/services/database/apikey"
-	crypt_util "github.com/brutalzinn/api-task-list/services/utils/crypt"
+	crypt_util "github.com/brutalzinn/api-task-list/utils/crypt"
 	"github.com/google/uuid"
 )
 

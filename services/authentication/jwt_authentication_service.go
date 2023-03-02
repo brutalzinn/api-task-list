@@ -9,7 +9,7 @@ import (
 	"github.com/brutalzinn/api-task-list/configs"
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
 	user_service "github.com/brutalzinn/api-task-list/services/database/user"
-	crypt_util "github.com/brutalzinn/api-task-list/services/utils/crypt"
+	crypt_util "github.com/brutalzinn/api-task-list/utils/crypt"
 
 	"github.com/golang-jwt/jwt/v4"
 )

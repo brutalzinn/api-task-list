@@ -10,8 +10,7 @@ import (
 	response_entities "github.com/brutalzinn/api-task-list/models/response"
 	authentication_util "github.com/brutalzinn/api-task-list/services/authentication"
 	user_service "github.com/brutalzinn/api-task-list/services/database/user"
-	crypt_utils "github.com/brutalzinn/api-task-list/services/utils/crypt"
-
+	crypt_util "github.com/brutalzinn/api-task-list/utils/crypt"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -101,7 +100,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	hash, _ := crypt_utils.HashPassword(user.Password, 15)
+	hash, _ := crypt_util.HashPassword(user.Password, 15)
 	user.Password = hash
 	_, err = user_service.Insert(user)
 	resp := response_entities.GenericResponse{
@@ -126,7 +125,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	user, err := user_service.FindByEmail(auth.Email)
-	validPassword := crypt_utils.CheckPasswordHash(auth.Password, user.Password)
+	validPassword := crypt_util.CheckPasswordHash(auth.Password, user.Password)
 	if validPassword == false {
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return

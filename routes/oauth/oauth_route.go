@@ -14,12 +14,10 @@ func Register(route *chi.Mux) {
 		r.HandleFunc("/oauth/authorize", oauth_controller.Authorize)
 		r.HandleFunc("/oauth/token", oauth_controller.Token)
 		r.HandleFunc("/oauth/test", oauth_controller.Test)
-
 		r.Group(func(r chi.Router) {
 			r.Use(middlewares.JWTMiddleware)
 			r.Post("/oauth/generate", oauth_controller.Generate)
-			r.Post("/oauth/list", oauth_controller.List)
-
+			r.Get("/oauth/list", oauth_controller.List)
 		})
 	})
 }
