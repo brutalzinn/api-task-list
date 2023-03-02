@@ -9,35 +9,35 @@ import (
 )
 
 func Delete(id int64) (int64, error) {
-	conn, err := db.OpenConnection()
+	conn, err, ctx := db.OpenConnection()
 	if err != nil {
 		return 0, err
 	}
-	defer conn.Close()
-	res, err := conn.Exec("DELETE FROM api_keys WHERE id=$1", id)
+	defer conn.Close(ctx)
+	res, err := conn.Exec(ctx, "DELETE FROM api_keys WHERE id=$1", id)
 	if err != nil {
 		return 0, err
 	}
-	return res.RowsAffected()
+	return res.RowsAffected(), nil
 }
 
 func Get(keyId string) (apiKey database_entities.ApiKey, err error) {
-	conn, err := db.OpenConnection()
+	conn, err, ctx := db.OpenConnection()
 	if err != nil {
 		return
 	}
-	defer conn.Close()
-	row := conn.QueryRow("SELECT * FROM api_keys WHERE id=$1", keyId)
+	defer conn.Close(ctx)
+	row := conn.QueryRow(ctx, "SELECT * FROM api_keys WHERE id=$1", keyId)
 	err = row.Scan(&apiKey.ID, &apiKey.ApiKey, &apiKey.Scopes, &apiKey.UserId, &apiKey.Name, &apiKey.NameNormalized, &apiKey.ExpireAt, &apiKey.CreateAt, &apiKey.UpdateAt)
 	return
 }
 func GetAll(userId string) (apiKeys []database_entities.ApiKey, err error) {
-	conn, err := db.OpenConnection()
+	conn, err, ctx := db.OpenConnection()
 	if err != nil {
 		return
 	}
-	defer conn.Close()
-	rows, err := conn.Query("SELECT * FROM api_keys WHERE user_id=$1", userId)
+	defer conn.Close(ctx)
+	rows, err := conn.Query(ctx, "SELECT * FROM api_keys WHERE user_id=$1", userId)
 	if err != nil {
 		return
 	}
@@ -52,77 +52,77 @@ func GetAll(userId string) (apiKeys []database_entities.ApiKey, err error) {
 	return
 }
 func GetByUserAndName(userId int64, appName string) (apiKey database_entities.ApiKey, err error) {
-	conn, err := db.OpenConnection()
+	conn, err, ctx := db.OpenConnection()
 	if err != nil {
 		return
 	}
-	defer conn.Close()
-	row := conn.QueryRow("SELECT * FROM api_keys WHERE user_id=$1 and name_normalized=$2", userId, appName)
+	defer conn.Close(ctx)
+	row := conn.QueryRow(ctx, "SELECT * FROM api_keys WHERE user_id=$1 and name_normalized=$2", userId, appName)
 	err = row.Scan(&apiKey.ID, &apiKey.ApiKey, &apiKey.Scopes, &apiKey.UserId, &apiKey.Name, &apiKey.NameNormalized, &apiKey.ExpireAt, &apiKey.CreateAt, &apiKey.UpdateAt)
 	return
 }
 func GetByIdAndUser(id string, userId string) (apiKey database_entities.ApiKey, err error) {
-	conn, err := db.OpenConnection()
+	conn, err, ctx := db.OpenConnection()
 	if err != nil {
 		return
 	}
-	defer conn.Close()
-	row := conn.QueryRow("SELECT * FROM api_keys WHERE id=$1 and user_id=$2", id, userId)
+	defer conn.Close(ctx)
+	row := conn.QueryRow(ctx, "SELECT * FROM api_keys WHERE id=$1 and user_id=$2", id, userId)
 	err = row.Scan(&apiKey.ID, &apiKey.ApiKey, &apiKey.Scopes, &apiKey.UserId, &apiKey.Name, &apiKey.NameNormalized, &apiKey.ExpireAt, &apiKey.CreateAt, &apiKey.UpdateAt)
 	return
 }
 func CountByUserAndName(userId string, appName string) (count int64, err error) {
-	conn, err := db.OpenConnection()
+	conn, err, ctx := db.OpenConnection()
 	if err != nil {
 		return
 	}
-	defer conn.Close()
-	row := conn.QueryRow("SELECT COUNT(*) FROM api_keys WHERE user_id=$1 and name_normalized=$2", userId, appName)
+	defer conn.Close(ctx)
+	row := conn.QueryRow(ctx, "SELECT COUNT(*) FROM api_keys WHERE user_id=$1 and name_normalized=$2", userId, appName)
 	err = row.Scan(&count)
 	return
 }
 
 func DeleteByIdAndUser(id string, userId string) (int64, error) {
-	conn, err := db.OpenConnection()
+	conn, err, ctx := db.OpenConnection()
 	if err != nil {
 		return 0, err
 	}
-	defer conn.Close()
-	res, err := conn.Exec("DELETE FROM api_keys WHERE id=$1 and user_id=$2", id, userId)
+	defer conn.Close(ctx)
+	res, err := conn.Exec(ctx, "DELETE FROM api_keys WHERE id=$1 and user_id=$2", id, userId)
 	if err != nil {
 		return 0, err
 	}
-	return res.RowsAffected()
+	return res.RowsAffected(), nil
 }
 func Count(userId string) (count int64, err error) {
-	conn, err := db.OpenConnection()
+	conn, err, ctx := db.OpenConnection()
 	if err != nil {
 		return
 	}
-	defer conn.Close()
-	row := conn.QueryRow("SELECT COUNT(*) FROM api_keys WHERE user_id=$1", userId)
+	defer conn.Close(ctx)
+	row := conn.QueryRow(ctx, "SELECT COUNT(*) FROM api_keys WHERE user_id=$1", userId)
 	err = row.Scan(&count)
 	return
 }
 func Insert(apiKey database_entities.ApiKey) (id string, err error) {
-	conn, err := db.OpenConnection()
+	conn, err, ctx := db.OpenConnection()
 	if err != nil {
 		return
 	}
-	defer conn.Close()
+	defer conn.Close(ctx)
 	sql := "INSERT INTO api_keys (id, apiKey, scopes, name, name_normalized, user_id, create_at, expire_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id"
-	err = conn.QueryRow(sql, &apiKey.ID, &apiKey.ApiKey, &apiKey.Scopes, &apiKey.Name, &apiKey.NameNormalized, apiKey.UserId, converter_util.ToDateTimeString(time.Now()), &apiKey.ExpireAt).Scan(&id)
+	err = conn.QueryRow(ctx, sql, &apiKey.ID, &apiKey.ApiKey, &apiKey.Scopes, &apiKey.Name, &apiKey.NameNormalized, apiKey.UserId, converter_util.ToDateTimeString(time.Now()), &apiKey.ExpireAt).Scan(&id)
 	return
 }
 func Update(id string, apiKey database_entities.ApiKey) (int64, error) {
-	conn, err := db.OpenConnection()
+	conn, err, ctx := db.OpenConnection()
 	if err != nil {
 		return 0, err
 	}
-	defer conn.Close()
-	res, err := conn.Exec("UPDATE api_keys SET apiKey=$1,scopes=$2,name=$3,update_at=$4,expire_at=$5 WHERE id=$6", &apiKey.ApiKey, &apiKey.Scopes, &apiKey.Name, converter_util.ToDateTimeString(time.Now()), &apiKey.ExpireAt, id)
+	defer conn.Close(ctx)
+	res, err := conn.Exec(ctx, "UPDATE api_keys SET apiKey=$1,scopes=$2,name=$3,update_at=$4,expire_at=$5 WHERE id=$6", &apiKey.ApiKey, &apiKey.Scopes, &apiKey.Name, converter_util.ToDateTimeString(time.Now()), &apiKey.ExpireAt, id)
 	if err != nil {
 		return 0, err
 	}
-	return res.RowsAffected()
+	return res.RowsAffected(), nil
 }

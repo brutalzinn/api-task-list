@@ -68,7 +68,7 @@ func createOAuthServer() (*server.Server, error) {
 	manager.MapTokenStorage(tokenStore)
 	manager.MapClientStorage(clientStore)
 	srv := server.NewServer(server.NewConfig(), manager)
-	srv.SetUserAuthorizationHandler(userAuthorizeHandler)
+	srv.SetUserAuthorizationHandler(UserAuthorizeHandler)
 	srv.SetInternalErrorHandler(func(err error) (re *errors.Response) {
 		log.Println("Internal Error:", err.Error())
 		return
@@ -83,7 +83,17 @@ func createOAuthServer() (*server.Server, error) {
 	return srv, nil
 }
 
-func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string, err error) {
+func DumpRequest(writer io.Writer, header string, r *http.Request) error {
+	data, err := httputil.DumpRequest(r, true)
+	if err != nil {
+		return err
+	}
+	writer.Write([]byte("\n" + header + ": \n"))
+	writer.Write(data)
+	return nil
+}
+
+func UserAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string, err error) {
 	store, err := session.Start(r.Context(), w, r)
 	if err != nil {
 		return
@@ -107,14 +117,4 @@ func userAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string
 	store.Delete("LoggedUserId")
 	store.Save()
 	return
-}
-
-func DumpRequest(writer io.Writer, header string, r *http.Request) error {
-	data, err := httputil.DumpRequest(r, true)
-	if err != nil {
-		return err
-	}
-	writer.Write([]byte("\n" + header + ": \n"))
-	writer.Write(data)
-	return nil
 }
