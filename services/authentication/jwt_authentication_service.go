@@ -14,16 +14,16 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func Authentication(email string, password string) (user database_entities.User, err error) {
-	user, err = user_service.FindByEmail(email)
+func Authentication(email string, password string) (userId string, err error) {
+	user, err := user_service.FindByEmail(email)
 	if err != nil {
-		return user, errors.New("Invalid user")
+		return "", errors.New("Invalid user")
 	}
 	validPassword := crypt_util.CheckPasswordHash(password, user.Password)
 	if validPassword == false {
-		return user, errors.New("Invalid user")
+		return "", errors.New("Invalid user")
 	}
-	return user, nil
+	return user.ID, nil
 }
 
 func GenerateJWT(id string) (string, error) {
