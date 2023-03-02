@@ -64,7 +64,6 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 	}
 	days := apiKeyRequest.ExpireAt.Days()
 	expireAt := time.Now().Add(time.Hour * 24 * time.Duration(days))
-	expireAtFormat := converter_util.ToDateString(expireAt)
 	uuid := authentication_service.CreateUUID()
 	randomFactor := authentication_service.CreateRandomFactor()
 	apiKeyCrypt, _ := authentication_service.CreateApiKeyCrypt(uuid, randomFactor)
@@ -83,7 +82,7 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 		Name:           apiKeyRequest.Name,
 		NameNormalized: nameNormalized,
 		UserId:         userId,
-		ExpireAt:       expireAtFormat,
+		ExpireAt:       expireAt,
 	}
 	_, err = apikey_service.Insert(apikey)
 	if err != nil {
@@ -113,17 +112,13 @@ func Regenerate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusNotAcceptable), http.StatusNotAcceptable)
 		return
 	}
-	expireAt, _ := converter_util.ToDateTime(apiKey.ExpireAt)
 	var expireDiff time.Duration
 	if apiKey.UpdateAt != nil {
-		updateAt, _ := converter_util.ToDateTime(*apiKey.UpdateAt)
-		expireDiff = expireAt.Sub(updateAt)
+		expireDiff = apiKey.ExpireAt.Sub(*apiKey.UpdateAt)
 	} else {
-		createAt, _ := converter_util.ToDateTime(*apiKey.CreateAt)
-		expireDiff = expireAt.Sub(createAt)
+		expireDiff = apiKey.ExpireAt.Sub(*apiKey.CreateAt)
 	}
-	expireAt = time.Now().Add(expireDiff)
-	expireAtFormat := converter_util.ToDateString(expireAt)
+	apiKey.ExpireAt = time.Now().Add(expireDiff)
 	nameNormalized := apiKey.NameNormalized
 	randomFactor := authentication_service.CreateRandomFactor()
 	apiKeyCrypt, _ := authentication_service.CreateApiKeyCrypt(apiKey.ID, randomFactor)
@@ -139,7 +134,7 @@ func Regenerate(w http.ResponseWriter, r *http.Request) {
 		Name:           apiKey.Name,
 		NameNormalized: nameNormalized,
 		UserId:         userId,
-		ExpireAt:       expireAtFormat,
+		ExpireAt:       apiKey.ExpireAt,
 	}
 	_, err = apikey_service.Update(id, apikey)
 	if err != nil {

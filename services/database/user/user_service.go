@@ -41,7 +41,7 @@ func GetAll() (users []database_entities.User, err error) {
 	}
 	return
 }
-func Get(id int64) (user database_entities.User, err error) {
+func Get(id string) (user database_entities.User, err error) {
 	conn, err, ctx := db.OpenConnection()
 	if err != nil {
 		return
@@ -59,7 +59,8 @@ func Insert(user database_entities.User) (id string, err error) {
 	if err != nil {
 		return
 	}
-	sql := "INSERT INTO users (email, password, username, firebaseToken, create_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
+	defer conn.Close(ctx)
+	sql := "INSERT INTO users (email, password, username, firebasetoken, create_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
 	err = conn.QueryRow(ctx, sql, user.Email, user.Password, user.Username, user.FirebaseToken, time.Now()).Scan(&id)
 	return
 }
@@ -68,6 +69,7 @@ func Update(id int64, user database_entities.User) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+	defer conn.Close(ctx)
 	res, err := conn.Exec(ctx, "UPDATE users SET email=$1, password=$2, username=$3, firebaseToken=$4, update_at=$5 WHERE id=$6",
 		user.Email, user.Password, user.Username, user.FirebaseToken, user.UpdateAt, id)
 	if err != nil {

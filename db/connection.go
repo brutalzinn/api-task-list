@@ -15,7 +15,6 @@ func OpenConnection() (*pgx.Conn, error, context.Context) {
 		panic(err)
 	}
 	err = conn.Ping(ctx)
-	defer conn.Close(ctx)
 	return conn, err, ctx
 }
 

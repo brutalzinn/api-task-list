@@ -1,7 +1,6 @@
 package oauth_controller
 
 import (
-	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -127,7 +126,7 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 	clientId := authentication_service.CreateRandomFactor()
 	secretId := authentication_service.CreateUUID()
 	tokenInfo := oauth2.TokenInfo.New(nil)
-	tokenManager.Create(context.TODO(), tokenInfo)
+	tokenManager.Create(r.Context(), tokenInfo)
 
 	// clientManager.Create(clientId, &models.Client{
 	// 	ID:     clientId,

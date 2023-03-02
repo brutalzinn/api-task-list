@@ -16,8 +16,8 @@ import (
 )
 
 func Get(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
-	users, err := user_service.Get(int64(id))
+	id := chi.URLParam(r, "id")
+	users, err := user_service.Get(id)
 	if err != nil {
 		log.Printf("error on decode json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

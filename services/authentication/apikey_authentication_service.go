@@ -10,7 +10,6 @@ import (
 
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
 	apikey_service "github.com/brutalzinn/api-task-list/services/database/apikey"
-	converter_util "github.com/brutalzinn/api-task-list/services/utils/converter"
 	crypt_util "github.com/brutalzinn/api-task-list/services/utils/crypt"
 	"github.com/google/uuid"
 )
@@ -78,14 +77,9 @@ func removeApiPrefix(apiKeyCrypt string) (string, error) {
 	return apiKey, nil
 }
 
-func isKeyExpired(expireAt string) bool {
-	date, err := converter_util.ToDateTime(expireAt)
-	if err != nil {
-		fmt.Println(err)
-		return true
-	}
+func isKeyExpired(expireAt time.Time) bool {
 	currentDateTime := time.Now()
-	if date.After(currentDateTime) {
+	if expireAt.After(currentDateTime) {
 		return false
 	}
 	return true

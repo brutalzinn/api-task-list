@@ -1,5 +1,7 @@
 package database_entities
 
+import "time"
+
 type ApiKey struct {
 	ID             string
 	ApiKey         string
@@ -7,7 +9,7 @@ type ApiKey struct {
 	Name           string
 	NameNormalized string
 	UserId         string
-	CreateAt       *string
-	UpdateAt       *string
-	ExpireAt       string
+	CreateAt       *time.Time
+	UpdateAt       *time.Time
+	ExpireAt       time.Time
 }

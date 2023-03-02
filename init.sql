@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS tasks (
     repo_id INT NOT NULL,
     description TEXT,
     text TEXT,
-    create_at timestamp default NULL,
-    update_at timestamp default NULL
+    create_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    update_at timestamptz default NULL
 );
 
 CREATE TABLE IF NOT EXISTS repos (
@@ -15,8 +15,8 @@ CREATE TABLE IF NOT EXISTS repos (
 	title TEXT default NULL,
     description TEXT default NULL,
     user_id uuid NOT NULL,
-    create_at timestamp default NULL,
-    update_at timestamp default NULL
+    create_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    update_at timestamptz default NULL
 );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -25,8 +25,8 @@ CREATE TABLE IF NOT EXISTS users (
     password varchar(100),
     username TEXT,
     firebaseToken TEXT,
-    create_at timestamp default NULL,
-    update_at timestamp default NULL
+    create_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    update_at timestamptz default NULL
 );
 
 CREATE TABLE IF NOT EXISTS api_keys (
@@ -36,9 +36,9 @@ CREATE TABLE IF NOT EXISTS api_keys (
 	user_id uuid NOT NULL,
     name text NOT NULL,
     name_normalized text NOT NULL,
-    expire_at timestamp default NULL,
-	create_at timestamp default NULL,
-	update_at timestamp default NULL
+    expire_at timestamptz default NULL,
+	create_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+	update_at timestamptz default NULL
 );
 
 ALTER TABLE api_keys

@@ -1,6 +1,8 @@
 package dto
 
 import (
+	"time"
+
 	"github.com/brutalzinn/api-task-list/middlewares/hypermedia"
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
 )
@@ -8,10 +10,10 @@ import (
 type ApiKeyDTO struct {
 	ID       string                      `json:"id"`
 	Name     string                      `json:"name"`
-	ExpireAt string                      `json:"expireAt"`
+	ExpireAt time.Time                   `json:"expireAt"`
 	Scopes   string                      `json:"scopes"`
-	UpdateAt *string                     `json:"updateAt"`
-	CreateAt *string                     `json:"createAt"`
+	UpdateAt *time.Time                  `json:"updateAt"`
+	CreateAt *time.Time                  `json:"createAt"`
 	Links    []hypermedia.HypermediaLink `json:"links"`
 }
 
