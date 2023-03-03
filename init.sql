@@ -49,7 +49,7 @@ CREATE TABLE IF not  exists  users_oauth_client(
 
 CREATE TABLE IF not  exists  oauth_client_application(
     id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    appname uuid NOT NULL,
+    appname text NOT NULL,
     mode INT NOT NULL,
 	oauth_client_id uuid NOT NULL,
     create_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP(6),

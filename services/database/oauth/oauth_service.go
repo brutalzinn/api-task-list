@@ -37,23 +37,24 @@ func CreateOauthForUser(oAuthApp database_entities.OAuthApp) (err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = tx.Exec(ctx, "INSERT INTO users_oauth_client (user_id, oauth_client_id) VALUES($1, $2)", oAuthApp.UserId, oAuthApp.OAuthClientId)
+	_, err = tx.Exec(ctx, "INSERT INTO users_oauth_client (user_id, oauth_client_id) VALUES ($1, $2)", oAuthApp.UserId, oAuthApp.OAuthClientId)
 	if err != nil {
 		log.Fatal(err)
+		return
 	}
 	nestedTx, err := tx.Begin(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = nestedTx.Exec(ctx, "INSERT INTO oauth_client_application(appname, mode, oauth_client_id) VALUES($1, $2, $3)",
-		oAuthApp.AppName, oAuthApp.Mode, oAuthApp.OAuthClientId, oAuthApp.CreateAt, oAuthApp.UpdateAt)
+	_, err = nestedTx.Exec(ctx, "INSERT INTO oauth_client_application (appname, mode, oauth_client_id) VALUES ($1, $2, $3)",
+		oAuthApp.AppName, oAuthApp.Mode, oAuthApp.OAuthClientId)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	err = tx.Commit(ctx)
 	if err != nil {
-		log.Fatal(err)
+		return
 	}
 	return
 }

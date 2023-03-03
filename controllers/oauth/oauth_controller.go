@@ -8,9 +8,11 @@ import (
 	"os"
 	"time"
 
+	database_entities "github.com/brutalzinn/api-task-list/models/database"
 	request_entities "github.com/brutalzinn/api-task-list/models/request"
 	response_entities "github.com/brutalzinn/api-task-list/models/response"
 	authentication_service "github.com/brutalzinn/api-task-list/services/authentication"
+	oauth_service "github.com/brutalzinn/api-task-list/services/database/oauth"
 	"github.com/go-oauth2/oauth2/v4/models"
 	"github.com/go-session/session"
 )
@@ -130,6 +132,17 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 		Secret: secretId,
 		Domain: request.Callback,
 	})
+	newApp := database_entities.OAuthApp{
+		AppName:       request.ApplicationName,
+		Mode:          0,
+		UserId:        userId,
+		OAuthClientId: clientId,
+	}
+	err = oauth_service.CreateOauthForUser(newApp)
+	if err != nil {
+		response_entities.GenericMessageError(w, r, "Cant create your credentials.")
+		return
+	}
 	data := map[string]interface{}{
 		"client_id":     clientId,
 		"client_secret": secretId,
