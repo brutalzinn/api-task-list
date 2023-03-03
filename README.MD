@@ -11,7 +11,7 @@
 - https://github.com/brutalzinn/cli-task-list
 
 
-# Implementations
+# Goals
 
 - [x] Authentication
 - [x] Tasks route
@@ -22,8 +22,15 @@
 - [x] Table tasks
 - [x] Table api keys
 - [x] Hypermedia links base
-- [ ] Swagger
-- [ ] Firebase integration
+- [ ] Go tests
+- [ ] CI/CD to digital ocean with Dokku
+- [ ] Swagger auto documentation
+- [ ] Notification channel for discord, twitter and firebase
+
+# Table relations
+
+#### This is the current table configuration with all data explained ( still in development )
+<img src="docs/imgs/relationship_table_oauth2.drawio.png" alt="postman example of api keys list" height="50%"/>
 
 # Purpose of existence
 

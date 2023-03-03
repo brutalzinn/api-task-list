@@ -113,6 +113,7 @@ func Test(w http.ResponseWriter, r *http.Request) {
 }
 
 func Generate(w http.ResponseWriter, r *http.Request) {
+	userId := authentication_service.GetCurrentUser(w, r)
 	var request request_entities.OauthGenerateRequest
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
@@ -124,6 +125,7 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 	clientId := authentication_service.CreateUUID()
 	secretId := authentication_service.CreateUUID()
 	clientStore.Create(&models.Client{
+		UserID: userId,
 		ID:     clientId,
 		Secret: secretId,
 		Domain: request.Callback,
@@ -136,9 +138,11 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 }
 
 func List(w http.ResponseWriter, r *http.Request) {
-
+	clientStore := authentication_service.GetClientStore()
+	teste, err := clientStore.GetByID(r.Context(), "")
 	response_entities.GenericOK(w, r, "OK")
 }
+
 
 func outputHTML(w http.ResponseWriter, req *http.Request, filename string) {
 	file, err := os.Open(filename)
