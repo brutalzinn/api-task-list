@@ -29,8 +29,11 @@
 
 # Table relations
 
-#### This is the current table configuration with all data explained ( still in development )
+#### Version 1 by draw.io without relations explicity true  ( still in development )
 <img src="docs/imgs/relationship_table_oauth2.drawio.png" alt="postman example of api keys list" height="50%"/>
+
+#### Version 2 by dbeaver ( still in development )
+<img src="docs/imgs/dbeaver.png" alt="postman example of api keys list" height="50%"/>
 
 # Purpose of existence
 
