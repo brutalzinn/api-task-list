@@ -138,11 +138,10 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 }
 
 func List(w http.ResponseWriter, r *http.Request) {
-	clientStore := authentication_service.GetClientStore()
-	teste, err := clientStore.GetByID(r.Context(), "")
+	// clientStore := authentication_service.GetClientStore()
+	// teste, err := clientStore.GetByID(r.Context(), "")
 	response_entities.GenericOK(w, r, "OK")
 }
-
 
 func outputHTML(w http.ResponseWriter, req *http.Request, filename string) {
 	file, err := os.Open(filename)

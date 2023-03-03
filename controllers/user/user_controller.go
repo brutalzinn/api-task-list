@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
+	request_entities "github.com/brutalzinn/api-task-list/models/request"
 	response_entities "github.com/brutalzinn/api-task-list/models/response"
 	authentication_util "github.com/brutalzinn/api-task-list/services/authentication"
 	user_service "github.com/brutalzinn/api-task-list/services/database/user"
@@ -117,7 +118,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 func Login(w http.ResponseWriter, r *http.Request) {
-	var auth database_entities.AuthRequest
+	var auth request_entities.AuthRequest
 	err := json.NewDecoder(r.Body).Decode(&auth)
 	if err != nil {
 		log.Printf("error on decode json %v", err)
@@ -131,7 +132,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	jwtToken, err := authentication_util.GenerateJWT(user.ID)
-	resp := database_entities.AuthResponse{
+	resp := request_entities.AuthResponse{
 		AccessToken: jwtToken,
 	}
 	w.Header().Add("Content-Type", "application/json")

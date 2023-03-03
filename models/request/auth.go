@@ -1,4 +1,4 @@
-package database_entities
+package request_entities
 
 import "github.com/golang-jwt/jwt/v4"
 
