@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/brutalzinn/api-task-list/configs"
+	"github.com/brutalzinn/api-task-list/db"
 	authentication_service "github.com/brutalzinn/api-task-list/services/authentication"
 
 	_ "github.com/brutalzinn/api-task-list/docs"
@@ -32,6 +33,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	db.CreateConnection()
 	config := configs.GetConfig().API
 	route := chi.NewRouter()
 	route.Use(cors.Handler(cors.Options{

@@ -7,6 +7,32 @@ import (
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
 )
 
+func Delete(oauthApp database_entities.OAuthApp) (int64, error) {
+	conn, err, ctx := db.OpenConnection()
+	if err != nil {
+		return 0, err
+	}
+	defer conn.Close(ctx)
+	res, err := conn.Exec(ctx, "DELETE FROM users_oauth_client WHERE oauth_client_id=$1", oauthApp.OAuthClientId)
+	if err != nil {
+		return 0, err
+	}
+	return res.RowsAffected(), nil
+}
+
+func UpdateSecret(oauthApp database_entities.OAuthApp) (int64, error) {
+	conn, err, ctx := db.OpenConnection()
+	if err != nil {
+		return 0, err
+	}
+	defer conn.Close(ctx)
+	res, err := conn.Exec(ctx, "UPDATE FROM users_oauth_client WHERE oauth_client_id=$1", oauthApp.OAuthClientId)
+	if err != nil {
+		return 0, err
+	}
+	return res.RowsAffected(), nil
+}
+
 func List(userId string) (oauthApps []database_entities.OAuthApp, err error) {
 	conn, err, ctx := db.OpenConnection()
 	if err != nil {

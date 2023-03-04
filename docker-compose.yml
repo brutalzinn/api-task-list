@@ -10,21 +10,22 @@ services:
     #     volumes:
     #         - ./:/app
     #     restart: unless-stopped
-#comment to remember that this database its not attached to any volume
-    database_service:
+    postgres:
         image: postgres
         hostname: postgree_hostname
         environment:
-            - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_USER=test
+            - POSTGRES_PASSWORD=test
             - POSTGRES_DB=test
         ports:
             - "5432:5432"
         volumes:
             - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+        tmpfs:
+            - /var/lib/postgresql/data
         restart: unless-stopped
-    # redis_service:
-    #     image: redis:6.2-alpine
-    #     hostname: redis_hostname
-    #     ports:
-    #     - "6379:6379"
+        healthcheck:
+            test: ["CMD", "pg_isready"]
+            interval: 10s
+            timeout: 5s
+            retries: 5

@@ -13,6 +13,7 @@ import (
 	response_entities "github.com/brutalzinn/api-task-list/models/response"
 	authentication_service "github.com/brutalzinn/api-task-list/services/authentication"
 	oauth_service "github.com/brutalzinn/api-task-list/services/database/oauth"
+	"github.com/go-chi/chi"
 	"github.com/go-oauth2/oauth2/v4/models"
 	"github.com/go-session/session"
 )
@@ -150,40 +151,30 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 	response_entities.GenericOK(w, r, data)
 }
 func Regenerate(w http.ResponseWriter, r *http.Request) {
-	// userId := authentication_service.GetCurrentUser(w, r)
-	// id := chi.URLParam(r, "id")
-	// if id == "" {
-	// 	http.Error(w, http.StatusText(http.StatusNotAcceptable), http.StatusNotAcceptable)
-	// 	return
-	// }
-	// tokenStore := authentication_service.GetTokenStore()
-	// // tokenStore.
-	// clientStore := authentication_service.GetClientStore()
-	// clientId := authentication_service.CreateUUID()
-	// secretId := authentication_service.CreateUUID()
-	// clientStore.Create()
-	// clientStore.Create(&models.Client{
-	// 	UserID: userId,
-	// 	ID:     clientId,
-	// 	Secret: secretId,
-	// 	Domain: request.Callback,
-	// })
-	// newApp := database_entities.OAuthApp{
-	// 	AppName:       request.ApplicationName,
-	// 	Mode:          0,
-	// 	UserId:        userId,
-	// 	OAuthClientId: clientId,
-	// }
-	// err = oauth_service.CreateOauthForUser(newApp)
-	// if err != nil {
-	// 	response_entities.GenericMessageError(w, r, "Cant create your credentials.")
-	// 	return
-	// }
-	// data := map[string]interface{}{
-	// 	"client_id":     clientId,
-	// 	"client_secret": secretId,
-	// }
-	// response_entities.GenericOK(w, r, data)
+	userId := authentication_service.GetCurrentUser(w, r)
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		http.Error(w, http.StatusText(http.StatusNotAcceptable), http.StatusNotAcceptable)
+		return
+	}
+	clientStore := authentication_service.GetClientStore()
+	client, err := clientStore.GetByID(r.Context(), id)
+	if err != nil {
+		response_entities.GenericMessageError(w, r, "Cant create your credentials.")
+		return
+	}
+	secretId := authentication_service.CreateUUID()
+	newClient := &models.Client{
+		UserID: userId,
+		ID:     client.GetID(),
+		Secret: secretId,
+		Domain: client.GetDomain(),
+	}
+	clientStore.Update(newClient)
+	data := map[string]interface{}{
+		"client_secret": secretId,
+	}
+	response_entities.GenericOK(w, r, data)
 }
 func List(w http.ResponseWriter, r *http.Request) {
 	userId := authentication_service.GetCurrentUser(w, r)

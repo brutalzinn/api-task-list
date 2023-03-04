@@ -3,25 +3,29 @@ package db
 import (
 	"context"
 	"fmt"
+	"os"
 
-	"github.com/brutalzinn/api-task-list/configs"
 	"github.com/jackc/pgx/v4"
 )
 
+var uri string
+
+func CreateConnection() {
+	uri := os.Getenv("PG_URI")
+	if uri == "" {
+		fmt.Println("Env variable PG_URI is required to run")
+		os.Exit(1)
+	}
+}
+func GetConnectionUri() string {
+	return uri
+}
 func OpenConnection() (*pgx.Conn, error, context.Context) {
 	ctx := context.Background()
-	conn, err := pgx.ConnectConfig(ctx, GetConnectionAdapter())
+	conn, err := pgx.Connect(ctx, uri)
 	if err != nil {
 		panic(err)
 	}
 	err = conn.Ping(ctx)
 	return conn, err, ctx
-}
-
-func GetConnectionAdapter() *pgx.ConnConfig {
-	conf := configs.GetConfig().DB
-	sc := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		conf.Host, conf.Port, conf.User, conf.Pass, conf.Database)
-	pgConfig, _ := pgx.ParseConfig(sc)
-	return pgConfig
 }

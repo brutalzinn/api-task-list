@@ -40,7 +40,8 @@ CREATE TABLE IF NOT EXISTS api_keys (
 	create_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
 	update_at timestamptz default NULL
 );
-
+-- MY UNDERGROUND ACTION TO PERFMORM WHAT I NEED TO EASILY IMPLEMENTATION
+-- START TABLEs WITH WILL BE USED AS A PROXY BEHIND MY BUSINESS RULE WITH GOLANG OAUTH2 PACKAGE
 CREATE TABLE IF not  exists  users_oauth_client(
     id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     user_id uuid NOT NULL,
@@ -55,8 +56,11 @@ CREATE TABLE IF not exists  oauth_client_application(
     create_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
 	update_at timestamptz default NULL
 );
+-- END TABLES
 
 -- DONT CONTROLLED TABLE THOSE TABLES IS PROVIDED BY GO OAUTH PACKAGE. I THINK I DO THE WRONG CHOOSE. BUT ONLY HAVE MORE ONE WEEK TO CLOSE ALL MY MIND THREADS.
+-- START TABLEs THAT WILL BE CREATED BY OAUTH2 PACKAGE.
+
 CREATE TABLE IF not exists oauth2_clients (
 	id text NOT NULL,
 	"secret" text NOT NULL,
@@ -80,6 +84,8 @@ CREATE INDEX idx_oauth2_tokens_access ON public.oauth2_tokens USING btree (acces
 CREATE INDEX idx_oauth2_tokens_code ON public.oauth2_tokens USING btree (code);
 CREATE INDEX idx_oauth2_tokens_expires_at ON public.oauth2_tokens USING btree (expires_at);
 CREATE INDEX idx_oauth2_tokens_refresh ON public.oauth2_tokens USING btree (refresh);
+
+-- END TABLE NOT UNDER MY CONTROL
 
 
 ALTER TABLE users_oauth_client

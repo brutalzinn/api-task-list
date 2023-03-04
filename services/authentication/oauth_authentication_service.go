@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/brutalzinn/api-task-list/db"
+	pg "github.com/brutalzinn/go-oauth2-pg"
 	"github.com/go-oauth2/oauth2/v4/errors"
 	"github.com/go-oauth2/oauth2/v4/generates"
 	"github.com/go-oauth2/oauth2/v4/manage"
@@ -15,7 +16,6 @@ import (
 	"github.com/go-session/session"
 	"github.com/golang-jwt/jwt"
 	"github.com/jackc/pgx/v4"
-	pg "github.com/vgarvardt/go-oauth2-pg/v4"
 
 	"github.com/vgarvardt/go-pg-adapter/pgx4adapter"
 )
@@ -53,7 +53,7 @@ func GetTokenStore() *pg.TokenStore {
 	return oauthTokenStore
 }
 func createOAuthServer() (*server.Server, error) {
-	pgxConn, _ := pgx.ConnectConfig(context.TODO(), db.GetConnectionAdapter())
+	pgxConn, _ := pgx.Connect(context.TODO(), db.GetConnectionUri())
 	manager := manage.NewDefaultManager()
 
 	adapter := pgx4adapter.NewConn(pgxConn)
