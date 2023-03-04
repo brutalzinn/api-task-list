@@ -2,59 +2,60 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE IF NOT EXISTS tasks (
     id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-	title TEXT,
-    repo_id INT NOT NULL,
-    description TEXT,
-    text TEXT,
-    create_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    update_at timestamptz default NULL
+	"title" TEXT,
+    "repo_id" INT NOT NULL,
+    "description" TEXT,
+    "text" TEXT,
+    "create_at" timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    "update_at" timestamptz default NULL
 );
 
 CREATE TABLE IF NOT EXISTS repos (
     id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-	title TEXT default NULL,
-    description TEXT default NULL,
-    user_id uuid NOT NULL,
-    create_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    update_at timestamptz default NULL
+	"title" TEXT default NULL,
+    "description" TEXT default NULL,
+    "user_id" uuid NOT NULL,
+    "create_at" timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    "update_at" timestamptz default NULL
 );
 
 CREATE TABLE IF NOT EXISTS users (
     id uuid DEFAULT uuid_generate_v4(),
-	email varchar(100),
-    password varchar(100),
-    username TEXT,
-    firebaseToken TEXT,
-    create_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    update_at timestamptz default NULL
+	"email" varchar(100),
+    "password" varchar(100),
+    "username" TEXT,
+    "firebaseToken" TEXT,
+    "create_at" timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    "update_at" timestamptz default NULL
 );
 
 CREATE TABLE IF NOT EXISTS api_keys (
     id uuid DEFAULT uuid_generate_v4(),
-	apikey text NOT NULL,
-	scopes text NOT NULL,
-	user_id uuid NOT NULL,
-    name text NOT NULL,
-    name_normalized text NOT NULL,
-    expire_at timestamptz default NULL,
-	create_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-	update_at timestamptz default NULL
+	"apikey" text NOT NULL,
+	"scopes" text NOT NULL,
+	"user_id" uuid NOT NULL,
+    "name" text NOT NULL,
+    "name_normalized" text NOT NULL,
+    "expire_at" timestamptz default NULL,
+	"create_at" timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+	"update_at" timestamptz default NULL
 );
+
 -- MY UNDERGROUND ACTION TO PERFMORM WHAT I NEED TO EASILY IMPLEMENTATION
 -- START TABLEs WITH WILL BE USED AS A PROXY BEHIND MY BUSINESS RULE WITH GOLANG OAUTH2 PACKAGE
 CREATE TABLE IF not  exists  users_oauth_client(
     id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    user_id uuid NOT NULL,
-	oauth_client_id uuid NOT NULL
+    "user_id" uuid NOT NULL,
+	"oauth_client_id" uuid NOT NULL
 );
 
 CREATE TABLE IF not exists  oauth_client_application(
     id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    appname text NOT NULL,
-    mode INT NOT NULL,
-	oauth_client_id uuid NOT NULL,
-    create_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-	update_at timestamptz default NULL
+    "appname" text NOT NULL,
+    "mode" INT NOT NULL,
+	"oauth_client_id" uuid NOT NULL,
+    "create_at" timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+	"update_at" timestamptz default NULL
 );
 -- END TABLES
 
@@ -71,11 +72,11 @@ CREATE TABLE IF not exists oauth2_clients (
 
 CREATE TABLE IF not exists oauth2_tokens (
 	id bigserial NOT NULL,
-	created_at timestamptz NOT NULL,
-	expires_at timestamptz NOT NULL,
-	code text NOT NULL,
-	access text NOT NULL,
-	refresh text NOT NULL,
+	"created_at" timestamptz NOT NULL,
+	"expires_at" timestamptz NOT NULL,
+	"code" text NOT NULL,
+	"access" text NOT NULL,
+	"refresh" text NOT NULL,
 	"data" jsonb NOT NULL,
 	CONSTRAINT oauth2_tokens_pkey PRIMARY KEY (id)
 );

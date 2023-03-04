@@ -20,7 +20,7 @@ services:
         ports:
             - "5432:5432"
         volumes:
-            - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+            - ./scripts:/docker-entrypoint-initdb.d
         tmpfs:
             - /var/lib/postgresql/data
         restart: unless-stopped
