@@ -151,9 +151,14 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 }
 
 func List(w http.ResponseWriter, r *http.Request) {
-	// clientStore := authentication_service.GetClientStore()
-	// teste, err := clientStore.GetByID(r.Context(), "")
-	response_entities.GenericOK(w, r, "OK")
+	userId := authentication_service.GetCurrentUser(w, r)
+	oauthapps, err := oauth_service.List(userId)
+	if err != nil {
+		log.Printf("error on decode json %v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	response_entities.GenericOK(w, r, oauthapps)
 }
 
 func outputHTML(w http.ResponseWriter, req *http.Request, filename string) {

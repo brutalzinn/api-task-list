@@ -7,23 +7,24 @@ import (
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
 )
 
-func List(userId string) (apiKeys []database_entities.ApiKey, err error) {
+func List(userId string) (oauthApps []database_entities.OAuthApp, err error) {
 	conn, err, ctx := db.OpenConnection()
 	if err != nil {
 		return
 	}
 	defer conn.Close(ctx)
-	rows, err := conn.Query(ctx, "SELECT * FROM oauth2_clients WHERE user_id=$1", userId)
+	rows, err := conn.Query(ctx, "SELECT client_app.id, appname, mode, client_app.oauth_client_id, user_id, create_at, update_at FROM oauth_client_application as client_app INNER JOIN users_oauth_client as uc ON uc.oauth_client_id = client_app.oauth_client_id where uc.user_id=$1", userId)
 	if err != nil {
+		log.Fatal(err)
 		return
 	}
 	for rows.Next() {
-		var apiKey database_entities.ApiKey
-		err = rows.Scan(&apiKey.ID, &apiKey.ApiKey, &apiKey.Scopes, &apiKey.UserId, &apiKey.Name, &apiKey.NameNormalized, &apiKey.ExpireAt, &apiKey.CreateAt, &apiKey.UpdateAt)
+		var oauthApp database_entities.OAuthApp
+		err = rows.Scan(&oauthApp.ID, &oauthApp.AppName, &oauthApp.Mode, &oauthApp.OAuthClientId, &oauthApp.UserId, &oauthApp.CreateAt, &oauthApp.UpdateAt)
 		if err != nil {
 			continue
 		}
-		apiKeys = append(apiKeys, apiKey)
+		oauthApps = append(oauthApps, oauthApp)
 	}
 	return
 }
