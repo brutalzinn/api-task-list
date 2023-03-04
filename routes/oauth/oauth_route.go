@@ -17,6 +17,8 @@ func Register(route *chi.Mux) {
 		r.Group(func(r chi.Router) {
 			r.Use(middlewares.JWTMiddleware)
 			r.Post("/oauth/generate", oauth_controller.Generate)
+			r.Post("/oauth/regenerate/{id}", oauth_controller.Regenerate)
+			// r.Post("/oauth/delete/{id}", oauth_controller.Generate)
 			r.Get("/oauth/list", oauth_controller.List)
 		})
 	})
