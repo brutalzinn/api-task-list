@@ -52,6 +52,6 @@ func main() {
 	repo_route.Register(route)
 	oauth_route.Register(route)
 	authentication_service.InitOauthServer()
-	fmt.Printf("API-AUTO-ASSISTANT STARTED WITH PORT %s", config.Port)
+	fmt.Printf("API-TASK-MANAGER STARTED WITH PORT %s", config.Port)
 	http.ListenAndServe(fmt.Sprintf(":%s", config.Port), route)
 }

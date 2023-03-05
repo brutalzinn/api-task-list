@@ -1,7 +1,7 @@
 
 stop:
-	@echo "Stopping and clear all"
-	@docker-compose down
+	@echo "Stopping and clear all" \
+	@docker-compose down \
 	rmdir /s tmp
 
 start: 
