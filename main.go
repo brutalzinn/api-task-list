@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/brutalzinn/api-task-list/configs"
-	"github.com/brutalzinn/api-task-list/db"
 	authentication_service "github.com/brutalzinn/api-task-list/services/authentication"
+	"github.com/joho/godotenv"
 
 	_ "github.com/brutalzinn/api-task-list/docs"
 	apikey_route "github.com/brutalzinn/api-task-list/routes/apikey"
@@ -29,11 +30,14 @@ import (
 // @BasePath  /api/v1
 
 func main() {
-	err := configs.Load()
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("Some error occured. Err: %s", err)
+	}
+	err = configs.Load()
 	if err != nil {
 		panic(err)
 	}
-	db.CreateConnection()
 	config := configs.GetConfig().API
 	route := chi.NewRouter()
 	route.Use(cors.Handler(cors.Options{

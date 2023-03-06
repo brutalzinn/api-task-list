@@ -18,9 +18,9 @@ services:
             - POSTGRES_PASSWORD=test
             - POSTGRES_DB=test
         ports:
-            - "5432:5432"
+            - 5555:5432
         volumes:
-            - ./scripts:/docker-entrypoint-initdb.d
+            - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
         tmpfs:
             - /var/lib/postgresql/data
         restart: unless-stopped

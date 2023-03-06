@@ -1,8 +1,6 @@
 package user_service
 
 import (
-	"time"
-
 	"github.com/brutalzinn/api-task-list/db"
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
 )
@@ -60,8 +58,8 @@ func Insert(user database_entities.User) (id string, err error) {
 		return
 	}
 	defer conn.Close(ctx)
-	sql := "INSERT INTO users (email, password, username, firebasetoken, create_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
-	err = conn.QueryRow(ctx, sql, user.Email, user.Password, user.Username, user.FirebaseToken, time.Now()).Scan(&id)
+	sql := "INSERT INTO users (email, password, username, firebase_token) VALUES ($1, $2, $3, $4) RETURNING id"
+	err = conn.QueryRow(ctx, sql, user.Email, user.Password, user.Username, user.FirebaseToken).Scan(&id)
 	return
 }
 func Update(id int64, user database_entities.User) (int64, error) {

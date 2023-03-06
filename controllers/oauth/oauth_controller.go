@@ -8,7 +8,9 @@ import (
 	"time"
 
 	"github.com/brutalzinn/api-task-list/common"
+	"github.com/brutalzinn/api-task-list/middlewares/hypermedia"
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
+	"github.com/brutalzinn/api-task-list/models/dto"
 	request_entities "github.com/brutalzinn/api-task-list/models/request"
 	response_entities "github.com/brutalzinn/api-task-list/models/response"
 	authentication_service "github.com/brutalzinn/api-task-list/services/authentication"
@@ -232,5 +234,10 @@ func List(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	response_entities.GenericOK(w, r, oauthapps)
+	var appsList = dto.ToOAuthListDTO(oauthapps)
+	for i, item := range appsList {
+		links := hypermedia.CreateHyperMediaLinksFor(item.ID, r.Context())
+		appsList[i].Links = links
+	}
+	response_entities.GenericOK(w, r, appsList)
 }

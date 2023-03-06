@@ -2,7 +2,6 @@ package authentication_service
 
 import (
 	"context"
-	"flag"
 	"log"
 	"net/http"
 	"time"
@@ -24,17 +23,7 @@ var oauthserver *server.Server
 var oauthClientManager *pg.ClientStore
 var oauthTokenStore *pg.TokenStore
 
-var (
-	idvar     string
-	secretvar string
-	domainvar string
-)
-
 func InitOauthServer() {
-	flag.Parse()
-	flag.StringVar(&idvar, "i", "222222", "The client id being passed in")
-	flag.StringVar(&secretvar, "s", "22222222", "The client secret being passed in")
-	flag.StringVar(&domainvar, "r", "https://oauth.pstmn.io/v1/callback", "The domain of the redirect url")
 	serverConfig, err := createOAuthServer()
 	if err != nil {
 		log.Println("Internal Error:", err.Error())
@@ -53,16 +42,17 @@ func GetTokenStore() *pg.TokenStore {
 	return oauthTokenStore
 }
 func createOAuthServer() (*server.Server, error) {
-	pgxConn, _ := pgx.Connect(context.TODO(), db.GetConnectionUri())
+	dbUri := db.GetConnectionUri()
+	pgxConn, err := pgx.Connect(context.TODO(), dbUri)
+	if err != nil {
+		panic(err)
+	}
 	manager := manage.NewDefaultManager()
-
 	adapter := pgx4adapter.NewConn(pgxConn)
-	tokenStore, _ := pg.NewTokenStore(adapter, pg.WithTokenStoreGCInterval(time.Minute))
+	tokenStore, _ := pg.NewTokenStore(adapter, pg.WithTokenStoreGCInterval(5*time.Minute))
 	defer tokenStore.Close()
 	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
 	clientStore, _ := pg.NewClientStore(adapter)
-
-	// generate jwt access token
 	manager.MapAccessGenerate(generates.NewJWTAccessGenerate("", []byte("00000000"), jwt.SigningMethodHS512))
 	manager.MapTokenStorage(tokenStore)
 	manager.MapClientStorage(clientStore)
@@ -72,11 +62,10 @@ func createOAuthServer() (*server.Server, error) {
 		log.Println("Internal Error:", err.Error())
 		return
 	})
-
 	srv.SetResponseErrorHandler(func(re *errors.Response) {
 		log.Println("Response Error:", re.Error.Error())
+		return
 	})
-
 	oauthClientManager = clientStore
 	oauthTokenStore = tokenStore
 	return srv, nil

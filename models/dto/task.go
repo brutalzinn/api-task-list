@@ -3,18 +3,19 @@ package dto
 import (
 	"time"
 
+	"github.com/brutalzinn/api-task-list/middlewares/hypermedia"
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
 )
 
 type TaskDTO struct {
-	ID          int64      `json:"id"`
-	Title       string     `json:"title"`
-	Text        string     `json:"text"`
-	Description string     `json:"description"`
-	RepoId      int64      `json:"repo_id"`
-	CreateAt    *time.Time `json:"create_at"`
-	UpdateAt    *time.Time `json:"update_at"`
-	Links       any        `json:"links"`
+	ID          int64                       `json:"id"`
+	Title       string                      `json:"title"`
+	Text        string                      `json:"text"`
+	Description string                      `json:"description"`
+	RepoId      int64                       `json:"repo_id"`
+	CreateAt    *time.Time                  `json:"create_at"`
+	UpdateAt    *time.Time                  `json:"update_at"`
+	Links       []hypermedia.HypermediaLink `json:"links"`
 }
 
 func ToTaskDTO(task database_entities.Task) TaskDTO {

@@ -30,9 +30,7 @@ func createHyperMedia() *hypermedia.HyperMedia {
 	var links []hypermedia.HypermediaLink
 	links = append(links, hypermedia.CreateHyperMedia("generate", "/oauth/generate/%d", "DELETE"))
 	links = append(links, hypermedia.CreateHyperMedia("regenerate", "/oauth/regenerate/%d", "PATCH"))
-	links = append(links, hypermedia.CreateHyperMedia("update", "/oauth/update/%d", "PUT"))
-	links = append(links, hypermedia.CreateHyperMedia("list", "/oauth/list", "GET"))
-	links = append(links, hypermedia.CreateHyperMedia("self", "/oauth/&d", "GET"))
+	links = append(links, hypermedia.CreateHyperMedia("_self", "/oauth/%d", "GET"))
 	options := hypermedia.HyperMediaOptions{
 		Links: links,
 	}
