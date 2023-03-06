@@ -2,7 +2,6 @@ package task_controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -34,14 +33,7 @@ func Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	taskDto := dto.ToTaskDTO(task)
-	ctx := r.Context()
-	links, _ := ctx.Value("links").([]hypermedia.HypermediaLink)
-	var hypermediaLink []hypermedia.HypermediaLink
-	for _, link := range links {
-		link.Href = fmt.Sprintf(link.Href, task.ID)
-		hypermediaLink = append(hypermediaLink, link)
-	}
-	taskDto.Links = hypermediaLink
+	taskDto.Links = hypermedia.CreateHyperMediaLinksFor(id, r.Context())
 	response_entities.GenericOK(w, r, taskDto)
 }
 
@@ -193,15 +185,9 @@ func Paginate(w http.ResponseWriter, r *http.Request) {
 	totalTasks, _ := task_service.Count(repoId)
 	totalPages := (totalTasks + limit - 1) / limit
 	taskList := dto.ToTaskListDTO(tasks)
-	ctx := r.Context()
-	links, _ := ctx.Value("links").([]hypermedia.HypermediaLink)
 	for i, repo := range taskList {
-		var hypermediaLink []hypermedia.HypermediaLink
-		for _, link := range links {
-			link.Href = fmt.Sprintf(link.Href, repo.ID)
-			hypermediaLink = append(hypermediaLink, link)
-		}
-		taskList[i].Links = hypermediaLink
+		links := hypermedia.CreateHyperMediaLinksFor(repo.ID, r.Context())
+		taskList[i].Links = links
 	}
 	response_entities.PaginateTask(w, r, taskList, totalPages, currentPage)
 }

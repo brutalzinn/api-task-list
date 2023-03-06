@@ -2,7 +2,6 @@ package repo_controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -32,21 +31,8 @@ func Get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	//	links := map[string]any{}
 	var repoMap = dto.ToRepoDTO(repo)
-	ctx := r.Context()
-	links, _ := ctx.Value("links").([]hypermedia.HypermediaLink)
-	var hypermediaLink []hypermedia.HypermediaLink
-	for _, link := range links {
-		link.Href = fmt.Sprintf(link.Href, repo.ID)
-		hypermediaLink = append(hypermediaLink, link)
-	}
-	repoMap.Links = hypermediaLink
-
-	// hypermedia_util.CreateHyperMedia(links, "delete", fmt.Sprintf("/repo/%d", repo.ID), "DELETE")
-	// hypermedia_util.CreateHyperMedia(links, "update_one", fmt.Sprintf("/repo/%d", repo.ID), "PATCH")
-	// hypermedia_util.CreateHyperMedia(links, "detail", fmt.Sprintf("/repo/%d", repo.ID), "GET")
-	//	repoMap.Links = links
+	repoMap.Links = hypermedia.CreateHyperMediaLinksFor(repo.ID, r.Context())
 	response_entities.GenericOK(w, r, repoMap)
 }
 
@@ -117,15 +103,9 @@ func Paginate(w http.ResponseWriter, r *http.Request) {
 	totalTasks, _ := repo_service.Count(userId)
 	totalPages := (totalTasks + limit - 1) / limit
 	var repoList = dto.ToRepoListDTO(repos)
-	ctx := r.Context()
-	links, _ := ctx.Value("links").([]hypermedia.HypermediaLink)
 	for i, repo := range repoList {
-		var hypermediaLink []hypermedia.HypermediaLink
-		for _, link := range links {
-			link.Href = fmt.Sprintf(link.Href, repo.ID)
-			hypermediaLink = append(hypermediaLink, link)
-		}
-		repoList[i].Links = hypermediaLink
+		links := hypermedia.CreateHyperMediaLinksFor(repo.ID, r.Context())
+		repoList[i].Links = links
 	}
 	response_entities.PaginateRepo(w, r, repoList, totalPages, currentPage)
 }

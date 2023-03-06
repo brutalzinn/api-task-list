@@ -2,6 +2,7 @@ package hypermedia
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 )
 
@@ -46,4 +47,14 @@ func CreateHyperMedia(rel string, href string, request_type string) HypermediaLi
 		Type: request_type,
 	}
 	return hypermedia
+}
+
+func CreateHyperMediaLinksFor(ID int64, context context.Context) []HypermediaLink {
+	links, _ := context.Value("links").([]HypermediaLink)
+	var hypermediaLink []HypermediaLink
+	for _, link := range links {
+		link.Href = fmt.Sprintf(link.Href, ID)
+		hypermediaLink = append(hypermediaLink, link)
+	}
+	return hypermediaLink
 }

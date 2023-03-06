@@ -17,14 +17,14 @@ func Register(route *chi.Mux) {
 		r.Put("/task", task_controller.Put)
 		r.Delete("/task/{id}", task_controller.Delete)
 		r.Group(func(r chi.Router) {
-			r.Use(createTaskHyperMedia().Handler)
+			r.Use(createHyperMedia().Handler)
 			r.Get("/task/paginate", task_controller.Paginate)
 			r.Get("/task/{id}", task_controller.Get)
 		})
 	})
 }
 
-func createTaskHyperMedia() *hypermedia.HyperMedia {
+func createHyperMedia() *hypermedia.HyperMedia {
 	var links []hypermedia.HypermediaLink
 	links = append(links, hypermedia.CreateHyperMedia("delete", "/task/%d", "DELETE"))
 	links = append(links, hypermedia.CreateHyperMedia("update_one", "/task/%d", "PATCH"))
