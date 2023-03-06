@@ -5,9 +5,9 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"time"
 
+	"github.com/brutalzinn/api-task-list/common"
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
 	request_entities "github.com/brutalzinn/api-task-list/models/request"
 	response_entities "github.com/brutalzinn/api-task-list/models/response"
@@ -45,8 +45,7 @@ func Authorize(w http.ResponseWriter, r *http.Request) {
 
 	err = srv.HandleAuthorizeRequest(w, r)
 	if err != nil {
-		// w.WriteHeader(http.StatusUnauthorized)
-		outputHTML(w, r, "static/auth.html")
+		common.OutputHTML(w, r, "static/auth.html")
 	}
 }
 
@@ -63,7 +62,7 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	outputHTML(w, r, "static/auth.html")
+	common.OutputHTML(w, r, "static/auth.html")
 
 }
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -85,7 +84,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 		userId, err := authentication_service.Authentication(email, password)
 		if err != nil {
-			outputHTML(w, r, "static/error.html")
+			common.OutputHTML(w, r, "static/error.html")
 			return
 		}
 		store.Set("LoggedUserId", userId)
@@ -94,7 +93,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusFound)
 		return
 	}
-	outputHTML(w, r, "static/login.html")
+	common.OutputHTML(w, r, "static/login.html")
 }
 
 func Test(w http.ResponseWriter, r *http.Request) {
@@ -144,13 +143,13 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 		response_entities.GenericMessageError(w, r, "Cant create your credentials.")
 		return
 	}
-	data := map[string]interface{}{
-		"client_id":     clientId,
-		"client_secret": secretId,
+	data := response_entities.OAuthResponse{
+		ClientId:     clientId,
+		ClientSecret: secretId,
 	}
 	response_entities.GenericOK(w, r, data)
 }
-func Regenerate(w http.ResponseWriter, r *http.Request) {
+func RegenerateSecret(w http.ResponseWriter, r *http.Request) {
 	userId := authentication_service.GetCurrentUser(w, r)
 	id := chi.URLParam(r, "id")
 	if id == "" {
@@ -160,7 +159,7 @@ func Regenerate(w http.ResponseWriter, r *http.Request) {
 	clientStore := authentication_service.GetClientStore()
 	client, err := clientStore.GetByID(r.Context(), id)
 	if err != nil {
-		response_entities.GenericMessageError(w, r, "Cant create your credentials.")
+		response_entities.GenericMessageError(w, r, "Cant generate your credentials.")
 		return
 	}
 	secretId := authentication_service.CreateUUID()
@@ -171,8 +170,57 @@ func Regenerate(w http.ResponseWriter, r *http.Request) {
 		Domain: client.GetDomain(),
 	}
 	clientStore.Update(newClient)
-	data := map[string]interface{}{
-		"client_secret": secretId,
+	data := response_entities.OAuthResponse{
+		ClientId:     id,
+		ClientSecret: secretId,
+	}
+	response_entities.GenericOK(w, r, data)
+}
+func Update(w http.ResponseWriter, r *http.Request) {
+	userId := authentication_service.GetCurrentUser(w, r)
+	var request request_entities.OauthGenerateRequest
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		log.Printf("error on decode json %v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		http.Error(w, http.StatusText(http.StatusNotAcceptable), http.StatusNotAcceptable)
+		return
+	}
+	clientStore := authentication_service.GetClientStore()
+	client, err := clientStore.GetByID(r.Context(), id)
+	if err != nil {
+		response_entities.GenericMessageError(w, r, "Cant update your credentials.")
+		return
+	}
+	newClient := &models.Client{
+		UserID: userId,
+		ID:     client.GetID(),
+		Secret: client.GetSecret(),
+		Domain: request.Callback,
+	}
+	err = clientStore.Update(newClient)
+	if err != nil {
+		response_entities.GenericMessageError(w, r, "Cant update your credentials.")
+		return
+	}
+	newApp := database_entities.OAuthApp{
+		AppName:       request.ApplicationName,
+		Mode:          0,
+		UserId:        userId,
+		OAuthClientId: client.GetID(),
+	}
+	rows, err := oauth_service.Update(newApp)
+	if rows == 0 {
+		response_entities.GenericMessageError(w, r, "Cant create your credentials.")
+		return
+	}
+
+	data := response_entities.OAuthResponse{
+		ClientId: id,
 	}
 	response_entities.GenericOK(w, r, data)
 }
@@ -185,15 +233,4 @@ func List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response_entities.GenericOK(w, r, oauthapps)
-}
-
-func outputHTML(w http.ResponseWriter, req *http.Request, filename string) {
-	file, err := os.Open(filename)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-	defer file.Close()
-	fi, _ := file.Stat()
-	http.ServeContent(w, req, file.Name(), fi.ModTime(), file)
 }
