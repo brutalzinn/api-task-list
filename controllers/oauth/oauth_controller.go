@@ -105,7 +105,6 @@ func Test(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
 	data := map[string]interface{}{
 		"expires_in": int64(token.GetAccessCreateAt().Add(token.GetAccessExpiresIn()).Sub(time.Now()).Seconds()),
 		"client_id":  token.GetClientID(),
