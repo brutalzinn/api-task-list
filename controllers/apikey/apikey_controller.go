@@ -109,7 +109,7 @@ func Regenerate(w http.ResponseWriter, r *http.Request) {
 	}
 	apiKey, err := apikey_service.GetByIdAndUser(id, userId)
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusNotAcceptable), http.StatusNotAcceptable)
+		response_entities.GenericMessageError(w, r, "api key not found or expired")
 		return
 	}
 	var expireDiff time.Duration

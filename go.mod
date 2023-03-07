@@ -3,8 +3,7 @@ module github.com/brutalzinn/api-task-list
 go 1.20
 
 require (
-	github.com/brutalzinn/go-oauth2-pg v0.0.0-20230304175840-b93de7d9a405
-	github.com/go-chi/chi v1.5.4
+	github.com/brutalzinn/go-oauth2-pg v0.1.6
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-chi/cors v1.2.1
 	github.com/golang-jwt/jwt/v4 v4.4.3
@@ -12,7 +11,6 @@ require (
 	github.com/jackc/pgx/v4 v4.18.1
 	github.com/joho/godotenv v1.5.1
 	github.com/spf13/viper v1.15.0
-	github.com/swaggo/http-swagger v1.3.3
 	github.com/swaggo/swag v1.8.10
 	github.com/vgarvardt/go-pg-adapter v1.0.0
 	golang.org/x/crypto v0.6.0
@@ -53,7 +51,6 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
-	github.com/swaggo/files v1.0.0 // indirect
 	github.com/tidwall/btree v1.6.0 // indirect
 	github.com/tidwall/buntdb v1.2.10 // indirect
 	github.com/tidwall/gjson v1.14.4 // indirect

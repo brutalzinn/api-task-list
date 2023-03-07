@@ -15,7 +15,7 @@ import (
 	response_entities "github.com/brutalzinn/api-task-list/models/response"
 	authentication_service "github.com/brutalzinn/api-task-list/services/authentication"
 	oauth_service "github.com/brutalzinn/api-task-list/services/database/oauth"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-oauth2/oauth2/v4/models"
 	"github.com/go-session/session"
 )
@@ -142,6 +142,7 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 	}
 	err = oauth_service.CreateOauthForUser(newApp)
 	if err != nil {
+		log.Printf("Cant create credentials. %v", err)
 		response_entities.GenericMessageError(w, r, "Cant create your credentials.")
 		return
 	}
@@ -151,11 +152,21 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 	}
 	response_entities.GenericOK(w, r, data)
 }
-func RegenerateSecret(w http.ResponseWriter, r *http.Request) {
-	userId := authentication_service.GetCurrentUser(w, r)
+
+func Regenerate(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
+	userId := authentication_service.GetCurrentUser(w, r)
 	if id == "" {
+		log.Printf("error on decode json %v", id)
 		http.Error(w, http.StatusText(http.StatusNotAcceptable), http.StatusNotAcceptable)
+		return
+	}
+
+	var request request_entities.OauthGenerateRequest
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		log.Printf("error on decode json %v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	clientStore := authentication_service.GetClientStore()
@@ -169,60 +180,12 @@ func RegenerateSecret(w http.ResponseWriter, r *http.Request) {
 		UserID: userId,
 		ID:     client.GetID(),
 		Secret: secretId,
-		Domain: client.GetDomain(),
+		Domain: request.Callback,
 	}
 	clientStore.Update(newClient)
 	data := response_entities.OAuthResponse{
 		ClientId:     id,
 		ClientSecret: secretId,
-	}
-	response_entities.GenericOK(w, r, data)
-}
-func Update(w http.ResponseWriter, r *http.Request) {
-	userId := authentication_service.GetCurrentUser(w, r)
-	var request request_entities.OauthGenerateRequest
-	err := json.NewDecoder(r.Body).Decode(&request)
-	if err != nil {
-		log.Printf("error on decode json %v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-	id := chi.URLParam(r, "id")
-	if id == "" {
-		http.Error(w, http.StatusText(http.StatusNotAcceptable), http.StatusNotAcceptable)
-		return
-	}
-	clientStore := authentication_service.GetClientStore()
-	client, err := clientStore.GetByID(r.Context(), id)
-	if err != nil {
-		response_entities.GenericMessageError(w, r, "Cant update your credentials.")
-		return
-	}
-	newClient := &models.Client{
-		UserID: userId,
-		ID:     client.GetID(),
-		Secret: client.GetSecret(),
-		Domain: request.Callback,
-	}
-	err = clientStore.Update(newClient)
-	if err != nil {
-		response_entities.GenericMessageError(w, r, "Cant update your credentials.")
-		return
-	}
-	newApp := database_entities.OAuthApp{
-		AppName:       request.ApplicationName,
-		Mode:          0,
-		UserId:        userId,
-		OAuthClientId: client.GetID(),
-	}
-	rows, err := oauth_service.Update(newApp)
-	if rows == 0 {
-		response_entities.GenericMessageError(w, r, "Cant create your credentials.")
-		return
-	}
-
-	data := response_entities.OAuthResponse{
-		ClientId: id,
 	}
 	response_entities.GenericOK(w, r, data)
 }
@@ -240,4 +203,41 @@ func List(w http.ResponseWriter, r *http.Request) {
 		appsList[i].Links = links
 	}
 	response_entities.GenericOK(w, r, appsList)
+}
+
+func Delete(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	userId := authentication_service.GetCurrentUser(w, r)
+	if id == "" {
+		log.Printf("error on decode json %v", id)
+		http.Error(w, http.StatusText(http.StatusNotAcceptable), http.StatusNotAcceptable)
+		return
+	}
+
+	var request request_entities.OauthGenerateRequest
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		log.Printf("error on decode json %v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	clientStore := authentication_service.GetClientStore()
+	client, err := clientStore.GetByID(r.Context(), id)
+	if err != nil {
+		response_entities.GenericMessageError(w, r, "Cant generate your credentials.")
+		return
+	}
+
+	err = oauth_service.DeleteOauthForUser(client, userId)
+	if err != nil {
+		log.Printf("Cant create credentials. %v", err)
+		response_entities.GenericMessageError(w, r, "Cant create your credentials.")
+		return
+	}
+
+	newClient := &models.Client{
+		ID: client.GetID(),
+	}
+	clientStore.Remove(newClient)
+	response_entities.GenericOK(w, r, "Deleted with success.")
 }

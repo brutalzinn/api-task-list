@@ -19,7 +19,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 // @title           github.com/brutalzinn/api-task-list
@@ -28,7 +27,6 @@ import (
 
 // @host      localhost:9000
 // @BasePath  /api/v1
-
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -47,14 +45,16 @@ func main() {
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
+	route.Use(middleware.RequestID)
+	route.Use(middleware.RealIP)
 	route.Use(middleware.Logger)
-	route.Mount("/swagger", httpSwagger.WrapHandler)
+	route.Use(middleware.Recoverer)
 	task_route.Register(route)
 	login_route.Register(route)
 	user_route.Register(route)
 	apikey_route.Register(route)
-	repo_route.Register(route)
 	oauth_route.Register(route)
+	repo_route.Register(route)
 	authentication_service.InitOauthServer()
 	fmt.Printf("API-TASK-MANAGER STARTED WITH PORT %s", config.Port)
 	http.ListenAndServe(fmt.Sprintf(":%s", config.Port), route)

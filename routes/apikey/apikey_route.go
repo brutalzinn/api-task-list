@@ -11,12 +11,12 @@ import (
 func Register(route *chi.Mux) {
 	route.Group(func(r chi.Router) {
 		r.Use(middlewares.JWTMiddleware)
-		r.Post("/apikey/generate", apikey_controller.Generate)
-		r.Post("/apikey/regenerate/{id}", apikey_controller.Regenerate)
-		r.Delete("/apikey/delete/{id}", apikey_controller.Delete)
-		r.Group(func(r chi.Router) {
-			r.Use(createApiHyperMedia().Handler)
-			r.Get("/apikey", apikey_controller.List)
+		r.Use(createApiHyperMedia().Handler)
+		r.Route("/apikey", func(r chi.Router) {
+			r.Post("/generate", apikey_controller.Generate)
+			r.Post("/regenerate/{id}", apikey_controller.Regenerate)
+			r.Delete("/apikey/{id}", apikey_controller.Delete)
+			r.Get("/", apikey_controller.List)
 		})
 	})
 }

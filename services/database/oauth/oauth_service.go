@@ -5,6 +5,7 @@ import (
 
 	"github.com/brutalzinn/api-task-list/db"
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
+	"github.com/go-oauth2/oauth2/v4"
 )
 
 func List(userId string) (oauthApps []database_entities.OAuthApp, err error) {
@@ -70,4 +71,47 @@ func Update(oauthApp database_entities.OAuthApp) (int64, error) {
 		return 0, err
 	}
 	return res.RowsAffected(), nil
+}
+
+func Get(id int64) (oauthApp database_entities.OAuthApp, err error) {
+	conn, err, ctx := db.OpenConnection()
+	if err != nil {
+		return
+	}
+	defer conn.Close(ctx)
+	row := conn.QueryRow(ctx, "SELECT appname, mode, oauth_client_id FROM oauth_client_application WHERE id=$1", id)
+	err = row.Scan(&oauthApp.ID, &oauthApp.AppName, &oauthApp.Mode,
+		&oauthApp.OAuthClientId)
+	return
+}
+
+func DeleteOauthForUser(info oauth2.ClientInfo, userId string) (err error) {
+	conn, err, ctx := db.OpenConnection()
+	if err != nil {
+		return err
+	}
+	defer conn.Close(ctx)
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = tx.Exec(ctx, "DELETE FROM users_oauth_client where oauth_client_id = $1 and user_id = $2", info.GetID(), userId)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	nestedTx, err := tx.Begin(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = nestedTx.Exec(ctx, "DELETE FROM oauth_client_application where id = $1 and user_id = $2", info.GetID(), userId)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return
+	}
+	return
 }

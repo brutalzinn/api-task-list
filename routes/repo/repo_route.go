@@ -12,13 +12,13 @@ func Register(route *chi.Mux) {
 	route.Group(func(r chi.Router) {
 		r.Use(middlewares.JWTMiddleware)
 		r.Use(middlewares.ApiKeyMiddleware)
-		r.Post("/repo", repo_controller.Create)
-		r.Patch("/repo/{id}", repo_controller.Patch)
-		r.Delete("/repo/{id}", repo_controller.Delete)
-		r.Group(func(r chi.Router) {
-			r.Use(createRepoHypermedia().Handler)
-			r.Get("/repo/paginate", repo_controller.Paginate)
-			r.Get("/repo/{id}", repo_controller.Get)
+		r.Use(createRepoHypermedia().Handler)
+		r.Route("/repo", func(r chi.Router) {
+			r.Post("/", repo_controller.Create)
+			r.Patch("/{id}", repo_controller.Patch)
+			r.Delete("/{id}", repo_controller.Delete)
+			r.Get("/paginate", repo_controller.Paginate)
+			r.Get("/{id}", repo_controller.Get)
 		})
 	})
 }

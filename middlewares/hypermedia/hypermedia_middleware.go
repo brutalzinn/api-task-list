@@ -9,7 +9,7 @@ import (
 func (hypermedia *HyperMedia) Handler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		ctx = context.WithValue(r.Context(), "links", hypermedia.Links)
+		ctx = context.WithValue(ctx, "links", hypermedia.Links)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

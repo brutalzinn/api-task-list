@@ -20,7 +20,7 @@ func ApiKeyMiddleware(next http.Handler) http.Handler {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
 		}
-		ctx = context.WithValue(r.Context(), "user_id", apiKey.UserId)
+		ctx = context.WithValue(ctx, "user_id", apiKey.UserId)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
