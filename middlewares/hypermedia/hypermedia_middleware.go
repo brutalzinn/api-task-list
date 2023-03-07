@@ -49,11 +49,11 @@ func CreateHyperMedia(rel string, href string, request_type string) HypermediaLi
 	return hypermedia
 }
 
-func CreateHyperMediaLinksFor(ID int64, context context.Context) []HypermediaLink {
+func CreateHyperMediaLinksFor(id any, context context.Context) []HypermediaLink {
 	links, _ := context.Value("links").([]HypermediaLink)
 	var hypermediaLink []HypermediaLink
 	for _, link := range links {
-		link.Href = fmt.Sprintf(link.Href, ID)
+		link.Href = fmt.Sprintf(link.Href, id)
 		hypermediaLink = append(hypermediaLink, link)
 	}
 	return hypermediaLink

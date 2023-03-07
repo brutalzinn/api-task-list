@@ -26,14 +26,15 @@ func Authentication(email string, password string) (userId string, err error) {
 	return user.ID, nil
 }
 
-func GenerateJWT(id string) (string, error) {
+func GenerateJWT(userId string) (string, error) {
 	var secretKey = configs.GetAuthSecret()
 	var authConfig = configs.GetConfig()
-	expirationTime := time.Now().Add(time.Duration(authConfig.Authentication.Expiration) * time.Second)
+	expirationTime := time.Now().Add(time.Duration(authConfig.Authentication.Expiration) * time.Second).Unix()
 	claims := request_entities.Claims{
-		ID: id,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(expirationTime),
+		ID: userId,
+		StandardClaims: jwt.StandardClaims{
+			Subject:   userId,
+			ExpiresAt: expirationTime,
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

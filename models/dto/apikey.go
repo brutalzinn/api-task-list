@@ -10,10 +10,10 @@ import (
 type ApiKeyDTO struct {
 	ID       string                      `json:"id"`
 	Name     string                      `json:"name"`
-	ExpireAt time.Time                   `json:"expireAt"`
+	ExpireAt time.Time                   `json:"expire_at"`
 	Scopes   string                      `json:"scopes"`
-	UpdateAt *time.Time                  `json:"updateAt"`
-	CreateAt *time.Time                  `json:"createAt"`
+	CreateAt *time.Time                  `json:"create_at"`
+	UpdateAt *time.Time                  `json:"update_at"`
 	Links    []hypermedia.HypermediaLink `json:"links"`
 }
 

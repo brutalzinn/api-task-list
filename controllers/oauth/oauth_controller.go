@@ -110,6 +110,7 @@ func Test(w http.ResponseWriter, r *http.Request) {
 		"expires_in": int64(token.GetAccessCreateAt().Add(token.GetAccessExpiresIn()).Sub(time.Now()).Seconds()),
 		"client_id":  token.GetClientID(),
 		"user_id":    token.GetUserID(),
+		"scopes":     token.GetScope(),
 	}
 	e := json.NewEncoder(w)
 	e.SetIndent("", "  ")
@@ -199,7 +200,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 	}
 	var appsList = dto.ToOAuthListDTO(oauthapps)
 	for i, item := range appsList {
-		links := hypermedia.CreateHyperMediaLinksFor(item.ID, r.Context())
+		links := hypermedia.CreateHyperMediaLinksFor(item.OAuthClientId, r.Context())
 		appsList[i].Links = links
 	}
 	response_entities.GenericOK(w, r, appsList)
@@ -213,25 +214,17 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusNotAcceptable), http.StatusNotAcceptable)
 		return
 	}
-
-	var request request_entities.OauthGenerateRequest
-	err := json.NewDecoder(r.Body).Decode(&request)
-	if err != nil {
-		log.Printf("error on decode json %v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
 	clientStore := authentication_service.GetClientStore()
 	client, err := clientStore.GetByID(r.Context(), id)
 	if err != nil {
-		response_entities.GenericMessageError(w, r, "Cant generate your credentials.")
+		response_entities.GenericMessageError(w, r, "Cant delete your credentials.")
 		return
 	}
 
 	err = oauth_service.DeleteOauthForUser(client, userId)
 	if err != nil {
 		log.Printf("Cant create credentials. %v", err)
-		response_entities.GenericMessageError(w, r, "Cant create your credentials.")
+		response_entities.GenericMessageError(w, r, "Cant delete your credentials.")
 		return
 	}
 

@@ -8,13 +8,12 @@ import (
 )
 
 type OAuthDTO struct {
-	ID            int64
-	AppName       string
-	Mode          int64
-	UserId        string
-	OAuthClientId string
-	CreateAt      *time.Time
-	UpdateAt      *time.Time
+	ID            int64                       `json:"id"`
+	AppName       string                      `json:"app_name"`
+	Mode          int64                       `json:"mode"`
+	OAuthClientId string                      `json:"client_id"`
+	CreateAt      *time.Time                  `json:"create_at"`
+	UpdateAt      *time.Time                  `json:"update_at"`
 	Links         []hypermedia.HypermediaLink `json:"links"`
 }
 
@@ -23,7 +22,6 @@ func ToOAuthDTO(oauth database_entities.OAuthApp) OAuthDTO {
 		ID:            oauth.ID,
 		AppName:       oauth.AppName,
 		Mode:          oauth.Mode,
-		UserId:        oauth.UserId,
 		OAuthClientId: oauth.OAuthClientId,
 		CreateAt:      oauth.CreateAt,
 		UpdateAt:      oauth.UpdateAt,

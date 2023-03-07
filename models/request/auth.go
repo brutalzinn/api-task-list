@@ -11,5 +11,5 @@ type AuthResponse struct {
 }
 type Claims struct {
 	ID string `json:"id"`
-	jwt.RegisteredClaims
+	jwt.StandardClaims
 }

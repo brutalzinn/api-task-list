@@ -6,14 +6,18 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/golang-jwt/jwt/v4"
+
+	"github.com/brutalzinn/api-task-list/configs"
 	"github.com/brutalzinn/api-task-list/db"
+	request_entities "github.com/brutalzinn/api-task-list/models/request"
 	pg "github.com/brutalzinn/go-oauth2-pg"
+	"github.com/go-oauth2/oauth2/v4"
 	"github.com/go-oauth2/oauth2/v4/errors"
 	"github.com/go-oauth2/oauth2/v4/generates"
 	"github.com/go-oauth2/oauth2/v4/manage"
 	"github.com/go-oauth2/oauth2/v4/server"
 	"github.com/go-session/session"
-	"github.com/golang-jwt/jwt"
 	"github.com/jackc/pgx/v4"
 
 	"github.com/vgarvardt/go-pg-adapter/pgx4adapter"
@@ -53,7 +57,8 @@ func createOAuthServer() (*server.Server, error) {
 	defer tokenStore.Close()
 	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
 	clientStore, _ := pg.NewClientStore(adapter)
-	manager.MapAccessGenerate(generates.NewJWTAccessGenerate("", []byte("00000000"), jwt.SigningMethodHS512))
+	secretKey := configs.GetAuthSecret()
+	manager.MapAccessGenerate(generates.NewJWTAccessGenerate("", secretKey, jwt.SigningMethodHS512))
 	manager.MapTokenStorage(tokenStore)
 	manager.MapClientStorage(clientStore)
 	srv := server.NewServer(server.NewConfig(), manager)
@@ -94,5 +99,28 @@ func UserAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string
 	userID = uid.(string)
 	store.Delete("LoggedUserId")
 	store.Save()
+	return
+}
+
+// https://github.com/go-oauth2/oauth2/issues/116
+type MyJWTGenerator struct {
+	SignedKey []byte
+}
+
+func (a *MyJWTGenerator) Token(data *oauth2.GenerateBasic, isGenRefresh bool) (access, refresh string, err error) {
+	expireAt := data.TokenInfo.GetAccessCreateAt().Add(data.TokenInfo.GetAccessExpiresIn()).Unix()
+	claims := request_entities.Claims{
+		ID: data.UserID,
+		StandardClaims: jwt.StandardClaims{
+			Subject:   data.UserID,
+			ExpiresAt: expireAt,
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	access, err = token.SignedString(a.SignedKey)
+	if err != nil {
+		return
+	}
+
 	return
 }

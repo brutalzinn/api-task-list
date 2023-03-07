@@ -19,6 +19,7 @@ func Register(route *chi.Mux) {
 			r.Use(middlewares.JWTMiddleware)
 			r.Use(createHyperMedia().Handler)
 			r.Post("/generate", oauth_controller.Generate)
+			r.Delete("/{id}", oauth_controller.Delete)
 			r.Post("/regenerate/{id}", oauth_controller.Regenerate)
 			r.Get("/list", oauth_controller.List)
 		})
@@ -28,7 +29,9 @@ func Register(route *chi.Mux) {
 
 func createHyperMedia() *hypermedia.HyperMedia {
 	var links []hypermedia.HypermediaLink
-	links = append(links, hypermedia.CreateHyperMedia("regenerate", "/oauth/regenerate/%d", "PATCH"))
+	links = append(links, hypermedia.CreateHyperMedia("regenerate", "/oauth/regenerate/%s", "POST"))
+	links = append(links, hypermedia.CreateHyperMedia("DELETE", "/oauth/%s", "DELETE"))
+
 	options := hypermedia.HyperMediaOptions{
 		Links: links,
 	}
