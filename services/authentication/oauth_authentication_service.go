@@ -14,7 +14,6 @@ import (
 	pg "github.com/brutalzinn/go-oauth2-pg"
 	"github.com/go-oauth2/oauth2/v4"
 	"github.com/go-oauth2/oauth2/v4/errors"
-	"github.com/go-oauth2/oauth2/v4/generates"
 	"github.com/go-oauth2/oauth2/v4/manage"
 	"github.com/go-oauth2/oauth2/v4/server"
 	"github.com/go-session/session"
@@ -58,7 +57,7 @@ func createOAuthServer() (*server.Server, error) {
 	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
 	clientStore, _ := pg.NewClientStore(adapter)
 	secretKey := configs.GetAuthSecret()
-	manager.MapAccessGenerate(generates.NewJWTAccessGenerate("", secretKey, jwt.SigningMethodHS512))
+	manager.MapAccessGenerate(&MyJWTGenerator{SignedKey: secretKey})
 	manager.MapTokenStorage(tokenStore)
 	manager.MapClientStorage(clientStore)
 	srv := server.NewServer(server.NewConfig(), manager)
@@ -87,10 +86,8 @@ func UserAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string
 		if r.Form == nil {
 			r.ParseForm()
 		}
-
 		store.Set("ReturnUri", r.Form)
 		store.Save()
-
 		w.Header().Set("Location", "/oauth/login")
 		w.WriteHeader(http.StatusFound)
 		return
@@ -107,10 +104,11 @@ type MyJWTGenerator struct {
 	SignedKey []byte
 }
 
-func (a *MyJWTGenerator) Token(data *oauth2.GenerateBasic, isGenRefresh bool) (access, refresh string, err error) {
+func (a *MyJWTGenerator) Token(ctx context.Context, data *oauth2.GenerateBasic, isGenRefresh bool) (access, refresh string, err error) {
 	expireAt := data.TokenInfo.GetAccessCreateAt().Add(data.TokenInfo.GetAccessExpiresIn()).Unix()
 	claims := request_entities.Claims{
-		ID: data.UserID,
+		ID:     data.UserID,
+		Scopes: data.TokenInfo.GetScope(),
 		StandardClaims: jwt.StandardClaims{
 			Subject:   data.UserID,
 			ExpiresAt: expireAt,

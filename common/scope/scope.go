@@ -9,7 +9,7 @@ type ScopePermission struct {
 }
 
 func New(scope string) (scopes ScopePermission) {
-	scopeStrings := strings.Split(scope, ",")
+	scopeStrings := strings.Split(scope, " ")
 	scopes = ScopePermission{
 		Scopes: scopeStrings,
 	}
@@ -17,16 +17,15 @@ func New(scope string) (scopes ScopePermission) {
 }
 
 func (s *ScopePermission) HasScope(scope []string) bool {
-	valid := true
+	valid := false
 	for _, v := range s.Scopes {
 		for _, t := range scope {
 			if v == t {
+				valid = true
 				continue
 			}
 			valid = false
 		}
 	}
-
-	return false
-
+	return valid
 }

@@ -22,6 +22,7 @@ func JWTMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		ctx = context.WithValue(ctx, "user_id", token.ID)
+		ctx = context.WithValue(ctx, "scopes", token.Scopes)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

@@ -81,6 +81,12 @@ func Patch(w http.ResponseWriter, r *http.Request) {
 // @Router       /repo/paginate [get]
 func Paginate(w http.ResponseWriter, r *http.Request) {
 	userId := authentication_util.GetCurrentUser(w, r)
+	err := authentication_util.VerifyScope(w, r, []string{"read:repo", "create:repo"})
+	if err != nil {
+		log.Printf("error on read scopes %v", err)
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
 	currentPage, err := strconv.ParseInt(r.URL.Query().Get("page"), 10, 64)
 	if err != nil {
 		currentPage = 1

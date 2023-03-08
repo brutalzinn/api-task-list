@@ -10,6 +10,7 @@ type AuthResponse struct {
 	AccessToken string `json:"accesstoken"`
 }
 type Claims struct {
-	ID string `json:"id"`
+	ID     string `json:"id"`
+	Scopes string `json:"scopes"`
 	jwt.StandardClaims
 }

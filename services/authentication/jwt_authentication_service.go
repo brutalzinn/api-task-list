@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/brutalzinn/api-task-list/common/scope"
 	"github.com/brutalzinn/api-task-list/configs"
 	request_entities "github.com/brutalzinn/api-task-list/models/request"
 	user_service "github.com/brutalzinn/api-task-list/services/database/user"
@@ -44,6 +45,7 @@ func GenerateJWT(userId string) (string, error) {
 func VerifyJWT(tokenJWT string) (*request_entities.Claims, error) {
 	var secretKey = configs.GetAuthSecret()
 	safeSplit := strings.Split(tokenJWT, " ")
+	///this messages will be removed after put this on mongoDB logger.
 	if len(safeSplit) != 2 {
 		return nil, errors.New("No valid token provided")
 	}
@@ -65,4 +67,18 @@ func GetCurrentUser(w http.ResponseWriter, r *http.Request) (user_id string) {
 		return
 	}
 	return
+}
+
+func VerifyScope(w http.ResponseWriter, r *http.Request, requiredScopes []string) error {
+	ctx := r.Context()
+	scopeClaim, ok := ctx.Value("scopes").(string)
+	if !ok {
+		return errors.New("No authorized to use this route")
+	}
+	scope := scope.New(scopeClaim)
+	valid := scope.HasScope(requiredScopes)
+	if !valid {
+		return errors.New("No authorized to use this route")
+	}
+	return nil
 }

@@ -31,7 +31,6 @@ func createHyperMedia() *hypermedia.HyperMedia {
 	var links []hypermedia.HypermediaLink
 	links = append(links, hypermedia.CreateHyperMedia("regenerate", "/oauth/regenerate/%s", "POST"))
 	links = append(links, hypermedia.CreateHyperMedia("DELETE", "/oauth/%s", "DELETE"))
-
 	options := hypermedia.HyperMediaOptions{
 		Links: links,
 	}

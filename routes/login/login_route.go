@@ -8,4 +8,5 @@ import (
 
 func Register(route *chi.Mux) {
 	route.Post("/login", user_controller.Login)
+	route.Post("/register", user_controller.Create)
 }
