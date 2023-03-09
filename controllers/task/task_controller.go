@@ -37,8 +37,8 @@ func Get(w http.ResponseWriter, r *http.Request) {
 	response_entities.GenericOK(w, r, taskDto)
 }
 
-// @Summary      Updates tasks
-// @Description  Updates array of tasks
+// @Summary      Update multiple tasks
+// @Description  Updates array of tasks with especify repo_id
 // @Tags         Tasks
 // @Accept       json
 // @Produce      json

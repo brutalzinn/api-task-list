@@ -13,31 +13,38 @@
 
 # Goals
 
-- [x] Authentication
-- [x] Tasks route
-- [x] Users route
-- [x] Authentication route
-- [x] Api key route ( revoke and generate )
+- [x] Tasks routes ( put, patch, delete, get, post)
+- [x] Users routes ( put, delete, get )
+- [x] Login routes ( post )
+- [x] Register routes ( post )
+- [x] Api key routes ( delete, post, get )
+- [x] OAuth2 routes ( delete, post, get )
 - [x] Table users
 - [x] Table tasks
-- [x] Table api keys
+- [x] Table repos
+- [x] Table api_keys
+- [x] Table users_oauth_client
+- [x] Table oauth_client_application
 - [x] Hypermedia links base
+- [x] Hypermedia links middleware
 - [ ] Go tests
 - [ ] CI/CD to digital ocean with Dokku
 - [ ] Swagger auto documentation
 - [ ] Notification channel for discord, twitter and firebase
+- [ ] Error log with MongoDB
+- [ ] Generic error middleware handler
+- [ ] Configure Dockerfile to uses air to hot reload
+
 
 # Table relations
 
-#### Version 1 by draw.io without relations explicity true  ( still in development )
-<img src="docs/imgs/relationship_table_oauth2.drawio.png" alt="postman example of api keys list" height="50%"/>
-
-#### Version 2 by dbeaver ( still in development )
+#### Version 3 by dbeaver ( still in development )
 <img src="docs/imgs/dbeaver.png" alt="postman example of api keys list" height="50%"/>
 
+The orange tables is created by go package oauth2. So i dont have this managed resource. To do my own oauth2 implementation of my business rule, i made a many to many helper table. 
 # Purpose of existence
 
-## This project is designed to my estudies case of hypermedia REST apis(HATEOAS).
+This project is designed to my estudies case of hypermedia REST apis(HATEOAS) and now oauth2 flux handle.
 
 #### This example shows a repository paging route. These routes list all repositories created by the user. The cool part here is that the API client can see all available actions to perform.
 <img src="docs/imgs/postman_example_repo_pagination.png" alt="postman example of api keys list" height="50%"/>
@@ -45,15 +52,17 @@
 #### This example shows apikey list route. This route list all api keys of current authenticated user. The frontend application can uses the hypermedia references to perform actions with the api keys.
 <img src="docs/imgs/postman_example_apikeys_list.png" alt="postman example of api keys list" height="50%"/>
 
-#### This example shows the web interface that lists API keys for an authenticated user. The revoke button uses the hypermedia links object to get the url that performs the revoke action of an api key.
-<img src="docs/imgs/react_web_example_apikeys.png" alt="postman example of api keys list" height="50%"/>
+# Web Example under construction
 
-#### This example shows how to uses Axios library and typescript to consume the hypermedia link by a web application.
-<img src="docs/imgs/react_consume_hypermedialink.png" alt="postman example of api keys list" height="50%"/>
+[Web App](https://github.com/brutalzinn/web-task-list)
 
-#### This example shows how a hypermedia link can easily be represented by a interface.
-<img src="docs/imgs/react_example_hypermedia_interface.png" alt="postman example of api keys list" height="50%"/>
+Web app is a react frontend application to perform login and manage user api keys and oauth2.
+# Dart CLI under construction
 
+[Dart CLI](https://github.com/brutalzinn/cli-task-list)
+
+Dart cli is a project designed to use this API.
+ This is the principal frontend application that will interact with this api. The ideia is use oauth2 auth flow to CLi authenticates and perform actions. The user can create tasks and repos using this.
 ### References
 
 - [api design with hypermedia rest](https://www.mscharhag.com/api-design/hypermedia-rest)

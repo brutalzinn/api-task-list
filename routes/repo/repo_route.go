@@ -25,7 +25,6 @@ func Register(route *chi.Mux) {
 
 func createRepoHypermedia() *hypermedia.HyperMedia {
 	var links []hypermedia.HypermediaLink
-	links = append(links, hypermedia.CreateHyperMedia("task_list", "/task/paginate?page=[page]&limit=[limit]&repo_id=%d&order=[DESC]", "GET"))
 	links = append(links, hypermedia.CreateHyperMedia("delete", "/repo/%d", "DELETE"))
 	links = append(links, hypermedia.CreateHyperMedia("update_one", "/repo/%d", "PATCH"))
 	links = append(links, hypermedia.CreateHyperMedia("_self", "/repo/%d", "GET"))

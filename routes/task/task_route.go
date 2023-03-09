@@ -29,7 +29,7 @@ func createHyperMedia() *hypermedia.HyperMedia {
 	links = append(links, hypermedia.CreateHyperMedia("delete", "/task/%d", "DELETE"))
 	links = append(links, hypermedia.CreateHyperMedia("update_one", "/task/%d", "PATCH"))
 	links = append(links, hypermedia.CreateHyperMedia("update_all", "/task/%d", "PUT"))
-	links = append(links, hypermedia.CreateHyperMedia("self", "/task/%d", "GET"))
+	links = append(links, hypermedia.CreateHyperMedia("_self", "/task/%d", "GET"))
 	options := hypermedia.HyperMediaOptions{
 		Links: links,
 	}

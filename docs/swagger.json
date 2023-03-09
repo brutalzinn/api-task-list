@@ -87,6 +87,137 @@
                 }
             }
         },
+        "/oauth/auth": {
+            "get": {
+                "description": "AuthHandler oauth for application",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Oauth"
+                ],
+                "summary": "AuthHandler oauth",
+                "responses": {}
+            }
+        },
+        "/oauth/authorize": {
+            "get": {
+                "description": "Authorize oauth for application",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Oauth"
+                ],
+                "summary": "Authorize oauth",
+                "responses": {}
+            }
+        },
+        "/oauth/generate": {
+            "get": {
+                "description": "Get token oauth for application",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Oauth"
+                ],
+                "summary": "Get token oauth key",
+                "responses": {}
+            },
+            "post": {
+                "description": "Generate oauth for application",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Oauth"
+                ],
+                "summary": "Generate oauth",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response_entities.OAuthResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/oauth/list": {
+            "post": {
+                "description": "List oauth for application",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Oauth"
+                ],
+                "summary": "List oauth",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response_entities.GenericResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/oauth/regenerate": {
+            "post": {
+                "description": "Regenerate oauth for application",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Oauth"
+                ],
+                "summary": "Regenerate oauth",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response_entities.OAuthResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/oauth/test": {
+            "get": {
+                "description": "Test oauth for application",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Oauth"
+                ],
+                "summary": "Test oauth",
+                "responses": {}
+            }
+        },
         "/repo": {
             "post": {
                 "description": "Create a repo for current user",
@@ -373,6 +504,17 @@
                     "type": "boolean"
                 },
                 "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "response_entities.OAuthResponse": {
+            "type": "object",
+            "properties": {
+                "client_id": {
+                    "type": "string"
+                },
+                "client_secret": {
                     "type": "string"
                 }
             }

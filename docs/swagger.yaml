@@ -8,6 +8,13 @@ definitions:
       message:
         type: string
     type: object
+  response_entities.OAuthResponse:
+    properties:
+      client_id:
+        type: string
+      client_secret:
+        type: string
+    type: object
 host: localhost:9000
 info:
   contact: {}
@@ -66,6 +73,94 @@ paths:
       summary: Revoke apikey
       tags:
       - ApiKeys
+  /oauth/auth:
+    get:
+      consumes:
+      - application/json
+      description: AuthHandler oauth for application
+      produces:
+      - application/json
+      responses: {}
+      summary: AuthHandler oauth
+      tags:
+      - Oauth
+  /oauth/authorize:
+    get:
+      consumes:
+      - application/json
+      description: Authorize oauth for application
+      produces:
+      - application/json
+      responses: {}
+      summary: Authorize oauth
+      tags:
+      - Oauth
+  /oauth/generate:
+    get:
+      consumes:
+      - application/json
+      description: Get token oauth for application
+      produces:
+      - application/json
+      responses: {}
+      summary: Get token oauth key
+      tags:
+      - Oauth
+    post:
+      consumes:
+      - application/json
+      description: Generate oauth for application
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response_entities.OAuthResponse'
+      summary: Generate oauth
+      tags:
+      - Oauth
+  /oauth/list:
+    post:
+      consumes:
+      - application/json
+      description: List oauth for application
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response_entities.GenericResponse'
+      summary: List oauth
+      tags:
+      - Oauth
+  /oauth/regenerate:
+    post:
+      consumes:
+      - application/json
+      description: Regenerate oauth for application
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response_entities.OAuthResponse'
+      summary: Regenerate oauth
+      tags:
+      - Oauth
+  /oauth/test:
+    get:
+      consumes:
+      - application/json
+      description: Test oauth for application
+      produces:
+      - application/json
+      responses: {}
+      summary: Test oauth
+      tags:
+      - Oauth
   /repo:
     post:
       consumes:

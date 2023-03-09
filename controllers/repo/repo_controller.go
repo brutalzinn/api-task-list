@@ -10,7 +10,7 @@ import (
 	database_entities "github.com/brutalzinn/api-task-list/models/database"
 	"github.com/brutalzinn/api-task-list/models/dto"
 	response_entities "github.com/brutalzinn/api-task-list/models/response"
-	authentication_util "github.com/brutalzinn/api-task-list/services/authentication"
+	authentication_service "github.com/brutalzinn/api-task-list/services/authentication"
 	repo_service "github.com/brutalzinn/api-task-list/services/database/repo"
 	"github.com/go-chi/chi/v5"
 )
@@ -45,7 +45,11 @@ func Get(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /repo/{id} [put]
 func Patch(w http.ResponseWriter, r *http.Request) {
-	user_id := authentication_util.GetCurrentUser(w, r)
+	userId, err := authentication_service.GetCurrentUser(r.Context())
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		log.Printf("wron url format %v", err)
@@ -59,7 +63,7 @@ func Patch(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	rows, err := repo_service.Update(id, user_id, repo)
+	rows, err := repo_service.Update(id, userId, repo)
 	if err != nil {
 		log.Printf("error on update register %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -80,13 +84,18 @@ func Patch(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /repo/paginate [get]
 func Paginate(w http.ResponseWriter, r *http.Request) {
-	userId := authentication_util.GetCurrentUser(w, r)
-	err := authentication_util.VerifyScope(w, r, []string{"read:repo", "create:repo"})
+	ctx := r.Context()
+	userId, err := authentication_service.GetCurrentUser(ctx)
 	if err != nil {
-		log.Printf("error on read scopes %v", err)
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
+	// err = authentication_service.VerifyScope(ctx, []string{"read:repo", "create:repo"})
+	// if err != nil {
+	// 	log.Printf("error on read scopes %v", err)
+	// 	http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+	// 	return
+	// }
 	currentPage, err := strconv.ParseInt(r.URL.Query().Get("page"), 10, 64)
 	if err != nil {
 		currentPage = 1
@@ -125,14 +134,18 @@ func Paginate(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /repo/{id} [delete]
 func Delete(w http.ResponseWriter, r *http.Request) {
-	user_id := authentication_util.GetCurrentUser(w, r)
+	userId, err := authentication_service.GetCurrentUser(r.Context())
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		log.Printf("error on decode json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	rows, err := repo_service.Delete(id, user_id)
+	rows, err := repo_service.Delete(id, userId)
 	if err != nil {
 		log.Printf("error on delete register %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -153,15 +166,19 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /repo [post]
 func Create(w http.ResponseWriter, r *http.Request) {
-	user_id := authentication_util.GetCurrentUser(w, r)
+	userId, err := authentication_service.GetCurrentUser(r.Context())
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
 	var repo database_entities.Repo
-	err := json.NewDecoder(r.Body).Decode(&repo)
+	err = json.NewDecoder(r.Body).Decode(&repo)
 	if err != nil {
 		log.Printf("error on decode json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	repo.UserId = user_id
+	repo.UserId = userId
 	id, err := repo_service.Insert(repo)
 	if err != nil {
 		response_entities.GenericMessageError(w, r, "Cant create this repo")

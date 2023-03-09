@@ -57,7 +57,7 @@ func createOAuthServer() (*server.Server, error) {
 	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
 	clientStore, _ := pg.NewClientStore(adapter)
 	secretKey := configs.GetAuthSecret()
-	manager.MapAccessGenerate(&MyJWTGenerator{SignedKey: secretKey})
+	manager.MapAccessGenerate(&OAuthToken{SignedKey: secretKey})
 	manager.MapTokenStorage(tokenStore)
 	manager.MapClientStorage(clientStore)
 	srv := server.NewServer(server.NewConfig(), manager)
@@ -100,11 +100,11 @@ func UserAuthorizeHandler(w http.ResponseWriter, r *http.Request) (userID string
 }
 
 // https://github.com/go-oauth2/oauth2/issues/116
-type MyJWTGenerator struct {
+type OAuthToken struct {
 	SignedKey []byte
 }
 
-func (a *MyJWTGenerator) Token(ctx context.Context, data *oauth2.GenerateBasic, isGenRefresh bool) (access, refresh string, err error) {
+func (a *OAuthToken) Token(ctx context.Context, data *oauth2.GenerateBasic, isGenRefresh bool) (access, refresh string, err error) {
 	expireAt := data.TokenInfo.GetAccessCreateAt().Add(data.TokenInfo.GetAccessExpiresIn()).Unix()
 	claims := request_entities.Claims{
 		ID:     data.UserID,

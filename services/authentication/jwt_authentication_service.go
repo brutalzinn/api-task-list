@@ -1,8 +1,8 @@
 package authentication_service
 
 import (
+	"context"
 	"errors"
-	"net/http"
 	"strings"
 	"time"
 
@@ -59,18 +59,15 @@ func VerifyJWT(tokenJWT string) (*request_entities.Claims, error) {
 	}
 	return &claims, err
 }
-func GetCurrentUser(w http.ResponseWriter, r *http.Request) (user_id string) {
-	ctx := r.Context()
+func GetCurrentUser(ctx context.Context) (user_id string, err error) {
 	user_id, ok := ctx.Value("user_id").(string)
 	if !ok {
-		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-		return
+		return "", errors.New("No authorized to use this route")
 	}
-	return
+	return user_id, nil
 }
 
-func VerifyScope(w http.ResponseWriter, r *http.Request, requiredScopes []string) error {
-	ctx := r.Context()
+func VerifyScope(ctx context.Context, requiredScopes []string) error {
 	scopeClaim, ok := ctx.Value("scopes").(string)
 	if !ok {
 		return errors.New("No authorized to use this route")

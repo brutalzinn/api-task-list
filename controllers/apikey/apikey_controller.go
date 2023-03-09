@@ -30,10 +30,14 @@ import (
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /apikey/generate [post]
 func Generate(w http.ResponseWriter, r *http.Request) {
-	userId := authentication_util.GetCurrentUser(w, r)
+	userId, err := authentication_util.GetCurrentUser(r.Context())
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
 	maxApiKeys := configs.GetConfig().API.MaxApiKeys
 	var apiKeyRequest request_entities.ApiKeyRequest
-	err := json.NewDecoder(r.Body).Decode(&apiKeyRequest)
+	err = json.NewDecoder(r.Body).Decode(&apiKeyRequest)
 	if err != nil {
 		log.Printf("error on decode json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -101,7 +105,11 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /apikey/generate [post]
 func Regenerate(w http.ResponseWriter, r *http.Request) {
-	userId := authentication_util.GetCurrentUser(w, r)
+	userId, err := authentication_util.GetCurrentUser(r.Context())
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
 	id := chi.URLParam(r, "id")
 	if id == "" {
 		http.Error(w, http.StatusText(http.StatusNotAcceptable), http.StatusNotAcceptable)
@@ -154,7 +162,11 @@ func Regenerate(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /apikey/revoke/{id} [delete]
 func Delete(w http.ResponseWriter, r *http.Request) {
-	userId := authentication_util.GetCurrentUser(w, r)
+	userId, err := authentication_util.GetCurrentUser(r.Context())
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
 	id := chi.URLParam(r, "id")
 	rows, err := apikey_service.DeleteByIdAndUser(id, userId)
 	if err != nil {
@@ -177,7 +189,11 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {object} response_entities.GenericResponse
 // @Router       /apikey [get]
 func List(w http.ResponseWriter, r *http.Request) {
-	userId := authentication_util.GetCurrentUser(w, r)
+	userId, err := authentication_util.GetCurrentUser(r.Context())
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
 	apiKeys, err := apikey_service.GetAll(userId)
 	if err != nil {
 		log.Printf("error on decode json %v", err)

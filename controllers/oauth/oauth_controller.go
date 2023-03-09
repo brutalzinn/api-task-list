@@ -20,6 +20,12 @@ import (
 	"github.com/go-session/session"
 )
 
+// @Summary      Get token oauth key
+// @Description  Get token oauth for application
+// @Tags         Oauth
+// @Accept       json
+// @Produce      json
+// @Router       /oauth/generate [get]
 func Token(w http.ResponseWriter, r *http.Request) {
 	srv := authentication_service.GetOauthServer()
 	err := srv.HandleTokenRequest(w, r)
@@ -28,6 +34,12 @@ func Token(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary      Authorize oauth
+// @Description  Authorize oauth for application
+// @Tags         Oauth
+// @Accept       json
+// @Produce      json
+// @Router       /oauth/authorize [get]
 func Authorize(w http.ResponseWriter, r *http.Request) {
 	srv := authentication_service.GetOauthServer()
 	store, err := session.Start(r.Context(), w, r)
@@ -51,6 +63,12 @@ func Authorize(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary      AuthHandler oauth
+// @Description  AuthHandler oauth for application
+// @Tags         Oauth
+// @Accept       json
+// @Produce      json
+// @Router       /oauth/auth [get]
 func AuthHandler(w http.ResponseWriter, r *http.Request) {
 	store, err := session.Start(nil, w, r)
 	if err != nil {
@@ -98,6 +116,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	common.OutputHTML(w, r, "static/login.html")
 }
 
+// @Summary      Test oauth
+// @Description  Test oauth for application
+// @Tags         Oauth
+// @Accept       json
+// @Produce      json
+// @Router       /oauth/test [get]
 func Test(w http.ResponseWriter, r *http.Request) {
 	srv := authentication_service.GetOauthServer()
 	token, err := srv.ValidationBearerToken(r)
@@ -116,10 +140,21 @@ func Test(w http.ResponseWriter, r *http.Request) {
 	e.Encode(data)
 }
 
+// @Summary      Generate oauth
+// @Description  Generate oauth for application
+// @Tags         Oauth
+// @Accept       json
+// @Produce      json
+// @Success      200  {object} response_entities.OAuthResponse
+// @Router       /oauth/generate [post]
 func Generate(w http.ResponseWriter, r *http.Request) {
-	userId := authentication_service.GetCurrentUser(w, r)
+	userId, err := authentication_service.GetCurrentUser(r.Context())
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
 	var request request_entities.OauthGenerateRequest
-	err := json.NewDecoder(r.Body).Decode(&request)
+	err = json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		log.Printf("error on decode json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -153,17 +188,27 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 	response_entities.GenericOK(w, r, data)
 }
 
+// @Summary      Regenerate oauth
+// @Description  Regenerate oauth for application
+// @Tags         Oauth
+// @Accept       json
+// @Produce      json
+// @Success      200  {object} response_entities.OAuthResponse
+// @Router       /oauth/regenerate [post]
 func Regenerate(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	userId := authentication_service.GetCurrentUser(w, r)
+	userId, err := authentication_service.GetCurrentUser(r.Context())
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
 	if id == "" {
 		log.Printf("error on decode json %v", id)
 		http.Error(w, http.StatusText(http.StatusNotAcceptable), http.StatusNotAcceptable)
 		return
 	}
-
 	var request request_entities.OauthGenerateRequest
-	err := json.NewDecoder(r.Body).Decode(&request)
+	err = json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		log.Printf("error on decode json %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -189,8 +234,20 @@ func Regenerate(w http.ResponseWriter, r *http.Request) {
 	}
 	response_entities.GenericOK(w, r, data)
 }
+
+// @Summary      List oauth
+// @Description  List oauth for application
+// @Tags         Oauth
+// @Accept       json
+// @Produce      json
+// @Success      200  {object} response_entities.GenericResponse
+// @Router       /oauth/list [post]
 func List(w http.ResponseWriter, r *http.Request) {
-	userId := authentication_service.GetCurrentUser(w, r)
+	userId, err := authentication_service.GetCurrentUser(r.Context())
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
 	oauthapps, err := oauth_service.List(userId)
 	if err != nil {
 		log.Printf("error on decode json %v", err)
@@ -207,7 +264,11 @@ func List(w http.ResponseWriter, r *http.Request) {
 
 func Delete(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	userId := authentication_service.GetCurrentUser(w, r)
+	userId, err := authentication_service.GetCurrentUser(r.Context())
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
 	if id == "" {
 		log.Printf("error on decode json %v", id)
 		http.Error(w, http.StatusText(http.StatusNotAcceptable), http.StatusNotAcceptable)
