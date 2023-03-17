@@ -1,5 +1,6 @@
 dev:
 	docker-compose up -d
+	
 dev-build:
 	docker-compose up --build
 
