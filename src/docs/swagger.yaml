@@ -1,0 +1,346 @@
+basePath: /api/v1
+definitions:
+  response_entities.GenericResponse:
+    properties:
+      data: {}
+      error:
+        type: boolean
+      message:
+        type: string
+    type: object
+  response_entities.OAuthResponse:
+    properties:
+      client_id:
+        type: string
+      client_secret:
+        type: string
+    type: object
+host: localhost:9000
+info:
+  contact: {}
+  description: API TASK LIST
+  title: github.com/brutalzinn/api-task-list
+  version: "1.0"
+paths:
+  /apikey:
+    get:
+      consumes:
+      - application/json
+      description: List apikeys for current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response_entities.GenericResponse'
+      summary: List apikeys
+      tags:
+      - ApiKeys
+  /apikey/generate:
+    post:
+      consumes:
+      - application/json
+      description: Generate api key for user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response_entities.GenericResponse'
+      summary: Generate api key
+      tags:
+      - ApiKeys
+  /apikey/revoke/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Revoke a user apikey
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response_entities.GenericResponse'
+      summary: Revoke apikey
+      tags:
+      - ApiKeys
+  /oauth/auth:
+    get:
+      consumes:
+      - application/json
+      description: AuthHandler oauth for application
+      produces:
+      - application/json
+      responses: {}
+      summary: AuthHandler oauth
+      tags:
+      - Oauth
+  /oauth/authorize:
+    get:
+      consumes:
+      - application/json
+      description: Authorize oauth for application
+      produces:
+      - application/json
+      responses: {}
+      summary: Authorize oauth
+      tags:
+      - Oauth
+  /oauth/generate:
+    get:
+      consumes:
+      - application/json
+      description: Get token oauth for application
+      produces:
+      - application/json
+      responses: {}
+      summary: Get token oauth key
+      tags:
+      - Oauth
+    post:
+      consumes:
+      - application/json
+      description: Generate oauth for application
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response_entities.OAuthResponse'
+      summary: Generate oauth
+      tags:
+      - Oauth
+  /oauth/list:
+    post:
+      consumes:
+      - application/json
+      description: List oauth for application
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response_entities.GenericResponse'
+      summary: List oauth
+      tags:
+      - Oauth
+  /oauth/regenerate:
+    post:
+      consumes:
+      - application/json
+      description: Regenerate oauth for application
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response_entities.OAuthResponse'
+      summary: Regenerate oauth
+      tags:
+      - Oauth
+  /oauth/test:
+    get:
+      consumes:
+      - application/json
+      description: Test oauth for application
+      produces:
+      - application/json
+      responses: {}
+      summary: Test oauth
+      tags:
+      - Oauth
+  /repo:
+    post:
+      consumes:
+      - application/json
+      description: Create a repo for current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response_entities.GenericResponse'
+      summary: Create a repo
+      tags:
+      - Repos
+  /repo/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a repo for current user
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response_entities.GenericResponse'
+      summary: Delete a repo
+      tags:
+      - Repos
+    get:
+      consumes:
+      - application/json
+      description: Get repo by id for current user
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response_entities.GenericResponse'
+      summary: Get repo by id
+      tags:
+      - Repos
+    put:
+      consumes:
+      - application/json
+      description: Update a repo for current user
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response_entities.GenericResponse'
+      summary: Update a repo
+      tags:
+      - Repos
+  /repo/paginate:
+    get:
+      consumes:
+      - application/json
+      description: Paginate Repos for current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response_entities.GenericResponse'
+      summary: Paginate Repos
+      tags:
+      - Repos
+  /task:
+    post:
+      consumes:
+      - application/json
+      description: Create a task for current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response_entities.GenericResponse'
+      summary: Create a task
+      tags:
+      - Tasks
+  /task/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a task for current user
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response_entities.GenericResponse'
+      summary: Delete a task
+      tags:
+      - Tasks
+    get:
+      consumes:
+      - application/json
+      description: Get task by id for current user
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response_entities.GenericResponse'
+      summary: Get task by id
+      tags:
+      - Tasks
+    put:
+      consumes:
+      - application/json
+      description: Replace all tasks for a repo
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response_entities.GenericResponse'
+      summary: Replace all tasks
+      tags:
+      - Tasks
+  /task/paginate:
+    get:
+      consumes:
+      - application/json
+      description: Paginate Tasks for current user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response_entities.GenericResponse'
+      summary: Paginate Tasks
+      tags:
+      - Tasks
+swagger: "2.0"

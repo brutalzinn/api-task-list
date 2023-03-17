@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "7b5437c0-064a-4ef6-89b1-debef692e73a",
-		"name": "github.com/brutalzinn/api-task-list",
+		"name": "api-auto-assistant",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "14945275"
 	},
@@ -12,11 +12,21 @@
 				{
 					"name": "AddTask",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"title\":\"Opaaat twetwerwr\",\r\n\t\"description\":\"Minha descrição aqui teste\"\r\n}",
+							"raw": "{\r\n\t\"title\":\"Primeira Task teste\",\r\n\t\"description\":\"Minha descrição aqui teste\",\r\n    \"text\":\"Minha anotação aqui.\",\r\n    \"repo_id\":1\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -38,11 +48,21 @@
 				{
 					"name": "UpdateTask",
 					"request": {
-						"method": "PUT",
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"title\":\"Teste 222\",\r\n\t\"description\":\"Minha descrição aqui\"\r\n}",
+							"raw": "[\r\n    {\r\n        \"id\":1,\r\n        \"repo_id\":1,\r\n        \"title\": \"update only this task 666\",\r\n        \"description\": \"Minha descrição aqui\",\r\n        \"text\":\"TEtinnnng\"\r\n    }\r\n]",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -62,7 +82,7 @@
 					"response": []
 				},
 				{
-					"name": "ListTask",
+					"name": "UpdateTaskList",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -74,15 +94,30 @@
 								}
 							]
 						},
-						"method": "GET",
+						"method": "PUT",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n        \"title\": \"ABACTÃO DE TASK\",\r\n        \"description\": \"Minha descrição aqui\"\r\n    },\r\n     {\r\n        \"title\": \"ABACTÃO DE TASK 333\",\r\n        \"description\": \"Minha descrição aqui\"\r\n    },\r\n     {\r\n        \"title\": \"ABACTÃO DE TASK 6666\",\r\n        \"description\": \"Minha descrição aqui\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "{{host}}/task",
+							"raw": "{{host}}/task?repo_id=3",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
 								"task"
+							],
+							"query": [
+								{
+									"key": "repo_id",
+									"value": "3"
+								}
 							]
 						}
 					},
@@ -91,6 +126,21 @@
 				{
 					"name": "TaskById",
 					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{x-api-key}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "x-api-key",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -105,7 +155,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "1"
+									"value": "5"
 								}
 							]
 						}
@@ -115,6 +165,16 @@
 				{
 					"name": "DeleteTask",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "DELETE",
 						"header": [],
 						"url": {
@@ -135,20 +195,76 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "PaginateTasks",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/task/paginate?page=1&limit=10&repo_id=1&order=DESC",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"task",
+								"paginate"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "repo_id",
+									"value": "1"
+								},
+								{
+									"key": "order",
+									"value": "DESC"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
 		{
-			"name": "Users",
+			"name": "Repos",
 			"item": [
 				{
-					"name": "AddUser",
+					"name": "AddRepo",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"email\":\"teste@gmail.com\",\r\n\t\"password\":\"Teste\",\r\n\t\"username\":\"robertocpaes\",\r\n\t\"firebaseToken\":\"\"\r\n}",
+							"raw": "{\r\n\t\"title\":\"My first repo\",\r\n\t\"description\":\"This is a example repo\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -156,17 +272,175 @@
 							}
 						},
 						"url": {
-							"raw": "{{host}}/users",
+							"raw": "{{host}}/repo",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
-								"users"
+								"repo"
 							]
 						}
 					},
 					"response": []
 				},
+				{
+					"name": "UpdateRepo",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"title\":\"My first repo\",\r\n\t\"description\":\"Repo example description\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/repo/:id",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"repo",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PaginateRepo",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/repo/paginate?page=1&limit=3&order=DESC",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"repo",
+								"paginate"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "3"
+								},
+								{
+									"key": "order",
+									"value": "DESC"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RepoById",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/repo/:id",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"repo",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteRepo",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/repo/:id",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"repo",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "66"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
 				{
 					"name": "UpdateUser",
 					"request": {
@@ -204,7 +478,14 @@
 					"name": "ListUsers",
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
 						},
 						"method": "GET",
 						"header": [],
@@ -281,18 +562,21 @@
 							"script": {
 								"exec": [
 									"let responseData=pm.response.json();\r",
-									"pm.environment.set(\"token\", responseData[\"AccessToken\"])"
+									"pm.environment.set(\"token\", responseData[\"accesstoken\"])"
 								],
 								"type": "text/javascript"
 							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"email\":\"teste@gmail.com\",\r\n\t\"password\":\"Teste\"\r\n}",
+							"raw": "{\r\n\t\"email\":\"test\",\r\n\t\"password\":\"test\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -306,6 +590,499 @@
 							],
 							"path": [
 								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AddUser",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"email\":\"test\",\r\n\t\"password\":\"test\",\r\n\t\"username\":\"robertocpaes\",\r\n\t\"firebaseToken\":\"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/register",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ApiKey",
+			"item": [
+				{
+					"name": "Generate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let responseData=pm.response.json();\r",
+									"pm.environment.set(\"x-api-key\", responseData[\"data\"][\"api_key\"])"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"Flutter app\",\r\n    \"expire_at\":1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/apikey/generate",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"apikey",
+								"generate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Regenerate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let responseData=pm.response.json();\r",
+									"pm.environment.set(\"x-api-key\", responseData[\"data\"][\"api_key\"])"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/apikey/regenerate/:id",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"apikey",
+								"regenerate",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "2175d97b-513d-4bfa-a5b9-84760d0133e2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// let responseData=pm.response.json();\r",
+									"// pm.environment.set(\"x-api-key\", responseData[\"AccessToken\"])"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/apikey",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"apikey"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/apikey/delete/:id",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"apikey",
+								"delete",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "03bbcf2c-c97b-4279-afb9-57317bad6318"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Oauth2",
+			"item": [
+				{
+					"name": "Generate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let responseData=pm.response.json();\r",
+									"pm.environment.set(\"client_id\", responseData[\"data\"][\"client_id\"])\r",
+									"pm.environment.set(\"client_secret\", responseData[\"data\"][\"client_secret\"])"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"callback\":\"https://oauth.pstmn.io/v1/callback\",\r\n    \"application_name\":\"Meu aplicativo flutter\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/oauth/generate",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"oauth",
+								"generate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// let responseData=pm.response.json();\r",
+									"// pm.environment.set(\"x-api-key\", responseData[\"AccessToken\"])"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/oauth/list",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"oauth",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// let responseData=pm.response.json();\r",
+									"// pm.environment.set(\"x-api-key\", responseData[\"AccessToken\"])"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/oauth/:id",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"oauth",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "scope",
+									"value": "read:repo create:repo",
+									"type": "string"
+								},
+								{
+									"key": "clientSecret",
+									"value": "{{client_secret}}",
+									"type": "string"
+								},
+								{
+									"key": "clientId",
+									"value": "{{client_id}}",
+									"type": "string"
+								},
+								{
+									"key": "tokenName",
+									"value": "TESTE",
+									"type": "string"
+								},
+								{
+									"key": "useBrowser",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "grant_type",
+									"value": "authorization_code",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "redirect_uri",
+									"value": "{{host}}/oauth/test",
+									"type": "string"
+								},
+								{
+									"key": "client_authentication",
+									"value": "header",
+									"type": "string"
+								},
+								{
+									"key": "accessTokenUrl",
+									"value": "{{host}}/oauth/token",
+									"type": "string"
+								},
+								{
+									"key": "authUrl",
+									"value": "{{host}}/oauth/authorize",
+									"type": "string"
+								},
+								{
+									"key": "challengeAlgorithm",
+									"value": "S256",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/oauth/test",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"oauth",
+								"test"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Regenerate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let responseData=pm.response.json();\r",
+									"pm.environment.set(\"client_id\", responseData[\"data\"][\"client_id\"])\r",
+									"pm.environment.set(\"client_secret\", responseData[\"data\"][\"client_secret\"])"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"callback\":\"http://localhost/tdsadaadasdeste\",\r\n    \"application_name\":\"Meu aplicativo flutter\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/oauth/regenerate/:id",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"oauth",
+								"regenerate",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "e3600358-085a-4920-92d0-5ecf2cce9d3c"
+								}
 							]
 						}
 					},

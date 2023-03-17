@@ -1,9 +1,0 @@
-[api]
-port = "9000"
-maxapikeys = 5
-maxapps = 5
-
-[authentication]
-secret = "secretket"
-aeskey = "abc&1*~#^2^#s0^=)^^7%b34"
-expiration = 900

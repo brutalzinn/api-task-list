@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Auth</title>
+    <link
+      rel="stylesheet"
+      href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+    />
+    <script src="//code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="jumbotron">
+        <form action="/oauth/authorize" method="POST">
+          <h1>Authorize</h1>
+          <p>The application requests the use of your user data.</p>
+          <ul>
+          <li>Read, Write repositories</li>
+          <li>Read, Write tasks</li>
+          </ul>
+          <p>The duck of credentials is requesting your data consent.</p>
+          <img src="https://media.tenor.com/sPoPeaxn8c4AAAAj/duck.gif"/>
+          <p>The duck says "give me access to your data." The knifes is just suggestive action that can happen if your dont grant</p>
+          <p>
+            <button
+              type="submit"
+              class="btn btn-primary btn-lg"
+              style="width:200px;"
+            >
+              Authorize
+            </button>
+          </p>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

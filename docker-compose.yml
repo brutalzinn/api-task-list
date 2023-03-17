@@ -1,15 +1,17 @@
 version: '3.8'
 
 services:
-    # app:
-    #     build: 
-    #         dockerfile: Dockerfile
-    #         context: .
-    #     ports:
-    #         - 9000:9000
-    #     volumes:
-    #         - ./:/app
-    #     restart: unless-stopped
+    app:
+        build: 
+            context: .
+        ports:
+            - 9000:80
+        environment:
+            - PG_URI=postgres://test:test@postgree_hostname/test?sslmode=disable
+        volumes:
+            - "./src:/app/"
+        restart: unless-stopped
+        tty: true
     postgres:
         image: postgres
         hostname: postgree_hostname
