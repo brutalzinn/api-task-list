@@ -8,25 +8,25 @@ import (
 )
 
 type OAuthDTO struct {
-	ID            int64                       `json:"id"`
-	AppName       string                      `json:"app_name"`
-	Mode          int64                       `json:"mode"`
-	OauthSecret   string                      `json:"oauth_secret"`
-	OAuthClientId string                      `json:"client_id"`
-	CreateAt      *time.Time                  `json:"create_at"`
-	UpdateAt      *time.Time                  `json:"update_at"`
-	Links         []hypermedia.HypermediaLink `json:"links"`
+	ID           int64                       `json:"id"`
+	AppName      string                      `json:"app_name"`
+	Mode         int64                       `json:"mode"`
+	ClientSecret string                      `json:"client_secret"`
+	ClientId     string                      `json:"client_id"`
+	CreateAt     *time.Time                  `json:"create_at"`
+	UpdateAt     *time.Time                  `json:"update_at"`
+	Links        []hypermedia.HypermediaLink `json:"links"`
 }
 
 func ToOAuthDTO(oauth database_entities.OAuthApp) OAuthDTO {
 	return OAuthDTO{
-		ID:            oauth.ID,
-		AppName:       oauth.AppName,
-		Mode:          oauth.Mode,
-		OauthSecret:   oauth.OauthSecret,
-		OAuthClientId: oauth.OAuthClientId,
-		CreateAt:      oauth.CreateAt,
-		UpdateAt:      oauth.UpdateAt,
+		ID:           oauth.ID,
+		AppName:      oauth.AppName,
+		Mode:         oauth.Mode,
+		ClientSecret: oauth.ClientSecret,
+		ClientId:     oauth.ClientId,
+		CreateAt:     oauth.CreateAt,
+		UpdateAt:     oauth.UpdateAt,
 	}
 }
 

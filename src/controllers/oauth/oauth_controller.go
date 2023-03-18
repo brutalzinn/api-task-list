@@ -169,10 +169,10 @@ func Generate(w http.ResponseWriter, r *http.Request) {
 		Domain: request.Callback,
 	})
 	newApp := database_entities.OAuthApp{
-		AppName:       request.ApplicationName,
-		Mode:          0,
-		UserId:        userId,
-		OAuthClientId: clientId,
+		AppName:  request.ApplicationName,
+		Mode:     0,
+		UserId:   userId,
+		ClientId: clientId,
 	}
 	err = oauth_service.CreateOauthForUser(newApp)
 	if err != nil {
@@ -255,7 +255,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 	}
 	var appsList = dto.ToOAuthListDTO(oauthapps)
 	for i, item := range appsList {
-		links := hypermedia.CreateHyperMediaLinksFor(item.OAuthClientId, r.Context())
+		links := hypermedia.CreateHyperMediaLinksFor(item.ClientId, r.Context())
 		appsList[i].Links = links
 	}
 	response_entities.GenericOK(w, r, appsList)
