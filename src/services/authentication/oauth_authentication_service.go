@@ -1,12 +1,16 @@
 package authentication_service
 
 import (
+	_ "bytes"
 	"context"
+	"encoding/base64"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 
 	"github.com/brutalzinn/api-task-list/configs"
 	"github.com/brutalzinn/api-task-list/db"
@@ -118,6 +122,9 @@ func (a *OAuthToken) Token(ctx context.Context, data *oauth2.GenerateBasic, isGe
 	if err != nil {
 		return
 	}
-
+	if isGenRefresh {
+		refresh = base64.URLEncoding.EncodeToString([]byte(uuid.NewSHA1(uuid.Must(uuid.NewRandom()), []byte("somewhere.com")).String()))
+		refresh = strings.ToUpper(strings.TrimRight(refresh, "="))
+	}
 	return
 }

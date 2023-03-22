@@ -21,6 +21,7 @@ func ApiKeyMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		ctx = context.WithValue(ctx, "user_id", apiKey.UserId)
+		ctx = context.WithValue(ctx, "scopes", apiKey.Scopes)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
