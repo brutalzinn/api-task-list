@@ -27,13 +27,17 @@
 - [x] Table oauth_client_application
 - [x] Hypermedia links base
 - [x] Hypermedia links middleware
-- [ ] Go tests
+- [ ] Unit tests
+- [ ] Database tests using postgree temporary container
+- [ ] Makefile to execute tests and easy test database queries
 - [ ] CI/CD to digital ocean with Dokku
 - [ ] Swagger auto documentation
-- [ ] Notification channel for discord, twitter and firebase
+- [ ] Notification channel using web hook at IFTTT
 - [ ] Error log with MongoDB
 - [ ] Generic error middleware handler
 - [x] Configure Dockerfile to hot reload
+- [ ] Error middleware
+
 
 
 # Table relations
