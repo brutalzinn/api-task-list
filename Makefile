@@ -1,3 +1,6 @@
+user := root
+database := test
+
 dev:
 	docker-compose up -d
 	@echo "docker development setup started."
@@ -16,15 +19,15 @@ swagger:
 	@echo "Swagger doc generated"
 
 create-db:
-	docker-compose exec -it postgres psql -U test -d test -f /docker-entrypoint-initdb.d/init.sql
+	docker-compose exec -it postgres psql -U ${user} -d ${database} -f /scripts/init.sql
 	@echo "database created"
 
 delete-data-db:
-	docker-compose exec -it postgres psql -U test -d test -f /docker-entrypoint-initdb.d/clear_data.sql
+	docker-compose exec -it postgres psql -U ${user} -d ${database} -f /scripts/clear_data.sql
 	@echo "database clearned"
 
 insert-data-db:
-	docker-compose exec -it postgres psql -U test -d test -f /docker-entrypoint-initdb.d/insert_data.sql
+	docker-compose exec -it postgres psql -U ${user} -d ${database} -f /scripts/insert_data.sql
 	@echo "Initial data inserted"
 
 restart-db: delete-data-db insert-data-db

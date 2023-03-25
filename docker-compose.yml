@@ -7,7 +7,7 @@ services:
         ports:
             - 9000:80
         environment:
-            - PG_URI=postgres://test:test@postgree_hostname/test?sslmode=disable
+            - PG_URI=postgres://root:test@postgree_hostname/test?sslmode=disable
         volumes:
             - "./src:/app/"
         restart: unless-stopped
@@ -16,13 +16,15 @@ services:
         image: postgres
         hostname: postgree_hostname
         environment:
-            - POSTGRES_USER=test
+            - POSTGRES_USER=root
             - POSTGRES_PASSWORD=test
             - POSTGRES_DB=test
         ports:
             - 5555:5432
         volumes:
-            - ./scripts:/docker-entrypoint-initdb.d
+            - ./scripts/clear_data.sql:/scripts/clear_data.sql
+            - ./scripts/insert_data.sql:/scripts/insert_data.sql
+            - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
         # tmpfs:
         #     - /var/lib/postgresql/data
         restart: unless-stopped

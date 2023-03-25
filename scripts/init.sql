@@ -1,14 +1,14 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TABLE IF NOT EXISTS tasks (
-	id bigserial NOT NULL,
-	"title" TEXT,
-    "repo_id" INT NOT NULL,
-    "description" TEXT,
-    "text" TEXT,
+CREATE TABLE IF NOT EXISTS users (
+    id uuid DEFAULT uuid_generate_v4(),
+	"email" varchar(100),
+    "password" varchar(100),
+    "username" TEXT,
+    "firebase_token" TEXT,
     "create_at" timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     "update_at" timestamptz default NULL,
-    CONSTRAINT tasks_pkey PRIMARY KEY (id)
+    CONSTRAINT users_pkey PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS repos (
@@ -21,16 +21,18 @@ CREATE TABLE IF NOT EXISTS repos (
     CONSTRAINT repos_pkey PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS users (
-    id uuid DEFAULT uuid_generate_v4(),
-	"email" varchar(100),
-    "password" varchar(100),
-    "username" TEXT,
-    "firebase_token" TEXT,
+
+CREATE TABLE IF NOT EXISTS tasks (
+	id bigserial NOT NULL,
+	"title" TEXT,
+    "repo_id" INT NOT NULL,
+    "description" TEXT,
+    "text" TEXT,
     "create_at" timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     "update_at" timestamptz default NULL,
-    CONSTRAINT users_pkey PRIMARY KEY (id)
+    CONSTRAINT tasks_pkey PRIMARY KEY (id)
 );
+
 
 CREATE TABLE IF NOT EXISTS api_keys (
     id uuid DEFAULT uuid_generate_v4(),
@@ -55,7 +57,7 @@ CREATE TABLE IF not  exists  users_oauth_client(
 
 );
 
-CREATE TABLE IF not exists  oauth_client_application(
+CREATE TABLE IF NOT EXISTS oauth_client_application(
 	id bigserial NOT NULL,
     "appname" text NOT NULL,
     "mode" INT NOT NULL,
@@ -69,7 +71,7 @@ CREATE TABLE IF not exists  oauth_client_application(
 -- DONT CONTROLLED TABLE THOSE TABLES IS PROVIDED BY GO OAUTH PACKAGE. I THINK I DO THE WRONG CHOOSE. BUT ONLY HAVE MORE ONE WEEK TO CLOSE ALL MY MIND THREADS.
 -- START TABLEs THAT WILL BE CREATED BY OAUTH2 PACKAGE.
 
-CREATE TABLE IF not exists oauth2_clients (
+CREATE TABLE IF NOT EXISTS oauth2_clients (
 	id text NOT NULL,
 	"secret" text NOT NULL,
 	"domain" text NOT NULL,
@@ -88,13 +90,10 @@ CREATE TABLE IF not exists oauth2_tokens (
 	CONSTRAINT oauth2_tokens_pkey PRIMARY KEY (id)
 );
 
-CREATE INDEX idx_oauth2_tokens_access ON oauth2_tokens USING btree (access);
-CREATE INDEX idx_oauth2_tokens_code ON oauth2_tokens USING btree (code);
-CREATE INDEX idx_oauth2_tokens_expires_at ON oauth2_tokens USING btree (expires_at);
-CREATE INDEX idx_oauth2_tokens_refresh ON oauth2_tokens USING btree (refresh);
-
--- END TABLE NOT UNDER MY CONTROL
-
+CREATE INDEX IF not exists idx_oauth2_tokens_access ON oauth2_tokens USING btree (access);
+CREATE INDEX IF not exists idx_oauth2_tokens_code ON oauth2_tokens USING btree (code);
+CREATE INDEX IF not exists idx_oauth2_tokens_expires_at ON oauth2_tokens USING btree (expires_at);
+CREATE INDEX IF not exists idx_oauth2_tokens_refresh ON oauth2_tokens USING btree (refresh);
 
 ALTER TABLE users_oauth_client
 ADD FOREIGN KEY ("user_id") REFERENCES users (id)
@@ -114,4 +113,4 @@ DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE tasks
 ADD FOREIGN KEY ("repo_id") REFERENCES repos (id)
 ON DELETE CASCADE
-DEFERRABLE INITIALLY DEFERRED
+DEFERRABLE INITIALLY DEFERRED;

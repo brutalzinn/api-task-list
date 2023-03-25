@@ -36,8 +36,6 @@
 - [ ] Error log with MongoDB
 - [ ] Generic error middleware handler
 - [x] Configure Dockerfile to hot reload
-- [ ] Error middleware
-
 
 
 # Table relations
