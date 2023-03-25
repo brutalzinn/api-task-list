@@ -38,13 +38,21 @@
 
 # Table relations
 
-#### Version 3 by dbeaver ( still in development )
+#### Version 4 by dbeaver ( still in development )
 <img src="src/docs/imgs/dbeaver.png" alt="postman example of api keys list" height="50%"/>
 
 The orange tables is created by go package oauth2. So i dont have this managed resource. To do my own oauth2 implementation of my business rule, i made a many to many helper table. 
 # Purpose of existence
 
-This project is designed to my estudies case of hypermedia REST apis(HATEOAS) and now oauth2 flux handle. This project is a overthink project. Why? Because i can.
+This project is designed to my estudies case of hypermedia REST apis(HATEOAS). This project is a overthink project. Why? Because i can.
+
+# HATEOAS Example with repo paginate route
+
+<img src="src/docs/imgs/hyperlink_example_1.png" alt="postman example of repos" height="50%"/>
+
+# HATEOAS Example with api keys route
+
+<img src="src/docs/imgs/hypermedia_example_2.png" alt="postman example of api keys list" height="50%"/>
 
 
 # Web Example under construction
@@ -61,3 +69,11 @@ Dart cli is a project designed to use this API.
 ### References
 
 - [api design with hypermedia rest](https://www.mscharhag.com/api-design/hypermedia-rest)
+
+
+# Libs
+
+- [go-oauth2/go-oauth2](https://github.com/go-oauth2/oauth2)
+- [vgarvardt/go-pg-adapter](https://github.com/vgarvardt/go-pg-adapter)
+- [brutalzinn/go-auth2-pg my fork of vgarvardt/go-oauth2-pg](https://github.com/brutalzinn/go-oauth2-pg)
+- [go-chi/chi](github.com/go-chi/chi)
