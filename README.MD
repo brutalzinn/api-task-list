@@ -43,7 +43,7 @@
 # Table relations
 
 #### Version 4 by dbeaver ( still in development )
-<img src="src/docs/imgs/dbeaver.png" alt="postman example of api keys list" height="50%"/>
+<img src="docs/imgs/dbeaver.png" alt="postman example of api keys list" height="50%"/>
 
 The orange tables is created by go package oauth2. So i dont have this managed resource. To do my own oauth2 implementation of my business rule, i made a many to many helper table. 
 # Purpose of existence
@@ -52,41 +52,41 @@ This project is designed to my estudies case of hypermedia REST apis(HATEOAS). T
 
 # HATEOAS Example with repo paginate route
 
-{
-    "error": false,
-    "message": "",
-    "data": {
-        "repos": [
-            {
-                "id": 1,
-                "title": "My first repo",
-                "description": "This is a example repo",
-                "create_at": "2023-03-25T01:26:29.854407Z",
-                "update_at": null,
-                "links": [
-                    {
-                        "rel": "delete",
-                        "href": "/repo/1",
-                        "type": "DELETE"
-                    },
-                    {
-                        "rel": "update_one",
-                        "href": "/repo/1",
-                        "type": "PATCH"
-                    },
-                    {
-                        "rel": "_self",
-                        "href": "/repo/1",
-                        "type": "GET"
-                    }
-                ]
-            }
-        ],
-        "totalItems": 1,
-        "totalPages": 0,
-        "currentPage": 1
+    {
+        "error": false,
+        "message": "",
+        "data": {
+            "repos": [
+                {
+                    "id": 1,
+                    "title": "My first repo",
+                    "description": "This is a example repo",
+                    "create_at": "2023-03-25T01:26:29.854407Z",
+                    "update_at": null,
+                    "links": [
+                        {
+                            "rel": "delete",
+                            "href": "/repo/1",
+                            "type": "DELETE"
+                        },
+                        {
+                            "rel": "update_one",
+                            "href": "/repo/1",
+                            "type": "PATCH"
+                        },
+                        {
+                            "rel": "_self",
+                            "href": "/repo/1",
+                            "type": "GET"
+                        }
+                    ]
+                }
+            ],
+            "totalItems": 1,
+            "totalPages": 0,
+            "currentPage": 1
+        }
     }
-}
 
 # HATEOAS Example with api keys route
 
