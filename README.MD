@@ -48,11 +48,70 @@ This project is designed to my estudies case of hypermedia REST apis(HATEOAS). T
 
 # HATEOAS Example with repo paginate route
 
-<img src="src/docs/imgs/hyperlink_example_1.png" alt="postman example of repos" height="50%"/>
+{
+    "error": false,
+    "message": "",
+    "data": {
+        "repos": [
+            {
+                "id": 1,
+                "title": "My first repo",
+                "description": "This is a example repo",
+                "create_at": "2023-03-25T01:26:29.854407Z",
+                "update_at": null,
+                "links": [
+                    {
+                        "rel": "delete",
+                        "href": "/repo/1",
+                        "type": "DELETE"
+                    },
+                    {
+                        "rel": "update_one",
+                        "href": "/repo/1",
+                        "type": "PATCH"
+                    },
+                    {
+                        "rel": "_self",
+                        "href": "/repo/1",
+                        "type": "GET"
+                    }
+                ]
+            }
+        ],
+        "totalItems": 1,
+        "totalPages": 0,
+        "currentPage": 1
+    }
+}
 
 # HATEOAS Example with api keys route
 
-<img src="src/docs/imgs/hypermedia_example_2.png" alt="postman example of api keys list" height="50%"/>
+    {
+        "error": false,
+        "message": "",
+        "data": [
+            {
+                "id": "574b32d5-f788-4b2c-aefb-979ef17a6602",
+                "name": "Flutter app",
+                "expire_at": "2023-04-24T01:32:07.641258Z",
+                "scopes": "task_manager,repo_manager",
+                "create_at": "2023-03-25T01:32:07.656142Z",
+                "update_at": null,
+                "links": [
+                    {
+                        "rel": "delete",
+                        "href": "/apikey/delete/574b32d5-f788-4b2c-aefb-979ef17a6602",
+                        "type": "DELETE"
+                    },
+                    {
+                        "rel": "regenerate",
+                        "href": "/apikey/regenerate/574b32d5-f788-4b2c-aefb-979ef17a6602",
+                        "type": "POST"
+                    }
+                ]
+            }
+        ]
+    }
 
 
 # Web Example under construction
