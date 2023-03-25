@@ -115,14 +115,3 @@ ALTER TABLE tasks
 ADD FOREIGN KEY ("repo_id") REFERENCES repos (id)
 ON DELETE CASCADE
 DEFERRABLE INITIALLY DEFERRED
-
--- API KEY INIT DATA
-INSERT INTO api_keys (id, apikey, scopes, user_id, "name", name_normalized, expire_at, create_at, update_at) VALUES('574b32d5-f788-4b2c-aefb-979ef17a6602'::uuid, '$2a$04$qIHJRvfn2G7GO1Aq2d.zf.xHkTrB7q8tEISsANDKMuLK3nfdTyjc.', 'task_manager,repo_manager', 'ab7d7136-6c24-4cd0-ba30-97ff0110ecac'::uuid, 'Flutter app', 'flutterapp', '2023-04-23 22:32:07.641', '2023-03-24 22:32:07.656', NULL);
-
--- USER INIT DATA
-INSERT INTO users (id, email, "password", username, firebase_token, create_at, update_at) VALUES('ab7d7136-6c24-4cd0-ba30-97ff0110ecac'::uuid, 'test', '$2a$15$zqJBJTKH7LZbTSQHhnNzeOx9VjcGwv3HamUksu8VQ81E/WbRJCLPW', 'usertest', '', '2023-03-17 09:47:02.881', NULL);
-
--- OAUTH INIT DATA
-INSERT INTO oauth2_clients (id, secret, "domain", "data") VALUES('d45bc6bd-a066-482e-8b64-b56a34d9b2ba', '434977f5-2dc8-4290-bec5-e4a14e629d37', 'http://localhost:8888', '{"ID": "d45bc6bd-a066-482e-8b64-b56a34d9b2ba", "Domain": "http://localhost:8888", "Public": false, "Secret": "434977f5-2dc8-4290-bec5-e4a14e629d37", "UserID": "ab7d7136-6c24-4cd0-ba30-97ff0110ecac"}'::jsonb);
-INSERT INTO oauth_client_application (id, appname, "mode", oauth_client_id, create_at, update_at) VALUES(22, 'Meu aplicativo CLI', 0, 'd45bc6bd-a066-482e-8b64-b56a34d9b2ba'::uuid, '2023-03-24 22:29:03.595', NULL);
-INSERT INTO users_oauth_client (id, user_id, oauth_client_id) VALUES(22, 'ab7d7136-6c24-4cd0-ba30-97ff0110ecac'::uuid, 'd45bc6bd-a066-482e-8b64-b56a34d9b2ba'::uuid);
