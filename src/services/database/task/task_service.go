@@ -163,7 +163,7 @@ func Paginate(repo_id int64, limit int64, offset int64, order string) (tasks []d
 	}
 	for rows.Next() {
 		var task database_entities.Task
-		err = rows.Scan(&task.ID, &task.Title, &task.RepoId, &task.Text, &task.Description, &task.CreateAt, &task.UpdateAt)
+		err = rows.Scan(&task.ID, &task.Title, &task.RepoId, &task.Description, &task.Text, &task.CreateAt, &task.UpdateAt)
 		if err != nil {
 			continue
 		}
